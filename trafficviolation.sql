@@ -10,10 +10,10 @@ CREATE TABLE driver (
     birth_date DATE NOT NULL,
     sex CHAR(1) NOT NULL,
     address VARCHAR(255) NOT NULL,
-    license_type VARCHAR(20) NOT NULL,
-    license_status VARCHAR(20) NOT NULL,
+    license_type ENUM('Student Permit', 'Non-Professional', 'Professional') NOT NULL,
+    license_status ENUM('Valid', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
-    license_expiry_date DATE GENERATED ALWAYS AS (DATE_ADD(license_issue_date, INTERVAL 5 YEAR)) STORED,
+    license_expiry_date DATE NOT NULL,
     PRIMARY KEY (license_number)
 );
 
