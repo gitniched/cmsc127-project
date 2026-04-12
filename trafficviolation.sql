@@ -368,16 +368,28 @@ SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
     AND vr.registration_status = 'Expired';
 
 -- View all drivers with expired or suspended licenses.
- 
+SELECT * FROM driver
+WHERE license_status IN ('Expired', 'Suspended');
  
 -- View all traffic violations committed by a given driver within a specified date range.
-
+SELECT * FROM traffic_violation
+WHERE license_number = @license_number
+AND violation_date BETWEEN @start_date AND @end_date;
  
 -- View the total number of violations per violation type for a given year.
-
+SELECT vt.violation_type, COUNT(*) AS total_violations FROM violation_type vt
+JOIN traffic_violation tv 
+ON vt.uovr_number = tv.uovr_number
+WHERE YEAR(tv.violation_date) = @year
+GROUP BY vt.violation_type
+ORDER BY total_violations DESC;
  
 -- View all vehicles involved in violations within a given city or region.
-
+SELECT DISTINCT v.* FROM vehicle v
+JOIN traffic_violation tv 
+ON v.plate_number = tv.plate_number
+WHERE tv.violation_location_city = @city
+OR tv.violation_location_region = @region;
 
 -- View all vehicles of each driver
 SELECT d.license_number, CONCAT(d.first_name, ' ', d.last_name) AS full_name, 
