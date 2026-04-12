@@ -56,6 +56,18 @@ CREATE TABLE vehicle_registration (
     FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
 );
 
+CREATE OR REPLACE VIEW v_active_registrations AS
+SELECT
+    vr.registration_number,
+    vr.plate_number,
+    vr.registration_date,
+    vr.expiration_date,
+    vr.registration_status,
+    v.license_number
+FROM VEHICLE_REGISTRATION vr
+JOIN VEHICLE v ON vr.plate_number = v.plate_number
+WHERE vr.registration_status = 'Active';
+
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
     officer VARCHAR(100),
