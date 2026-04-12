@@ -175,10 +175,20 @@ AFTER INSERT ON traffic_violation
 FOR EACH ROW
 BEGIN
     DECLARE v_pending_count INT;
+    DECLARE v_issue_date DATE;
+    DECLARE v_expiry_date DATE;
+
+    SELECT license_issue_date, license_expiry_date
+    INTO v_issue_date, v_expiry_date
+    FROM driver
+    WHERE license_number = NEW.license_number;
+
     SELECT COUNT(*) INTO v_pending_count
     FROM traffic_violation
     WHERE license_number = NEW.license_number
-      AND violation_status = 'Pending';
+      AND violation_status = 'Pending'
+      AND violation_date BETWEEN v_issue_date AND v_expiry_date;
+
     IF v_pending_count >= 3 THEN
         UPDATE driver
         SET license_status = 'Suspended'
