@@ -143,7 +143,7 @@ BEGIN
     SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
 END$$
 
--- block direct edits to expiry; allow renewal override via session var
+-- block direct edits to expiry, allow renewal override via session var
 CREATE TRIGGER trg_driver_before_update
 BEFORE UPDATE ON driver
 FOR EACH ROW
