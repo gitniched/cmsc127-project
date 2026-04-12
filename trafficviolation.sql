@@ -140,7 +140,11 @@ CREATE TRIGGER trg_driver_before_insert
 BEFORE INSERT ON driver
 FOR EACH ROW
 BEGIN
-    SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+    IF NEW.license_type = 'Student Permit' THEN
+        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
+    ELSE
+        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+    END IF;
 END$$
 
 -- block direct edits to expiry, allow renewal override via session var
