@@ -379,3 +379,8 @@ SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
 -- View all vehicles involved in violations within a given city or region.
 
 
+-- View all vehicles of each driver
+SELECT d.license_number, CONCAT(d.first_name, ' ', d.middle_name, ' ', d.last_name) AS full_name, 
+v.plate_number, v.make, v.model, v.year, v.vehicle_type 
+FROM driver d JOIN vehicle v on d.license_number = v.owner_license_number
+ORDER BY d.license_number; 
