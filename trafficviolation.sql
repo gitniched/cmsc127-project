@@ -293,53 +293,53 @@ INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('M23-0000001-1', 'Pending', 'Manila', 'NCR', '2023-05-15', 1000.00, 'Unpaid', 'D01-12-1234', 'ABC-1234', 'REG-2023-001'),
-('M23-0000002-2', 'Resolved', 'Makati', 'NCR', '2023-06-20', 500.00, 'Paid', 'D01-12-1234', 'XYZ-9876', 'REG-2023-002'),
-('M23-0000003-3', 'Pending', 'Quezon City', 'NCR', '2023-07-10', 2000.00, 'Unpaid', 'D01-12-1234', 'DEF-2468', 'REG-2022-003'),
-('M23-0000004-4', 'Resolved', 'Pasig', 'NCR', '2023-08-05', 1500.00, 'Paid', 'D02-13-2345', 'GHI-1357', 'REG-2023-004'),
-('G23-0000005-5', 'Pending', 'Cebu City', 'Region VII', '2023-09-12', 2500.00, 'Unpaid', 'D02-13-2345', 'JKL-1122', 'REG-2023-005'),
-('D23-0000006-6', 'Resolved', 'Davao City', 'Region XI', '2023-10-01', 1000.00, 'Paid', 'D03-14-3456', 'MNO-3344', 'REG-2023-006'),
-('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-10-15', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
-('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-11-20', 1000.00, 'Paid', 'D04-15-4567', 'STU-7788', 'REG-2023-008'),
-('F23-0000009-9', 'Pending', 'Iloilo City', 'Region VI', '2023-12-05', 2000.00, 'Unpaid', 'D05-16-5678', 'VWX-9900', 'REG-2021-009'),
-('M23-0000010-0', 'Resolved', 'Mandaluyong', 'NCR', '2023-12-10', 500.00, 'Paid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
-
+('M20-0000001-1', 'Resolved',  'Manila',       'NCR',        '2020-03-15', 1000.00, 'Paid',   'D01-12-1234', 'ABC-1234', 'REG-2019-001'),
+('M21-0000002-2', 'Resolved',  'Makati',       'NCR',        '2021-07-22',  500.00, 'Paid',   'D01-12-1234', 'XYZ-9876', 'REG-2020-002'),
+('M22-0000003-3', 'Dismissed', 'Quezon City',  'NCR',        '2022-02-10', 2000.00, 'Waived', 'D01-12-1234', 'DEF-2468', 'REG-2021-003'),
+('M21-0000004-4', 'Resolved',  'Pasig',        'NCR',        '2021-11-30', 1500.00, 'Paid',   'D02-13-2345', 'GHI-1357', 'REG-2020-004'),
+('G22-0000005-5', 'Resolved',  'Cebu City',    'Region VII', '2022-05-18', 2500.00, 'Paid',   'D02-13-2345', 'JKL-1122', 'REG-2022-005'),
+('D22-0000006-6', 'Contested', 'Davao City',   'Region XI',  '2022-09-04', 1000.00, 'Unpaid', 'D03-14-3456', 'MNO-3344', 'REG-2021-006'),
+('B23-0000007-7', 'Pending',   'Baguio City',  'CAR',        '2023-01-19', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
+('M23-0000008-8', 'Resolved',  'Taguig',       'NCR',        '2023-09-25', 1000.00, 'Paid',   'D04-15-4567', 'STU-7788', 'REG-2022-008'),
+('F20-0000009-9', 'Resolved',  'Iloilo City',  'Region VI',  '2020-06-11', 2000.00, 'Paid',   'D05-16-5678', 'VWX-9900', 'REG-2019-009'),
+('M24-0000010-0', 'Pending',   'Mandaluyong',  'NCR',        '2024-02-07',  500.00, 'Unpaid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
+ 
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
--- M23-0000001-1 has 2 violations
-('M23-0000001-1', 'Over speeding'),
-('M23-0000001-1', 'Reckless driving'),
-
--- M23-0000002-2 has 1 violation
-('M23-0000002-2', 'Illegal parking'),
-
--- M23-0000003-3 has 2 violations
-('M23-0000003-3', 'Expired drivers license'),
-('M23-0000003-3', 'No drivers license'),
-
--- M23-0000004-4 has 1 violation
-('M23-0000004-4', 'Disregarding traffic sign/signal'),
-
--- G23-0000005-5 has 3 violations
-('G23-0000005-5', 'Reckless driving'),
-('G23-0000005-5', 'No seatbelt'),
-('G23-0000005-5', 'Disobedience to traffic officer'),
-
--- D23-0000006-6 has 1 violation
-('D23-0000006-6', 'No seatbelt'),
-
+-- M20-0000001-1 has 2 violations
+('M20-0000001-1', 'Over speeding'),
+('M20-0000001-1', 'Reckless driving'),
+ 
+-- M21-0000002-2 has 1 violation
+('M21-0000002-2', 'Illegal parking'),
+ 
+-- M22-0000003-3 has 2 violations
+('M22-0000003-3', 'Expired drivers license'),
+('M22-0000003-3', 'No drivers license'),
+ 
+-- M21-0000004-4 has 1 violation
+('M21-0000004-4', 'Disregarding traffic sign/signal'),
+ 
+-- G22-0000005-5 has 3 violations
+('G22-0000005-5', 'Reckless driving'),
+('G22-0000005-5', 'No seatbelt'),
+('G22-0000005-5', 'Disobedience to traffic officer'),
+ 
+-- D22-0000006-6 has 1 violation
+('D22-0000006-6', 'No seatbelt'),
+ 
 -- B23-0000007-7 has 2 violations
 ('B23-0000007-7', 'Disobedience to traffic officer'),
 ('B23-0000007-7', 'Obstruction to traffic'),
-
+ 
 -- M23-0000008-8 has 1 violation
 ('M23-0000008-8', 'Over speeding'),
-
--- F23-0000009-9 has 1 violation
-('F23-0000009-9', 'Expired drivers license'),
-
--- M23-0000010-0 has 2 violations
-('M23-0000010-0', 'Violation of one way street'),
-('M23-0000010-0', 'Disregarding traffic sign/signal');
+ 
+-- F20-0000009-9 has 1 violation
+('F20-0000009-9', 'Expired drivers license'),
+ 
+-- M24-0000010-0 has 2 violations
+('M24-0000010-0', 'Violation of one way street'),
+('M24-0000010-0', 'Disregarding traffic sign/signal');
 
 
 -- reports to be generated
