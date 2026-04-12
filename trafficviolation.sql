@@ -246,16 +246,19 @@ DELIMITER ;
 -- dummy tables
 
 INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
-('D01-12-1234', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2020-05-10'),
-('D02-13-2345', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2019-11-22'),
+('D01-12-1234', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2022-05-10'),
+('D02-13-2345', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2022-11-22'),
 ('D03-14-3456', 'Michael', 'Jordan', 'Jeffrey', '1975-02-17', 'M', '789 Pine Rd, Pasig', 'Professional', 'Expired', '2015-03-14'),
 ('D04-15-4567', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Elm St, Quezon City', 'Non-Professional', 'Active', '2021-07-01'),
 ('D05-16-5678', 'Bruce', 'Wayne', 'Thomas', '1982-10-24', 'M', '1007 Mountain Dr, Taguig', 'Professional', 'Suspended', '2018-01-15'),
 ('D06-17-6789', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Clinton St, Manila', 'Non-Professional', 'Active', '2022-09-09'),
-('D07-18-7890', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Amazon Way, Pasay', 'Professional', 'Active', '2017-06-30'),
+('D07-18-7890', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Amazon Way, Pasay', 'Professional', 'Active', '2022-06-30'),
 ('D08-19-8901', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Ingram St, Mandaluyong', 'Non-Professional', 'Active', '2023-02-14'),
-('D09-20-9012', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Russian Blvd, Taguig', 'Professional', 'Active', '2016-10-05'),
-('D10-21-0123', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Malibu Point, Makati', 'Professional', 'Revoked', '2010-12-01');
+('D09-20-9012', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Russian Blvd, Taguig', 'Professional', 'Active', '2022-10-05'),
+('D10-21-0123', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Malibu Point, Makati', 'Professional', 'Revoked', '2010-12-01'),
+('S01-22-1111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Active', '2025-04-15'),
+('S02-23-2222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
+('S03-24-3333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20');
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
 ('ABC-1234', 'Toyota', 'Vios', 'ENG-00123', 'CHAS-00123', 'Sedan', 2018, 'Black', 'D01-12-1234'),
@@ -277,42 +280,32 @@ INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, v
 ('PRC-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'D10-21-0123');
 
 INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
-('REG-2019-001', 'ABC-1234',  '2019-03-10', 'Expired'),
-('REG-2020-002', 'XYZ-9876',  '2020-06-15', 'Expired'),
-('REG-2021-003', 'DEF-2468',  '2021-02-20', 'Expired'),
-('REG-2020-004', 'GHI-1357',  '2020-11-05', 'Expired'),
-('REG-2022-005', 'JKL-1122',  '2022-04-18', 'Expired'),
-('REG-2021-006', 'MNO-3344',  '2021-08-30', 'Expired'),
-('REG-2023-007', 'PQR-5566',  '2023-01-07', 'Expired'),
-('REG-2022-008', 'STU-7788',  '2022-09-14', 'Expired'),
-('REG-2019-009', 'VWX-9900',  '2019-05-22', 'Expired'),
-('REG-2023-010', 'YZA-0011',  '2023-10-25', 'Active'),
-('REG-2024-001', 'ABC-1234',  '2024-03-10', 'Active'),
-('REG-2024-002', 'XYZ-9876',  '2024-06-15', 'Active'),
-('REG-2024-003', 'DEF-2468',  '2024-02-20', 'Suspended'),
-('REG-2023-004', 'GHI-1357',  '2023-11-05', 'Active'),
-('REG-2024-005', 'JKL-1122',  '2024-04-18', 'Active'),
-('REG-2024-006', 'MNO-3344',  '2024-08-30', 'Active'),
-('REG-2024-007', 'PQR-5566',  '2024-01-07', 'Active'),
-('REG-2024-008', 'STU-7788',  '2024-09-14', 'Active'),
-('REG-2022-009', 'VWX-9900',  '2022-05-22', 'Expired'),
-('REG-2025-009', 'VWX-9900',  '2025-01-10', 'Active');
+('REG-2026-001', 'ABC-1234',  '2026-03-10', 'Active'),
+('REG-2025-002', 'XYZ-9876',  '2025-08-20', 'Active'),
+('REG-2026-003', 'GHI-1357',  '2026-01-15', 'Active'),
+('REG-2025-004', 'JKL-1122',  '2025-06-30', 'Active'),
+('REG-2026-005', 'MNO-3344',  '2026-02-10', 'Active'),
+('REG-2025-006', 'STU-7788',  '2025-09-05', 'Active'),
+('REG-2023-007', 'PQR-5566',  '2023-04-18', 'Expired'),
+('REG-2022-008', 'VWX-9900',  '2022-11-30', 'Expired'),
+('REG-2024-009', 'YZA-0011',  '2024-07-22', 'Expired'),
+('REG-2024-010', 'DEF-2468',  '2024-05-14', 'Suspended');
 
 -- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('M20-0000001-1', 'Resolved',  'Manila',       'NCR',        '2020-03-15', 1000.00, 'Paid',   'D01-12-1234', 'ABC-1234', 'REG-2019-001'),
-('M21-0000002-2', 'Resolved',  'Makati',       'NCR',        '2021-07-22',  500.00, 'Paid',   'D01-12-1234', 'XYZ-9876', 'REG-2020-002'),
-('M22-0000003-3', 'Dismissed', 'Quezon City',  'NCR',        '2022-02-10', 2000.00, 'Waived', 'D01-12-1234', 'DEF-2468', 'REG-2021-003'),
-('M21-0000004-4', 'Resolved',  'Pasig',        'NCR',        '2021-11-30', 1500.00, 'Paid',   'D02-13-2345', 'GHI-1357', 'REG-2020-004'),
-('G22-0000005-5', 'Resolved',  'Cebu City',    'Region VII', '2022-05-18', 2500.00, 'Paid',   'D02-13-2345', 'JKL-1122', 'REG-2022-005'),
-('D22-0000006-6', 'Contested', 'Davao City',   'Region XI',  '2022-09-04', 1000.00, 'Unpaid', 'D03-14-3456', 'MNO-3344', 'REG-2021-006'),
+('M20-0000001-1', 'Resolved',  'Manila',       'NCR',        '2020-03-15', 1000.00, 'Paid',   'D01-12-1234', 'ABC-1234', 'REG-2026-001'),
+('M21-0000002-2', 'Resolved',  'Makati',       'NCR',        '2021-07-22',  500.00, 'Paid',   'D01-12-1234', 'XYZ-9876', 'REG-2025-002'),
+('M22-0000003-3', 'Dismissed', 'Quezon City',  'NCR',        '2022-02-10', 2000.00, 'Waived', 'D01-12-1234', 'DEF-2468', 'REG-2024-010'),
+('M21-0000004-4', 'Resolved',  'Pasig',        'NCR',        '2021-11-30', 1500.00, 'Paid',   'D02-13-2345', 'GHI-1357', 'REG-2026-003'),
+('G22-0000005-5', 'Resolved',  'Cebu City',    'Region VII', '2022-05-18', 2500.00, 'Paid',   'D02-13-2345', 'JKL-1122', 'REG-2025-004'),
+('D22-0000006-6', 'Contested', 'Davao City',   'Region XI',  '2022-09-04', 1000.00, 'Unpaid', 'D03-14-3456', 'MNO-3344', 'REG-2026-005'),
 ('B23-0000007-7', 'Pending',   'Baguio City',  'CAR',        '2023-01-19', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
-('M23-0000008-8', 'Resolved',  'Taguig',       'NCR',        '2023-09-25', 1000.00, 'Paid',   'D04-15-4567', 'STU-7788', 'REG-2022-008'),
-('F20-0000009-9', 'Resolved',  'Iloilo City',  'Region VI',  '2020-06-11', 2000.00, 'Paid',   'D05-16-5678', 'VWX-9900', 'REG-2019-009'),
-('M24-0000010-0', 'Pending',   'Mandaluyong',  'NCR',        '2024-02-07',  500.00, 'Unpaid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
+('M23-0000008-8', 'Resolved',  'Taguig',       'NCR',        '2023-09-25', 1000.00, 'Paid',   'D04-15-4567', 'STU-7788', 'REG-2025-006'),
+('F20-0000009-9', 'Resolved',  'Iloilo City',  'Region VI',  '2020-06-11', 2000.00, 'Paid',   'D05-16-5678', 'VWX-9900', 'REG-2022-008'),
+('M24-0000010-0', 'Pending',   'Mandaluyong',  'NCR',        '2024-02-07',  500.00, 'Unpaid', 'D06-17-6789', 'YZA-0011', 'REG-2024-009');
  
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 -- M20-0000001-1 has 2 violations
