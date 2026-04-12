@@ -277,16 +277,26 @@ INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, v
 ('PRC-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'D10-21-0123');
 
 INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
-('REG-2023-001', 'ABC-1234', '2023-01-10', 'Active'),
-('REG-2023-002', 'XYZ-9876', '2023-02-15', 'Active'),
-('REG-2022-003', 'DEF-2468', '2022-03-20', 'Expired'),
-('REG-2023-004', 'GHI-1357', '2023-04-25', 'Active'),
-('REG-2023-005', 'JKL-1122', '2023-05-30', 'Active'),
-('REG-2023-006', 'MNO-3344', '2023-06-05', 'Active'),
-('REG-2023-007', 'PQR-5566', '2023-07-10', 'Active'),
-('REG-2023-008', 'STU-7788', '2023-08-15', 'Active'),
-('REG-2021-009', 'VWX-9900', '2021-09-20', 'Expired'),
-('REG-2023-010', 'YZA-0011', '2023-10-25', 'Active');
+('REG-2019-001', 'ABC-1234',  '2019-03-10', 'Expired'),
+('REG-2020-002', 'XYZ-9876',  '2020-06-15', 'Expired'),
+('REG-2021-003', 'DEF-2468',  '2021-02-20', 'Expired'),
+('REG-2020-004', 'GHI-1357',  '2020-11-05', 'Expired'),
+('REG-2022-005', 'JKL-1122',  '2022-04-18', 'Expired'),
+('REG-2021-006', 'MNO-3344',  '2021-08-30', 'Expired'),
+('REG-2023-007', 'PQR-5566',  '2023-01-07', 'Expired'),
+('REG-2022-008', 'STU-7788',  '2022-09-14', 'Expired'),
+('REG-2019-009', 'VWX-9900',  '2019-05-22', 'Expired'),
+('REG-2023-010', 'YZA-0011',  '2023-10-25', 'Active'),
+('REG-2024-001', 'ABC-1234',  '2024-03-10', 'Active'),
+('REG-2024-002', 'XYZ-9876',  '2024-06-15', 'Active'),
+('REG-2024-003', 'DEF-2468',  '2024-02-20', 'Suspended'),
+('REG-2023-004', 'GHI-1357',  '2023-11-05', 'Active'),
+('REG-2024-005', 'JKL-1122',  '2024-04-18', 'Active'),
+('REG-2024-006', 'MNO-3344',  '2024-08-30', 'Active'),
+('REG-2024-007', 'PQR-5566',  '2024-01-07', 'Active'),
+('REG-2024-008', 'STU-7788',  '2024-09-14', 'Active'),
+('REG-2022-009', 'VWX-9900',  '2022-05-22', 'Expired'),
+('REG-2025-009', 'VWX-9900',  '2025-01-10', 'Active');
 
 -- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
