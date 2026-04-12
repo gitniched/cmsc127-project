@@ -252,98 +252,98 @@ DELIMITER ;
 INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
 ('D01-12-1234', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2022-05-10'),
 ('D02-13-2345', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2022-11-22'),
-('D03-14-3456', 'Michael', 'Jordan', 'Jeffrey', '1975-02-17', 'M', '789 Pine Rd, Pasig', 'Professional', 'Expired', '2015-03-14'),
-('D04-15-4567', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Elm St, Quezon City', 'Non-Professional', 'Active', '2021-07-01'),
-('D05-16-5678', 'Bruce', 'Wayne', 'Thomas', '1982-10-24', 'M', '1007 Mountain Dr, Taguig', 'Professional', 'Suspended', '2018-01-15'),
-('D06-17-6789', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Clinton St, Manila', 'Non-Professional', 'Active', '2022-09-09'),
-('D07-18-7890', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Amazon Way, Pasay', 'Professional', 'Active', '2022-06-30'),
-('D08-19-8901', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Ingram St, Mandaluyong', 'Non-Professional', 'Active', '2023-02-14'),
-('D09-20-9012', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Russian Blvd, Taguig', 'Professional', 'Active', '2022-10-05'),
-('D10-21-0123', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Malibu Point, Makati', 'Professional', 'Revoked', '2010-12-01'),
+('D03-14-3456', 'Michael', 'Jordan', 'Jeffrey', '1975-02-17', 'M', '789 Colon St, Cebu City', 'Professional', 'Expired', '2015-03-14'),
+('D04-15-4567', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Ilustre St, Davao City', 'Non-Professional', 'Active', '2021-07-01'),
+('D05-16-5678', 'Bruce', 'Wayne', 'Thomas', '1982-10-24', 'M', '1007 Session Rd, Baguio City', 'Professional', 'Suspended', '2018-01-15'),
+('D06-17-6789', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Iznart St, Iloilo City', 'Non-Professional', 'Active', '2022-09-09'),
+('D07-18-7890', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Corrales Ave, Cagayan de Oro', 'Professional', 'Active', '2022-06-30'),
+('D08-19-8901', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Quezon Blvd, Quezon City', 'Non-Professional', 'Active', '2023-02-14'),
+('D09-20-9012', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Burgos St, General Santos City', 'Professional', 'Active', '2022-10-05'),
+('D10-21-0123', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Mabini St, Legazpi City', 'Professional', 'Revoked', '2010-12-01'),
 ('S01-22-1111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Active', '2025-04-15'),
 ('S02-23-2222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
 ('S03-24-3333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20');
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
-('ABC-1234', 'Toyota', 'Vios', 'ENG-00123', 'CHAS-00123', 'Sedan', 2018, 'Black', 'D01-12-1234'),
-('XYZ-9876', 'Toyota', 'Fortuner', 'ENG-00234', 'CHAS-00234', 'SUV', 2020, 'White', 'D01-12-1234'),
-('DEF-2468', 'Ford', 'Ranger', 'ENG-00345', 'CHAS-00345', 'Truck', 2019, 'Red', 'D01-12-1234'),
-('GHI-1357', 'Mitsubishi', 'Montero', 'ENG-00456', 'CHAS-00456', 'SUV', 2021, 'Silver', 'D02-13-2345'),
-('JKL-1122', 'Honda', 'Civic', 'ENG-00567', 'CHAS-00567', 'Sedan', 2017, 'Black', 'D02-13-2345'),
-('MNO-3344', 'Hyundai', 'Tucson', 'ENG-00678', 'CHAS-00678', 'SUV', 2022, 'Blue', 'D03-14-3456'),
-('PQR-5566', 'Suzuki', 'Swift', 'ENG-00789', 'CHAS-00789', 'Hatchback', 2015, 'Yellow', 'D04-15-4567'),
-('STU-7788', 'Kia', 'Rio', 'ENG-00890', 'CHAS-00890', 'Sedan', 2016, 'Green', 'D04-15-4567'),
-('VWX-9900', 'Chevrolet', 'Trailblazer', 'ENG-00901', 'CHAS-00901', 'SUV', 2018, 'Gray', 'D05-16-5678'),
-('YZA-0011', 'Audi', 'R8', 'ENG-01012', 'CHAS-01012', 'Coupe', 2023, 'Red', 'D06-17-6789'),
-('BCD-2233', 'BMW', 'X5', 'ENG-01123', 'CHAS-01123', 'SUV', 2022, 'White', 'D07-18-7890'),
-('EFG-3344', 'BMW', 'M3', 'ENG-01234', 'CHAS-01234', 'Sedan', 2020, 'Blue', 'D07-18-7890'),
-('NNN-4455', 'Nissan', 'Urvan', 'ENG-01345', 'CHAS-01345', 'Van', 2019, 'White', 'D08-19-8901'),
-('MZD-6677', 'Mazda', '3', 'ENG-01456', 'CHAS-01456', 'Sedan', 2021, 'Red', 'D09-20-9012'),
-('SBB-8899', 'Subaru', 'Crosstrek', 'ENG-01567', 'CHAS-01567', 'SUV', 2023, 'Orange', 'D09-20-9012'),
-('MRZ-1100', 'Mercedes', 'S-Class', 'ENG-01678', 'CHAS-01678', 'Sedan', 2023, 'Black', 'D10-21-0123'),
-('PRC-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'D10-21-0123');
+('ABK-1234', 'Toyota', 'Vios', 'ENG-00123', 'CHAS-00123', 'Sedan', 2018, 'Black', 'D01-12-1234'),
+('ACM-5678', 'Toyota', 'Fortuner', 'ENG-00234', 'CHAS-00234', 'SUV', 2020, 'White', 'D01-12-1234'),
+('ADR-9012', 'Ford', 'Ranger', 'ENG-00345', 'CHAS-00345', 'Truck', 2019, 'Red', 'D01-12-1234'),
+('AET-3456', 'Mitsubishi', 'Montero', 'ENG-00456', 'CHAS-00456', 'SUV', 2021, 'Silver', 'D02-13-2345'),
+('AFN-7890', 'Honda', 'Civic', 'ENG-00567', 'CHAS-00567', 'Sedan', 2017, 'Black', 'D02-13-2345'),
+('AGP-2345', 'Nissan', 'Urvan', 'ENG-01345', 'CHAS-01345', 'Van', 2019, 'White', 'D08-19-8901'),
+('WBK-6789', 'Hyundai', 'Tucson', 'ENG-00678', 'CHAS-00678', 'SUV', 2022, 'Blue', 'D03-14-3456'),
+('TDR-5566', 'Suzuki', 'Swift', 'ENG-00789', 'CHAS-00789', 'Hatchback', 2015, 'Yellow', 'D04-15-4567'),
+('TCN-7788', 'Kia', 'Rio', 'ENG-00890', 'CHAS-00890', 'Sedan', 2016, 'Green', 'D04-15-4567'),
+('BFM-9900', 'Chevrolet', 'Trailblazer', 'ENG-00901', 'CHAS-00901', 'SUV', 2018, 'Gray', 'D05-16-5678'),
+('PKR-0011', 'Audi', 'R8', 'ENG-01012', 'CHAS-01012', 'Coupe', 2023, 'Red', 'D06-17-6789'),
+('SBN-2233', 'BMW', 'X5', 'ENG-01123', 'CHAS-01123', 'SUV', 2022, 'White', 'D07-18-7890'),
+('SCT-3344', 'BMW', 'M3', 'ENG-01234', 'CHAS-01234', 'Sedan', 2020, 'Blue', 'D07-18-7890'),
+('QDM-6677', 'Mazda', '3', 'ENG-01456', 'CHAS-01456', 'Sedan', 2021, 'Red', 'D09-20-9012'),
+('QER-8899', 'Subaru', 'Crosstrek', 'ENG-01567', 'CHAS-01567', 'SUV', 2023, 'Orange', 'D09-20-9012'),
+('LBK-1100', 'Mercedes', 'S-Class', 'ENG-01678', 'CHAS-01678', 'Sedan', 2023, 'Black', 'D10-21-0123'),
+('LCT-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'D10-21-0123');
 
 INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
-('REG-2026-001', 'ABC-1234',  '2026-03-10', 'Active'),
-('REG-2025-002', 'XYZ-9876',  '2025-08-20', 'Active'),
-('REG-2026-003', 'GHI-1357',  '2026-01-15', 'Active'),
-('REG-2025-004', 'JKL-1122',  '2025-06-30', 'Active'),
-('REG-2026-005', 'MNO-3344',  '2026-02-10', 'Active'),
-('REG-2025-006', 'STU-7788',  '2025-09-05', 'Active'),
-('REG-2023-007', 'PQR-5566',  '2023-04-18', 'Expired'),
-('REG-2022-008', 'VWX-9900',  '2022-11-30', 'Expired'),
-('REG-2024-009', 'YZA-0011',  '2024-07-22', 'Expired'),
-('REG-2024-010', 'DEF-2468',  '2024-05-14', 'Suspended');
+('REG-2026-001', 'ABK-1234', '2026-03-10', 'Active'),
+('REG-2025-002', 'ACM-5678', '2025-08-20', 'Active'),
+('REG-2026-003', 'AET-3456', '2026-01-15', 'Active'),
+('REG-2025-004', 'AFN-7890', '2025-06-30', 'Active'),
+('REG-2026-005', 'WBK-6789', '2026-02-10', 'Active'),
+('REG-2025-006', 'TCN-7788', '2025-09-05', 'Active'),
+('REG-2023-007', 'TDR-5566', '2023-04-18', 'Expired'),
+('REG-2022-008', 'BFM-9900', '2022-11-30', 'Expired'),
+('REG-2024-009', 'PKR-0011', '2024-07-22', 'Expired'),
+('REG-2024-010', 'ADR-9012', '2024-05-14', 'Suspended');
 
 -- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('M20-0000001-1', 'Resolved',  'Manila',       'NCR',        '2020-03-15', 1000.00, 'Paid',   'D01-12-1234', 'ABC-1234', 'REG-2026-001'),
-('M21-0000002-2', 'Resolved',  'Makati',       'NCR',        '2021-07-22',  500.00, 'Paid',   'D01-12-1234', 'XYZ-9876', 'REG-2025-002'),
-('M22-0000003-3', 'Dismissed', 'Quezon City',  'NCR',        '2022-02-10', 2000.00, 'Waived', 'D01-12-1234', 'DEF-2468', 'REG-2024-010'),
-('M21-0000004-4', 'Resolved',  'Pasig',        'NCR',        '2021-11-30', 1500.00, 'Paid',   'D02-13-2345', 'GHI-1357', 'REG-2026-003'),
-('G22-0000005-5', 'Resolved',  'Cebu City',    'Region VII', '2022-05-18', 2500.00, 'Paid',   'D02-13-2345', 'JKL-1122', 'REG-2025-004'),
-('D22-0000006-6', 'Contested', 'Davao City',   'Region XI',  '2022-09-04', 1000.00, 'Unpaid', 'D03-14-3456', 'MNO-3344', 'REG-2026-005'),
-('B23-0000007-7', 'Pending',   'Baguio City',  'CAR',        '2023-01-19', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
-('M23-0000008-8', 'Resolved',  'Taguig',       'NCR',        '2023-09-25', 1000.00, 'Paid',   'D04-15-4567', 'STU-7788', 'REG-2025-006'),
-('F20-0000009-9', 'Resolved',  'Iloilo City',  'Region VI',  '2020-06-11', 2000.00, 'Paid',   'D05-16-5678', 'VWX-9900', 'REG-2022-008'),
-('M24-0000010-0', 'Pending',   'Mandaluyong',  'NCR',        '2024-02-07',  500.00, 'Unpaid', 'D06-17-6789', 'YZA-0011', 'REG-2024-009');
+('M20-0000001-1', 'Resolved',  'Manila',       'NCR',        '2020-03-15', 1000.00, 'Paid',   'D01-12-1234', 'ABK-1234', 'REG-2026-001'),
+('M21-0000002-2', 'Resolved',  'Makati',       'NCR',        '2021-07-22',  500.00, 'Paid',   'D01-12-1234', 'ACM-5678', 'REG-2025-002'),
+('M22-0000003-3', 'Dismissed', 'Quezon City',  'NCR',        '2022-02-10', 2000.00, 'Waived', 'D01-12-1234', 'ADR-9012', 'REG-2024-010'),
+('M21-0000004-4', 'Resolved',  'Pasig',        'NCR',        '2021-11-30', 1500.00, 'Paid',   'D02-13-2345', 'AET-3456', 'REG-2026-003'),
+('G22-0000005-5', 'Resolved',  'Cebu City',    'Region VII', '2022-05-18', 2500.00, 'Paid',   'D02-13-2345', 'AFN-7890', 'REG-2025-004'),
+('D22-0000006-6', 'Contested', 'Davao City',   'Region XI',  '2022-09-04', 1000.00, 'Unpaid', 'D03-14-3456', 'WBK-6789', 'REG-2026-005'),
+('B23-0000007-7', 'Pending',   'Baguio City',  'CAR',        '2023-01-19', 3000.00, 'Unpaid', 'D04-15-4567', 'TDR-5566', 'REG-2023-007'),
+('M23-0000008-8', 'Resolved',  'Taguig',       'NCR',        '2023-09-25', 1000.00, 'Paid',   'D04-15-4567', 'TCN-7788', 'REG-2025-006'),
+('F20-0000009-9', 'Resolved',  'Iloilo City',  'Region VI',  '2020-06-11', 2000.00, 'Paid',   'D05-16-5678', 'BFM-9900', 'REG-2022-008'),
+('M24-0000010-0', 'Pending',   'Mandaluyong',  'NCR',        '2024-02-07',  500.00, 'Unpaid', 'D06-17-6789', 'PKR-0011', 'REG-2024-009');
  
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 -- M20-0000001-1 has 2 violations
 ('M20-0000001-1', 'Over speeding'),
 ('M20-0000001-1', 'Reckless driving'),
- 
+
 -- M21-0000002-2 has 1 violation
 ('M21-0000002-2', 'Illegal parking'),
- 
+
 -- M22-0000003-3 has 2 violations
 ('M22-0000003-3', 'Expired drivers license'),
 ('M22-0000003-3', 'No drivers license'),
- 
+
 -- M21-0000004-4 has 1 violation
 ('M21-0000004-4', 'Disregarding traffic sign/signal'),
- 
+
 -- G22-0000005-5 has 3 violations
 ('G22-0000005-5', 'Reckless driving'),
 ('G22-0000005-5', 'No seatbelt'),
 ('G22-0000005-5', 'Disobedience to traffic officer'),
- 
+
 -- D22-0000006-6 has 1 violation
 ('D22-0000006-6', 'No seatbelt'),
- 
+
 -- B23-0000007-7 has 2 violations
 ('B23-0000007-7', 'Disobedience to traffic officer'),
 ('B23-0000007-7', 'Obstruction to traffic'),
- 
+
 -- M23-0000008-8 has 1 violation
 ('M23-0000008-8', 'Over speeding'),
- 
+
 -- F20-0000009-9 has 1 violation
 ('F20-0000009-9', 'Expired drivers license'),
- 
+
 -- M24-0000010-0 has 2 violations
 ('M24-0000010-0', 'Violation of one way street'),
 ('M24-0000010-0', 'Disregarding traffic sign/signal');
