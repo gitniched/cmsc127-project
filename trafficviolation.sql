@@ -69,7 +69,7 @@ JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
  
 CREATE TABLE traffic_violation (
-    uovr_number INT NOT NULL AUTO_INCREMENT,
+    uovr_number VARCHAR(20) NOT NULL,
     officer VARCHAR(100),
     violation_status ENUM('Pending', 'Resolved', 'Contested', 'Dismissed') NOT NULL DEFAULT 'Pending',
     violation_location_city VARCHAR(100) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE traffic_violation (
  
 -- traffic violations that are based on the actual traffic violation receipt (TVR)
 CREATE TABLE violation_type (
-    uovr_number INT NOT NULL,
+    uovr_number VARCHAR(20) NOT NULL,
     violation_type ENUM(
         'Illegal parking',
         'Violation of loading zones',
@@ -289,56 +289,56 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2023-010', 'YZA-0011', '2023-10-25', 'Active');
 
 INSERT INTO traffic_violation (
-    uovr_number, violation_status, violation_location_city, 
-    violation_location_region, violation_date, fine_amount, 
+    uovr_number, violation_status, violation_location_city,
+    violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('UOVR-1001', 'Pending', 'Manila', 'NCR', '2023-05-15', 1000.00, 'Unpaid', 'D01-12-1234', 'ABC-1234', 'REG-2023-001'),
-('UOVR-1002', 'Resolved', 'Makati', 'NCR', '2023-06-20', 500.00, 'Paid', 'D01-12-1234', 'XYZ-9876', 'REG-2023-002'),
-('UOVR-1003', 'Pending', 'Quezon City', 'NCR', '2023-07-10', 2000.00, 'Unpaid', 'D01-12-1234', 'DEF-2468', 'REG-2022-003'),
-('UOVR-1004', 'Resolved', 'Pasig', 'NCR', '2023-08-05', 1500.00, 'Paid', 'D02-13-2345', 'GHI-1357', 'REG-2023-004'),
-('UOVR-1005', 'Pending', 'Cebu City', 'Region VII', '2023-09-12', 2500.00, 'Unpaid', 'D02-13-2345', 'JKL-1122', 'REG-2023-005'),
-('UOVR-1006', 'Resolved', 'Davao City', 'Region XI', '2023-10-01', 1000.00, 'Paid', 'D03-14-3456', 'MNO-3344', 'REG-2023-006'),
-('UOVR-1007', 'Pending', 'Baguio City', 'CAR', '2023-10-15', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
-('UOVR-1008', 'Resolved', 'Taguig', 'NCR', '2023-11-20', 1000.00, 'Paid', 'D04-15-4567', 'STU-7788', 'REG-2023-008'),
-('UOVR-1009', 'Pending', 'Iloilo City', 'Region VI', '2023-12-05', 2000.00, 'Unpaid', 'D05-16-5678', 'VWX-9900', 'REG-2021-009'),
-('UOVR-1010', 'Resolved', 'Mandaluyong', 'NCR', '2023-12-10', 500.00, 'Paid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
+('M23-0000001-1', 'Pending', 'Manila', 'NCR', '2023-05-15', 1000.00, 'Unpaid', 'D01-12-1234', 'ABC-1234', 'REG-2023-001'),
+('M23-0000002-2', 'Resolved', 'Makati', 'NCR', '2023-06-20', 500.00, 'Paid', 'D01-12-1234', 'XYZ-9876', 'REG-2023-002'),
+('M23-0000003-3', 'Pending', 'Quezon City', 'NCR', '2023-07-10', 2000.00, 'Unpaid', 'D01-12-1234', 'DEF-2468', 'REG-2022-003'),
+('M23-0000004-4', 'Resolved', 'Pasig', 'NCR', '2023-08-05', 1500.00, 'Paid', 'D02-13-2345', 'GHI-1357', 'REG-2023-004'),
+('G23-0000005-5', 'Pending', 'Cebu City', 'Region VII', '2023-09-12', 2500.00, 'Unpaid', 'D02-13-2345', 'JKL-1122', 'REG-2023-005'),
+('D23-0000006-6', 'Resolved', 'Davao City', 'Region XI', '2023-10-01', 1000.00, 'Paid', 'D03-14-3456', 'MNO-3344', 'REG-2023-006'),
+('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-10-15', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
+('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-11-20', 1000.00, 'Paid', 'D04-15-4567', 'STU-7788', 'REG-2023-008'),
+('F23-0000009-9', 'Pending', 'Iloilo City', 'Region VI', '2023-12-05', 2000.00, 'Unpaid', 'D05-16-5678', 'VWX-9900', 'REG-2021-009'),
+('M23-0000010-0', 'Resolved', 'Mandaluyong', 'NCR', '2023-12-10', 500.00, 'Paid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
 
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
--- UOVR-1001 has 2 violations
-('UOVR-1001', 'Over speeding'),
-('UOVR-1001', 'Reckless driving'),
- 
--- UOVR-1002 has 1 violation
-('UOVR-1002', 'Illegal parking'),
- 
--- UOVR-1003 has 2 violations
-('UOVR-1003', 'Expired drivers license'),
-('UOVR-1003', 'No drivers license'),
- 
--- UOVR-1004 has 1 violation
-('UOVR-1004', 'Disregarding traffic sign/signal'),
- 
--- UOVR-1005 has 3 violations
-('UOVR-1005', 'Reckless driving'),
-('UOVR-1005', 'No seatbelt'),
-('UOVR-1005', 'Disobedience to traffic officer'),
- 
--- UOVR-1006 has 1 violation
-('UOVR-1006', 'No seatbelt'),
- 
--- UOVR-1007 has 2 violations
-('UOVR-1007', 'Disobedience to traffic officer'),
-('UOVR-1007', 'Obstruction to traffic'),
- 
--- UOVR-1008 has 1 violation
-('UOVR-1008', 'Over speeding'),
- 
--- UOVR-1009 has 1 violation
-('UOVR-1009', 'Expired drivers license'),
- 
--- UOVR-1010 has 2 violations
-('UOVR-1010', 'Violation of one way street'),
-('UOVR-1010', 'Disregarding traffic sign/signal');
+-- M23-0000001-1 has 2 violations
+('M23-0000001-1', 'Over speeding'),
+('M23-0000001-1', 'Reckless driving'),
+
+-- M23-0000002-2 has 1 violation
+('M23-0000002-2', 'Illegal parking'),
+
+-- M23-0000003-3 has 2 violations
+('M23-0000003-3', 'Expired drivers license'),
+('M23-0000003-3', 'No drivers license'),
+
+-- M23-0000004-4 has 1 violation
+('M23-0000004-4', 'Disregarding traffic sign/signal'),
+
+-- G23-0000005-5 has 3 violations
+('G23-0000005-5', 'Reckless driving'),
+('G23-0000005-5', 'No seatbelt'),
+('G23-0000005-5', 'Disobedience to traffic officer'),
+
+-- D23-0000006-6 has 1 violation
+('D23-0000006-6', 'No seatbelt'),
+
+-- B23-0000007-7 has 2 violations
+('B23-0000007-7', 'Disobedience to traffic officer'),
+('B23-0000007-7', 'Obstruction to traffic'),
+
+-- M23-0000008-8 has 1 violation
+('M23-0000008-8', 'Over speeding'),
+
+-- F23-0000009-9 has 1 violation
+('F23-0000009-9', 'Expired drivers license'),
+
+-- M23-0000010-0 has 2 violations
+('M23-0000010-0', 'Violation of one way street'),
+('M23-0000010-0', 'Disregarding traffic sign/signal');
 
 
 -- reports to be generated
@@ -369,3 +369,5 @@ SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
 
  
 -- View all vehicles involved in violations within a given city or region.
+
+
