@@ -78,12 +78,12 @@ CREATE TABLE traffic_violation (
     violation_date DATE NOT NULL,
     fine_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     payment_status VARCHAR(20) NOT NULL,
-    license_number      VARCHAR(13)     NOT NULL,
-    plate_number        VARCHAR(10)     NOT NULL,
+    license_number VARCHAR(13) NOT NULL,
+    plate_number VARCHAR(10) NOT NULL,
     registration_number VARCHAR(20),
     PRIMARY KEY (uovr_number),
-    FOREIGN KEY (license_number)      REFERENCES DRIVER(license_number),
-    FOREIGN KEY (plate_number)        REFERENCES VEHICLE(plate_number),
+    FOREIGN KEY (license_number) REFERENCES DRIVER(license_number),
+    FOREIGN KEY (plate_number) REFERENCES VEHICLE(plate_number),
     FOREIGN KEY (registration_number) REFERENCES VEHICLE_REGISTRATION(registration_number)
 );
 
