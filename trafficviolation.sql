@@ -23,13 +23,13 @@ SELECT
     first_name,
     middle_name,
     last_name,
-    TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) AS age,
+    TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age,
     sex,
     address,
     license_type,
     license_status,
-    license_issuance_date,
-    license_expiration_date
+    license_issue_date,
+    license_expiry_date
 FROM DRIVER;
 
 CREATE TABLE vehicle (
