@@ -14,7 +14,7 @@ CREATE TABLE driver (
     license_status ENUM('Active', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
     license_expiry_date DATE NOT NULL,
-    PRIMARY KEY (license_number)
+    CONSTRAINT pk_driver PRIMARY KEY (license_number)
 );
 
 CREATE VIEW v_driver AS
@@ -42,8 +42,8 @@ CREATE TABLE vehicle (
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
-    PRIMARY KEY (plate_number),
-    FOREIGN KEY (owner_license_number) REFERENCES driver(license_number)
+    CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
+    CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number)
 );
 
 CREATE TABLE vehicle_registration (
@@ -52,8 +52,8 @@ CREATE TABLE vehicle_registration (
     registration_date DATE NOT NULL,
     expiration_date DATE NOT NULL,
     registration_status ENUM('Active', 'Expired', 'Suspended') NOT NULL,
-    PRIMARY KEY (registration_number),
-    FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
+    CONSTRAINT pk_vehicle_registration PRIMARY KEY (registration_number),
+    CONSTRAINT fk_registration_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
 );
 
 CREATE OR REPLACE VIEW v_active_registrations AS
@@ -81,10 +81,10 @@ CREATE TABLE traffic_violation (
     license_number VARCHAR(13) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
     registration_number VARCHAR(20),
-    PRIMARY KEY (uovr_number),
-    FOREIGN KEY (license_number) REFERENCES DRIVER(license_number),
-    FOREIGN KEY (plate_number) REFERENCES VEHICLE(plate_number),
-    FOREIGN KEY (registration_number) REFERENCES VEHICLE_REGISTRATION(registration_number)
+    CONSTRAINT pk_traffic_violation PRIMARY KEY (uovr_number),
+    CONSTRAINT fk_violation_driver FOREIGN KEY (license_number) REFERENCES driver(license_number),
+    CONSTRAINT fk_violation_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number),
+    CONSTRAINT fk_violation_registration FOREIGN KEY (registration_number) REFERENCES vehicle_registration(registration_number)
 );
 
 -- traffic violations that are based on the actual traffic violation receipt (TVR)
@@ -128,8 +128,8 @@ CREATE TABLE violation_type (
                         'Smoking inside PUV',
                         'Violation of emission standard'
                     ) NOT NULL,
-    PRIMARY KEY (uovr_number, violation_type),
-    FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
+    CONSTRAINT pk_violation_type PRIMARY KEY (uovr_number, violation_type),
+    CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
 );
 
 INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
