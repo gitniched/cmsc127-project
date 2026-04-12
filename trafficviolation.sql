@@ -65,47 +65,9 @@ CREATE TABLE traffic_violation (
     FOREIGN KEY (registration_number) REFERENCES VEHICLE_REGISTRATION(registration_number)
 );
 
--- traffic violations that are based on the actual traffic violation receipt (TVR)
 CREATE TABLE violation_type (
-    uovr_number VARCHAR(20) NOT NULL,
-    violation_type  ENUM(
-                        'Illegal parking',
-                        'Violation of loading zones',
-                        'Obstruction to traffic',
-                        'Colorum tricycles',
-                        '50/50 scheme',
-                        'Non display of Not-for-hire',
-                        'Violation of one way street',
-                        'Driving under the influence of liquor',
-                        'Truck ban',
-                        'No drivers license',
-                        'No professional drivers license',
-                        'Expired drivers license',
-                        'No seatbelt',
-                        'Noisy muffler',
-                        'Disobedience to traffic officer',
-                        'Disregarding traffic sign/signal',
-                        'Discourteous and disrespectful conduct to passer',
-                        'Others',
-                        'Untidy attire of driver',
-                        'Reckless driving',
-                        'No U-turn',
-                        'No interior light',
-                        'Over speeding',
-                        'No safety helmet',
-                        'Unauthorized driver',
-                        'Not posting of current passenger fare matrix',
-                        'Refusal to convey passenger',
-                        'No overloading',
-                        'No Mayor permit',
-                        'Overcharging',
-                        'Without proper light',
-                        'Jaywalking',
-                        'Expired TCT',
-                        'Driving through funeral or other processions',
-                        'Smoking inside PUV',
-                        'Violation of emission standard'
-                    ) NOT NULL,
+    uovr_number VARCHAR(20),
+    violation_type VARCHAR(50) NOT NULL,
     PRIMARY KEY (uovr_number, violation_type),
     FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
 );
