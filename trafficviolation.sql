@@ -12,6 +12,7 @@ CREATE TABLE driver (
     address VARCHAR(255) NOT NULL,
     license_type ENUM('Student Permit', 'Non-Professional', 'Professional') NOT NULL,
     license_status ENUM('Valid', 'Expired', 'Suspended', 'Revoked') NOT NULL,
+    license_status ENUM('Active', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
     license_expiry_date DATE NOT NULL,
     PRIMARY KEY (license_number)
