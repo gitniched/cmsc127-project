@@ -30,7 +30,7 @@ SELECT
     license_status,
     license_issue_date,
     license_expiry_date
-FROM DRIVER;
+FROM driver;
 
 CREATE TABLE vehicle (
     plate_number VARCHAR(10) NOT NULL,
@@ -63,9 +63,9 @@ SELECT
     vr.registration_date,
     vr.expiration_date,
     vr.registration_status,
-    v.license_number
-FROM VEHICLE_REGISTRATION vr
-JOIN VEHICLE v ON vr.plate_number = v.plate_number
+    v.owner_license_number
+FROM vehicle_registration vr
+JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
 
 CREATE TABLE traffic_violation (
