@@ -48,6 +48,7 @@ CREATE TABLE vehicle_registration (
 
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
+    officer VARCHAR(100),
     violation_status VARCHAR(20) NOT NULL,
     vehicle_registration_number VARCHAR(20) NOT NULL,
     violation_location_city VARCHAR(20) NOT NULL,
