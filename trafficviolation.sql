@@ -1,7 +1,7 @@
 DROP DATABASE IF EXISTS trafficviolation;
 CREATE DATABASE trafficviolation;
 USE trafficviolation;
-
+ 
 CREATE TABLE driver (
     license_number VARCHAR(13) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE driver (
     license_expiry_date DATE NOT NULL,
     CONSTRAINT pk_driver PRIMARY KEY (license_number)
 );
-
+ 
 CREATE VIEW v_driver AS
 SELECT
     license_number,
@@ -31,7 +31,7 @@ SELECT
     license_issue_date,
     license_expiry_date
 FROM driver;
-
+ 
 CREATE TABLE vehicle (
     plate_number VARCHAR(10) NOT NULL,
     make VARCHAR(50) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE vehicle (
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number)
 );
-
+ 
 CREATE TABLE vehicle_registration (
     registration_number VARCHAR(20) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE vehicle_registration (
     CONSTRAINT pk_vehicle_registration PRIMARY KEY (registration_number),
     CONSTRAINT fk_registration_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
 );
-
+ 
 CREATE OR REPLACE VIEW v_active_registrations AS
 SELECT
     vr.registration_number,
@@ -67,14 +67,13 @@ SELECT
 FROM vehicle_registration vr
 JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
-
+ 
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
     officer VARCHAR(100),
     violation_status ENUM('Pending', 'Resolved', 'Contested', 'Dismissed') NOT NULL DEFAULT 'Pending',
-    vehicle_registration_number VARCHAR(20) NOT NULL,
-    violation_location_city VARCHAR(20) NOT NULL,
-    violation_location_region VARCHAR(20) NOT NULL,
+    violation_location_city VARCHAR(100) NOT NULL,
+    violation_location_region VARCHAR(100) NOT NULL,
     violation_date DATE NOT NULL,
     fine_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     payment_status ENUM('Paid', 'Unpaid', 'Waived') NOT NULL DEFAULT 'Unpaid',
@@ -86,48 +85,48 @@ CREATE TABLE traffic_violation (
     CONSTRAINT fk_violation_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number),
     CONSTRAINT fk_violation_registration FOREIGN KEY (registration_number) REFERENCES vehicle_registration(registration_number)
 );
-
+ 
 -- traffic violations that are based on the actual traffic violation receipt (TVR)
 CREATE TABLE violation_type (
     uovr_number VARCHAR(20) NOT NULL,
-    violation_type  ENUM(
-                        'Illegal parking',
-                        'Violation of loading zones',
-                        'Obstruction to traffic',
-                        'Colorum tricycles',
-                        '50/50 scheme',
-                        'Non display of Not-for-hire',
-                        'Violation of one way street',
-                        'Driving under the influence of liquor',
-                        'Truck ban',
-                        'No drivers license',
-                        'No professional drivers license',
-                        'Expired drivers license',
-                        'No seatbelt',
-                        'Noisy muffler',
-                        'Disobedience to traffic officer',
-                        'Disregarding traffic sign/signal',
-                        'Discourteous and disrespectful conduct to passer',
-                        'Others',
-                        'Untidy attire of driver',
-                        'Reckless driving',
-                        'No U-turn',
-                        'No interior light',
-                        'Over speeding',
-                        'No safety helmet',
-                        'Unauthorized driver',
-                        'Not posting of current passenger fare matrix',
-                        'Refusal to convey passenger',
-                        'No overloading',
-                        'No Mayor permit',
-                        'Overcharging',
-                        'Without proper light',
-                        'Jaywalking',
-                        'Expired TCT',
-                        'Driving through funeral or other processions',
-                        'Smoking inside PUV',
-                        'Violation of emission standard'
-                    ) NOT NULL,
+    violation_type ENUM(
+        'Illegal parking',
+        'Violation of loading zones',
+        'Obstruction to traffic',
+        'Colorum tricycles',
+        '50/50 scheme',
+        'Non display of Not-for-hire',
+        'Violation of one way street',
+        'Driving under the influence of liquor',
+        'Truck ban',
+        'No drivers license',
+        'No professional drivers license',
+        'Expired drivers license',
+        'No seatbelt',
+        'Noisy muffler',
+        'Disobedience to traffic officer',
+        'Disregarding traffic sign/signal',
+        'Discourteous and disrespectful conduct to passer',
+        'Others',
+        'Untidy attire of driver',
+        'Reckless driving',
+        'No U-turn',
+        'No interior light',
+        'Over speeding',
+        'No safety helmet',
+        'Unauthorized driver',
+        'Not posting of current passenger fare matrix',
+        'Refusal to convey passenger',
+        'No overloading',
+        'No Mayor permit',
+        'Overcharging',
+        'Without proper light',
+        'Jaywalking',
+        'Expired TCT',
+        'Driving through funeral or other processions',
+        'Smoking inside PUV',
+        'Violation of emission standard'
+    ) NOT NULL,
     CONSTRAINT pk_violation_type PRIMARY KEY (uovr_number, violation_type),
     CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
 );
