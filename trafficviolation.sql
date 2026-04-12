@@ -131,6 +131,120 @@ CREATE TABLE violation_type (
     CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
 );
 
+-- triggers
+
+DELIMITER $$
+
+-- auto-compute expiry on insert (always 5 years)
+CREATE TRIGGER trg_driver_before_insert
+BEFORE INSERT ON driver
+FOR EACH ROW
+BEGIN
+    SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+END$$
+
+-- block direct edits to expiry; allow renewal override via session var
+CREATE TRIGGER trg_driver_before_update
+BEFORE UPDATE ON driver
+FOR EACH ROW
+BEGIN
+    IF @lto_renewal_override != 1 THEN
+        IF NEW.license_issue_date <> OLD.license_issue_date THEN
+            SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+        ELSEIF NEW.license_expiry_date <> OLD.license_expiry_date THEN
+            SET NEW.license_expiry_date = OLD.license_expiry_date;
+        END IF;
+    END IF;
+END$$
+
+-- auto-compute registration expiry (1 year)
+CREATE TRIGGER trg_registration_before_insert
+BEFORE INSERT ON vehicle_registration
+FOR EACH ROW
+BEGIN
+    SET NEW.expiration_date = DATE_ADD(NEW.registration_date, INTERVAL 1 YEAR);
+END$$
+
+-- suspend license if driver reaches 3 or more pending violations
+CREATE TRIGGER trg_violation_after_insert
+AFTER INSERT ON traffic_violation
+FOR EACH ROW
+BEGIN
+    DECLARE v_pending_count INT;
+    SELECT COUNT(*) INTO v_pending_count
+    FROM traffic_violation
+    WHERE license_number = NEW.license_number
+      AND violation_status = 'Pending';
+    IF v_pending_count >= 3 THEN
+        UPDATE driver
+        SET license_status = 'Suspended'
+        WHERE license_number = NEW.license_number
+          AND license_status = 'Active';
+    END IF;
+END$$
+
+-- renew license: 10 years if no violations in current period, else 5 years
+CREATE PROCEDURE sp_renew_license(
+    IN p_license_number VARCHAR(13),
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE v_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
+    DECLARE v_issue_date DATE;
+    DECLARE v_expiry_date DATE;
+    DECLARE v_violation_count INT;
+    DECLARE v_renewal_years INT;
+    DECLARE v_new_issue_date DATE;
+    DECLARE v_new_expiry_date DATE;
+
+    SELECT license_status, license_issue_date, license_expiry_date
+    INTO v_status, v_issue_date, v_expiry_date
+    FROM driver
+    WHERE license_number = p_license_number;
+
+    IF v_status IS NULL THEN
+        SET p_message = CONCAT('error: no driver found with license number ', p_license_number);
+    ELSEIF v_status = 'Revoked' THEN
+        SET p_message = 'error: revoked licenses cannot be renewed';
+    ELSE
+        SELECT COUNT(*) INTO v_violation_count
+        FROM traffic_violation
+        WHERE license_number = p_license_number
+          AND violation_date BETWEEN v_issue_date AND v_expiry_date
+          AND violation_status <> 'Dismissed';
+
+        IF v_violation_count = 0 THEN
+            SET v_renewal_years = 10;
+        ELSE
+            SET v_renewal_years = 5;
+        END IF;
+
+        SET v_new_issue_date = CURDATE();
+        SET v_new_expiry_date = DATE_ADD(v_new_issue_date, INTERVAL v_renewal_years YEAR);
+
+        UPDATE driver
+        SET license_issue_date = v_new_issue_date,
+            license_status = 'Active'
+        WHERE license_number = p_license_number;
+
+        SET @lto_renewal_override = 1;
+        UPDATE driver
+        SET license_expiry_date = v_new_expiry_date
+        WHERE license_number = p_license_number;
+        SET @lto_renewal_override = 0;
+
+        SET p_message = CONCAT(
+            'license ', p_license_number, ' renewed for ', v_renewal_years, ' years. ',
+            'new expiry: ', DATE_FORMAT(v_new_expiry_date, '%Y-%m-%d'), '. ',
+            'violations in last period: ', v_violation_count
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- dummy tables
+
 INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
 ('D01-12-1234', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2020-05-10'),
 ('D02-13-2345', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2019-11-22'),
