@@ -263,6 +263,9 @@ INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_da
 ('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Active', '2025-04-15'),
 ('S02-25-222222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
 ('S03-23-333333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20');
+('N11-22-112233', 'Ramon', 'Cruz', 'Diego', '1993-07-14', 'M', '22 Dapitan St, Manila', 'Non-Professional', 'Active', '2022-03-20'),
+('N12-21-223344', 'Maria', 'Santos', 'Luz', '1998-05-30', 'F', '77 Sto. Tomas St, Quezon City', 'Non-Professional', 'Active', '2021-08-10'),
+('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Active', '2019-06-05');
 
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
@@ -283,6 +286,9 @@ INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, v
 ('QER-8899', 'Subaru', 'Crosstrek', 'ENG-01567', 'CHAS-01567', 'SUV', 2023, 'Orange', 'N09-22-901234'),
 ('LBK-1100', 'Mercedes', 'S-Class', 'ENG-01678', 'CHAS-01678', 'Sedan', 2023, 'Black', 'N10-10-012345'),
 ('LCT-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'N10-10-012345');
+('ANK-1234', 'Honda', 'Click 125i', 'ENG-02001', 'CHAS-02001', 'Motorcycle', 2021, 'Red', 'N11-22-112233'),
+('ABT-5678', 'Yamaha', 'Mio Gear', 'ENG-02002', 'CHAS-02002', 'Motorcycle', 2022, 'Blue', 'N12-21-223344'),
+('WMK-9012', 'Honda', 'XRM 125', 'ENG-02003', 'CHAS-02003', 'Motorcycle', 2019, 'Black', 'N13-19-334455');
 
 INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
 ('REG-2026-001', 'ABK-1234', '2026-03-10', 'Active'),
@@ -295,6 +301,9 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2022-008', 'BFM-9900', '2022-11-30', 'Expired'),
 ('REG-2024-009', 'PKR-0011', '2024-07-22', 'Expired'),
 ('REG-2024-010', 'ADR-9012', '2024-05-14', 'Suspended');
+('REG-2025-011', 'ANK-1234', '2025-03-20', 'Active'),
+('REG-2024-012', 'ABT-5678', '2024-08-10', 'Expired'),
+('REG-2025-013', 'WMK-9012', '2025-06-05', 'Active');
 
 -- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
@@ -311,8 +320,17 @@ INSERT INTO traffic_violation (
 ('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'D04-15-4567', 'TCN-7788', 'REG-2025-006'),
 ('F20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'D05-16-5678', 'BFM-9900', 'REG-2022-008'),
 ('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 500.00, 'Unpaid', 'D06-17-6789', 'PKR-0011', 'REG-2024-009');
+('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 1500.00, 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
+('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 500.00, 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
+('G25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 1000.00, 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013');
  
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
+
+('M25-0000011-1', 'No safety helmet'),
+('M25-0000011-1', 'Over speeding'),
+('M24-0000012-2', 'No safety helmet'),
+('G25-0000013-3', 'Reckless driving');
+
 -- M20-0000001-1 has 2 violations
 ('M20-0000001-1', 'Over speeding'),
 ('M20-0000001-1', 'Reckless driving'),
