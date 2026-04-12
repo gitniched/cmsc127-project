@@ -429,7 +429,7 @@ WHERE tv.violation_location_city = @city
 OR tv.violation_location_region = @region;
 
 -- View all vehicles of each driver
-SELECT d.license_number, CONCAT(d.first_name, ' ', d.last_name) AS full_name, 
+SELECT d.license_number, d.license_type,CONCAT(d.first_name, ' ', d.last_name) AS full_name, 
 v.plate_number, v.make, v.model, v.year, v.vehicle_type 
 FROM driver d LEFT JOIN vehicle v on d.license_number = v.owner_license_number
 ORDER BY d.license_number; 
