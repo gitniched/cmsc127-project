@@ -207,6 +207,7 @@ BEGIN
     DECLARE v_issue_date DATE;
     DECLARE v_expiry_date DATE;
     DECLARE v_violation_count INT;
+    DECLARE v_unpaid_count INT;
     DECLARE v_renewal_years INT;
     DECLARE v_new_issue_date DATE;
     DECLARE v_new_expiry_date DATE;
@@ -220,38 +221,50 @@ BEGIN
         SET p_message = CONCAT('error: no driver found with license number ', p_license_number);
     ELSEIF v_status = 'Revoked' THEN
         SET p_message = 'error: revoked licenses cannot be renewed';
+    ELSEIF v_issue_date > CURDATE() THEN
+        SET p_message = 'error: license_issue_date is in the future, please correct the record before renewing';
     ELSE
-        SELECT COUNT(*) INTO v_violation_count
+        SELECT COUNT(*) INTO v_unpaid_count
         FROM traffic_violation
         WHERE license_number = p_license_number
-          AND violation_date BETWEEN v_issue_date AND v_expiry_date
-          AND violation_status <> 'Dismissed';
+          AND payment_status = 'Unpaid'
+          AND violation_status NOT IN ('Dismissed', 'Contested');
 
-        IF v_violation_count = 0 THEN
-            SET v_renewal_years = 10;
+        IF v_unpaid_count > 0 THEN
+            SET p_message = CONCAT('error: driver has ', v_unpaid_count, ' unsettled fine(s). settle all unpaid violations before renewing');
         ELSE
-            SET v_renewal_years = 5;
+            SELECT COUNT(*) INTO v_violation_count
+            FROM traffic_violation
+            WHERE license_number = p_license_number
+              AND violation_date BETWEEN v_issue_date AND v_expiry_date
+              AND violation_status <> 'Dismissed';
+
+            IF v_violation_count = 0 THEN
+                SET v_renewal_years = 10;
+            ELSE
+                SET v_renewal_years = 5;
+            END IF;
+
+            SET v_new_issue_date = CURDATE();
+            SET v_new_expiry_date = DATE_ADD(v_new_issue_date, INTERVAL v_renewal_years YEAR);
+
+            UPDATE driver
+            SET license_issue_date = v_new_issue_date,
+                license_status = 'Active'
+            WHERE license_number = p_license_number;
+
+            SET @lto_renewal_override = 1;
+            UPDATE driver
+            SET license_expiry_date = v_new_expiry_date
+            WHERE license_number = p_license_number;
+            SET @lto_renewal_override = 0;
+
+            SET p_message = CONCAT(
+                'license ', p_license_number, ' renewed for ', v_renewal_years, ' years. ',
+                'new expiry: ', DATE_FORMAT(v_new_expiry_date, '%Y-%m-%d'), '. ',
+                'violations in last period: ', v_violation_count
+            );
         END IF;
-
-        SET v_new_issue_date = CURDATE();
-        SET v_new_expiry_date = DATE_ADD(v_new_issue_date, INTERVAL v_renewal_years YEAR);
-
-        UPDATE driver
-        SET license_issue_date = v_new_issue_date,
-            license_status = 'Active'
-        WHERE license_number = p_license_number;
-
-        SET @lto_renewal_override = 1;
-        UPDATE driver
-        SET license_expiry_date = v_new_expiry_date
-        WHERE license_number = p_license_number;
-        SET @lto_renewal_override = 0;
-
-        SET p_message = CONCAT(
-            'license ', p_license_number, ' renewed for ', v_renewal_years, ' years. ',
-            'new expiry: ', DATE_FORMAT(v_new_expiry_date, '%Y-%m-%d'), '. ',
-            'violations in last period: ', v_violation_count
-        );
     END IF;
 END$$
 
