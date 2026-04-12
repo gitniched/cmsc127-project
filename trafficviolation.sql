@@ -191,37 +191,37 @@ INSERT INTO traffic_violation (
 
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 -- UOVR-1001 has 2 violations
-('UOVR-1001', 'Speeding'),
-('UOVR-1001', 'Reckless Driving'),
-
+('UOVR-1001', 'Over speeding'),
+('UOVR-1001', 'Reckless driving'),
+ 
 -- UOVR-1002 has 1 violation
-('UOVR-1002', 'Illegal Parking'),
-
+('UOVR-1002', 'Illegal parking'),
+ 
 -- UOVR-1003 has 2 violations
-('UOVR-1003', 'Expired Registration'),
-('UOVR-1003', 'Driving Without License'),
-
+('UOVR-1003', 'Expired drivers license'),
+('UOVR-1003', 'No drivers license'),
+ 
 -- UOVR-1004 has 1 violation
-('UOVR-1004', 'Beating Red Light'),
-
+('UOVR-1004', 'Disregarding traffic sign/signal'),
+ 
 -- UOVR-1005 has 3 violations
-('UOVR-1005', 'Reckless Driving'),
-('UOVR-1005', 'No Seatbelt'),
-('UOVR-1005', 'Using Phone'),
-
+('UOVR-1005', 'Reckless driving'),
+('UOVR-1005', 'No seatbelt'),
+('UOVR-1005', 'Disobedience to traffic officer'),
+ 
 -- UOVR-1006 has 1 violation
-('UOVR-1006', 'No Seatbelt'),
-
+('UOVR-1006', 'No seatbelt'),
+ 
 -- UOVR-1007 has 2 violations
-('UOVR-1007', 'Using Phone'),
-('UOVR-1007', 'Swerving'),
-
+('UOVR-1007', 'Disobedience to traffic officer'),
+('UOVR-1007', 'Obstruction to traffic'),
+ 
 -- UOVR-1008 has 1 violation
-('UOVR-1008', 'Speeding'),
-
+('UOVR-1008', 'Over speeding'),
+ 
 -- UOVR-1009 has 1 violation
-('UOVR-1009', 'Expired Registration'),
-
+('UOVR-1009', 'Expired drivers license'),
+ 
 -- UOVR-1010 has 2 violations
-('UOVR-1010', 'Illegal Turn'),
-('UOVR-1010', 'Failure to Yield');
+('UOVR-1010', 'Violation of one way street'),
+('UOVR-1010', 'Disregarding traffic sign/signal');
