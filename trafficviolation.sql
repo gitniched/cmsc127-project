@@ -88,7 +88,7 @@ CREATE TABLE traffic_violation (
  
 -- traffic violations that are based on the actual traffic violation receipt (TVR)
 CREATE TABLE violation_type (
-    uovr_number VARCHAR(20) NOT NULL,
+    uovr_number INT NOT NULL,
     violation_type ENUM(
         'Illegal parking',
         'Violation of loading zones',
