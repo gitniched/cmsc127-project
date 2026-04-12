@@ -175,20 +175,19 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2023-010', 'YZA-0011', '2023-10-25', 'Active');
 
 INSERT INTO traffic_violation (
-    uovr_number, violation_status, vehicle_registration_number,
-    violation_location_city, violation_location_region,
-    violation_date, fine_amount, payment_status
-) VALUES
-('UOVR-1001', 'Pending', 'REG-2023-001', 'Manila', 'NCR', '2023-05-15', 1000.00, 'Unpaid'),
-('UOVR-1002', 'Resolved', 'REG-2023-002', 'Makati', 'NCR', '2023-06-20', 500.00, 'Paid'),
-('UOVR-1003', 'Pending', 'REG-2022-003', 'Quezon City', 'NCR', '2023-07-10', 2000.00, 'Unpaid'),
-('UOVR-1004', 'Resolved', 'REG-2023-004', 'Pasig', 'NCR', '2023-08-05', 1500.00, 'Paid'),
-('UOVR-1005', 'Pending', 'REG-2023-005', 'Cebu City', 'Region 7', '2023-09-12', 2500.00, 'Unpaid'),
-('UOVR-1006', 'Resolved', 'REG-2023-006', 'Davao City', 'Region 11', '2023-10-01', 1000.00, 'Paid'),
-('UOVR-1007', 'Pending', 'REG-2023-007', 'Baguio City', 'CAR', '2023-10-15', 3000.00, 'Unpaid'),
-('UOVR-1008', 'Resolved', 'REG-2023-008', 'Taguig', 'NCR', '2023-11-20', 1000.00, 'Paid'),
-('UOVR-1009', 'Pending', 'REG-2021-009', 'Iloilo City', 'Region 6', '2023-12-05', 2000.00, 'Unpaid'),
-('UOVR-1010', 'Resolved', 'REG-2023-010', 'Mandaluyong', 'NCR', '2023-12-10', 500.00, 'Paid');
+    uovr_number, violation_status, violation_location_city, 
+    violation_location_region, violation_date, fine_amount, 
+    payment_status, license_number, plate_number, registration_number) VALUES
+('UOVR-1001', 'Pending', 'Manila', 'NCR', '2023-05-15', 1000.00, 'Unpaid', 'D01-12-1234', 'ABC-1234', 'REG-2023-001'),
+('UOVR-1002', 'Resolved', 'Makati', 'NCR', '2023-06-20', 500.00, 'Paid', 'D01-12-1234', 'XYZ-9876', 'REG-2023-002'),
+('UOVR-1003', 'Pending', 'Quezon City', 'NCR', '2023-07-10', 2000.00, 'Unpaid', 'D01-12-1234', 'DEF-2468', 'REG-2022-003'),
+('UOVR-1004', 'Resolved', 'Pasig', 'NCR', '2023-08-05', 1500.00, 'Paid', 'D02-13-2345', 'GHI-1357', 'REG-2023-004'),
+('UOVR-1005', 'Pending', 'Cebu City', 'Region VII', '2023-09-12', 2500.00, 'Unpaid', 'D02-13-2345', 'JKL-1122', 'REG-2023-005'),
+('UOVR-1006', 'Resolved', 'Davao City', 'Region XI', '2023-10-01', 1000.00, 'Paid', 'D03-14-3456', 'MNO-3344', 'REG-2023-006'),
+('UOVR-1007', 'Pending', 'Baguio City', 'CAR', '2023-10-15', 3000.00, 'Unpaid', 'D04-15-4567', 'PQR-5566', 'REG-2023-007'),
+('UOVR-1008', 'Resolved', 'Taguig', 'NCR', '2023-11-20', 1000.00, 'Paid', 'D04-15-4567', 'STU-7788', 'REG-2023-008'),
+('UOVR-1009', 'Pending', 'Iloilo City', 'Region VI', '2023-12-05', 2000.00, 'Unpaid', 'D05-16-5678', 'VWX-9900', 'REG-2021-009'),
+('UOVR-1010', 'Resolved', 'Mandaluyong', 'NCR', '2023-12-10', 500.00, 'Paid', 'D06-17-6789', 'YZA-0011', 'REG-2023-010');
 
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 -- UOVR-1001 has 2 violations
