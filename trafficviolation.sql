@@ -288,6 +288,7 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2021-009', 'VWX-9900', '2021-09-20', 'Expired'),
 ('REG-2023-010', 'YZA-0011', '2023-10-25', 'Active');
 
+-- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
