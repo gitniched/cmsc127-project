@@ -339,3 +339,33 @@ INSERT INTO violation_type (uovr_number, violation_type) VALUES
 -- UOVR-1010 has 2 violations
 ('UOVR-1010', 'Violation of one way street'),
 ('UOVR-1010', 'Disregarding traffic sign/signal');
+
+
+-- reports to be generated
+
+-- View all registered drivers filtered by: License type, License status, Age range, Sex
+SELECT * FROM v_driver WHERE (@license_type IS NULL OR license_type = @license_type) 
+    AND (@license_status IS NULL OR license_status = @license_status) 
+    AND (@age_min IS NULL OR @age_max IS NULL OR age BETWEEN @age_min 
+    AND @age_max) 
+    AND (@sex IS NULL OR sex = @sex);
+ 
+-- View all vehicles owned by a given driver
+SELECT v.* FROM vehicle v WHERE v.owner_license_number = @license_number;
+ 
+-- View all vehicles with expired registrations as of a given date
+SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status 
+    FROM vehicle v JOIN vehicle_registration vr ON v.plate_number = vr.plate_number 
+    WHERE vr.expiration_date < @as_of_date
+    AND vr.registration_status = 'Expired';
+
+-- View all drivers with expired or suspended licenses.
+ 
+ 
+-- View all traffic violations committed by a given driver within a specified date range.
+
+ 
+-- View the total number of violations per violation type for a given year.
+
+ 
+-- View all vehicles involved in violations within a given city or region.
