@@ -29,9 +29,9 @@ CREATE TABLE vehicle (
     engine_number VARCHAR(20) NOT NULL,
     chassis_number VARCHAR(20) NOT NULL,
     vehicle_type VARCHAR(20) NOT NULL,
-    year INT NOT NULL,
+    year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
-    owner_license_number VARCHAR(11) NOT NULL,
+    owner_license_number VARCHAR(13) NOT NULL,
     PRIMARY KEY (plate_number),
     FOREIGN KEY (owner_license_number) REFERENCES driver(license_number)
 );
