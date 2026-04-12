@@ -18,9 +18,19 @@ CREATE TABLE driver (
 );
 
 CREATE VIEW v_driver AS
-SELECT *, 
-       TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age 
-FROM driver;
+SELECT
+    license_number,
+    first_name,
+    middle_name,
+    last_name,
+    TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) AS age,
+    sex,
+    address,
+    license_type,
+    license_status,
+    license_issuance_date,
+    license_expiration_date
+FROM DRIVER;
 
 CREATE TABLE vehicle (
     plate_number VARCHAR(10) NOT NULL,
