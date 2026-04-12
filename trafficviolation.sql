@@ -40,8 +40,8 @@ CREATE TABLE vehicle_registration (
     registration_number VARCHAR(20) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
     registration_date DATE NOT NULL,
-    expiration_date DATE GENERATED ALWAYS AS (DATE_ADD(registration_date, INTERVAL 1 YEAR)) STORED,
-    registration_status VARCHAR(20) NOT NULL,
+    expiration_date DATE NOT NULL,
+    registration_status ENUM('Active', 'Expired', 'Suspended') NOT NULL,
     PRIMARY KEY (registration_number),
     FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
 );
