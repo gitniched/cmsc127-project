@@ -69,7 +69,7 @@ JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
  
 CREATE TABLE traffic_violation (
-    uovr_number VARCHAR(20) NOT NULL,
+    uovr_number INT NOT NULL AUTO_INCREMENT,
     officer VARCHAR(100),
     violation_status ENUM('Pending', 'Resolved', 'Contested', 'Dismissed') NOT NULL DEFAULT 'Pending',
     violation_location_city VARCHAR(100) NOT NULL,
