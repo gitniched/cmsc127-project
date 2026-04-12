@@ -53,7 +53,7 @@ CREATE TABLE traffic_violation (
     violation_location_city VARCHAR(20) NOT NULL,
     violation_location_region VARCHAR(20) NOT NULL,
     violation_date DATE NOT NULL,
-    fine_amount DECIMAL(10,2) NOT NULL,
+    fine_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     payment_status VARCHAR(20) NOT NULL,
     PRIMARY KEY (uovr_number),
     FOREIGN KEY (vehicle_registration_number) REFERENCES vehicle_registration(registration_number)
