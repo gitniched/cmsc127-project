@@ -3,7 +3,7 @@ CREATE DATABASE trafficviolation;
 USE trafficviolation;
 
 CREATE TABLE driver (
-    license_number VARCHAR(11) NOT NULL,
+    license_number VARCHAR(13) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     middle_name VARCHAR(50),
