@@ -322,7 +322,7 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2025-002', 'ACM-5678', '2025-08-20', 'Active'),
 ('REG-2026-003', 'AET-3456', '2026-01-15', 'Active'),
 ('REG-2025-004', 'AFN-7890', '2025-06-30', 'Active'),
-('REG-2026-005', 'WBK-6789', '2026-02-10', 'Active'),
+('REG-2022-020', 'WBK-6789', '2022-07-01', 'Expired'),
 ('REG-2025-006', 'TCN-7788', '2025-09-05', 'Active'),
 ('REG-2023-007', 'TDR-5566', '2023-04-18', 'Expired'),
 ('REG-2022-008', 'BFM-9900', '2022-11-30', 'Expired'),
@@ -332,19 +332,23 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2024-012', 'ABT-5678', '2024-08-10', 'Expired'),
 ('REG-2025-013', 'WMK-9012', '2025-06-05', 'Active'),
 ('REG-2025-014', 'AXB-2468', '2025-07-15', 'Active'),
-('REG-2025-015', 'AJP-1357', '2025-11-03', 'Active');
+('REG-2025-015', 'AJP-1357', '2025-11-03', 'Active'),
+('REG-2020-016', 'ABK-1234', '2020-01-05', 'Expired'),
+('REG-2021-017', 'ACM-5678', '2021-05-10', 'Expired'),
+('REG-2021-018', 'AET-3456', '2021-09-20', 'Expired'),
+('REG-2022-019', 'AFN-7890', '2022-03-01', 'Expired');
 
 -- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 1000.00, 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2026-001'),
-('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 500.00, 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2025-002'),
-('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 2000.00, 'Waived', 'N01-22-123456', 'ADR-9012', 'REG-2024-010'),
-('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 1500.00, 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2026-003'),
-('G22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2025-004'),
-('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 1000.00, 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2026-005'),
+('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 1000.00, 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2020-016'),
+('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 500.00, 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
+('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 2000.00, 'Waived', 'N01-22-123456', 'ADR-9012', NULL),
+('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 1500.00, 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
+('G22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
+('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 1000.00, 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
 ('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 3000.00, 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2023-007'),
 ('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2025-006'),
 ('F20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2022-008'),
