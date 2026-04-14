@@ -204,6 +204,7 @@ CREATE PROCEDURE sp_renew_license(
 )
 BEGIN
     DECLARE v_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
+    DECLARE v_license_type ENUM('Student Permit', 'Non-Professional', 'Professional');
     DECLARE v_issue_date DATE;
     DECLARE v_expiry_date DATE;
     DECLARE v_violation_count INT;
@@ -212,17 +213,23 @@ BEGIN
     DECLARE v_new_issue_date DATE;
     DECLARE v_new_expiry_date DATE;
 
-    SELECT license_status, license_issue_date, license_expiry_date
-    INTO v_status, v_issue_date, v_expiry_date
+    SELECT license_status, license_type, license_issue_date, license_expiry_date
+    INTO v_status, v_license_type, v_issue_date, v_expiry_date
     FROM driver
     WHERE license_number = p_license_number;
 
     IF v_status IS NULL THEN
         SET p_message = CONCAT('error: no driver found with license number ', p_license_number);
+    ELSEIF v_license_type = 'Student Permit' THEN
+        SET p_message = 'error: student permits cannot be renewed. driver must reapply for a non-professional license';
     ELSEIF v_status = 'Revoked' THEN
         SET p_message = 'error: revoked licenses cannot be renewed';
+    ELSEIF v_status = 'Suspended' THEN
+        SET p_message = 'error: suspended licenses cannot be renewed until the suspension period is served';
     ELSEIF v_issue_date > CURDATE() THEN
         SET p_message = 'error: license_issue_date is in the future, please correct the record before renewing';
+    ELSEIF DATEDIFF(CURDATE(), v_expiry_date) > 730 THEN
+        SET p_message = 'error: license expired over 2 years ago. driver must retake written and practical exams before renewal';
     ELSE
         SELECT COUNT(*) INTO v_unpaid_count
         FROM traffic_violation
@@ -236,7 +243,7 @@ BEGIN
             SELECT COUNT(*) INTO v_violation_count
             FROM traffic_violation
             WHERE license_number = p_license_number
-              AND violation_date BETWEEN v_issue_date AND v_expiry_date
+              AND violation_date BETWEEN v_issue_date AND GREATEST(v_expiry_date, CURDATE())
               AND violation_status <> 'Dismissed';
 
             IF v_violation_count = 0 THEN
