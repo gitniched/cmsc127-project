@@ -440,3 +440,17 @@ SELECT d.license_number, d.license_type, CONCAT(d.first_name, ' ', d.last_name) 
 v.plate_number, v.make, v.model, v.year, v.vehicle_type 
 FROM driver d LEFT JOIN vehicle v on d.license_number = v.owner_license_number
 ORDER BY d.license_number;
+
+-- View registration history per vehicle
+SELECT
+    v.plate_number,
+    v.make,
+    v.model,
+    vr.registration_number,
+    vr.registration_date,
+    vr.expiration_date,
+    vr.registration_status
+FROM vehicle v
+JOIN vehicle_registration vr ON v.plate_number = vr.plate_number
+WHERE (@plate_number IS NULL OR v.plate_number = @plate_number)
+ORDER BY v.plate_number, vr.registration_date;
