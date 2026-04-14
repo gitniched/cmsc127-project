@@ -135,7 +135,7 @@ CREATE TABLE violation_type (
 
 DELIMITER $$
 
--- auto-compute expiry on insert (always 5 years)
+-- auto-compute expiry on insert
 CREATE TRIGGER trg_driver_before_insert
 BEFORE INSERT ON driver
 FOR EACH ROW
