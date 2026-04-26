@@ -169,7 +169,9 @@ BEGIN
     SET NEW.expiration_date = DATE_ADD(NEW.registration_date, INTERVAL 1 YEAR);
 END$$
 
--- suspend license if driver reaches 3 or more pending violations
+-- suspend license if driver reaches 3 or more pending violations within the current license period
+-- uses GREATEST(expiry, CURDATE()) to include post-expiry violations, mirroring sp_renew_license
+-- suspends both Active and Expired licenses, blocking renewal for repeat offenders
 CREATE TRIGGER trg_violation_after_insert
 AFTER INSERT ON traffic_violation
 FOR EACH ROW
@@ -187,13 +189,13 @@ BEGIN
     FROM traffic_violation
     WHERE license_number = NEW.license_number
       AND violation_status = 'Pending'
-      AND violation_date BETWEEN v_issue_date AND v_expiry_date;
+      AND violation_date BETWEEN v_issue_date AND GREATEST(v_expiry_date, CURDATE());
 
     IF v_pending_count >= 3 THEN
         UPDATE driver
         SET license_status = 'Suspended'
         WHERE license_number = NEW.license_number
-          AND license_status = 'Active';
+          AND license_status IN ('Active', 'Expired');
     END IF;
 END$$
 
