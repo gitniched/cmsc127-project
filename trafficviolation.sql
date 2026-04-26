@@ -68,6 +68,53 @@ FROM vehicle_registration vr
 JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
  
+-- source: R.A. 4136, JAO 2014-01, R.A. 10054, R.A. 8750, R.A. 10586, R.A. 10913.
+-- fines may escalate on repeat offenses; this table stores the first-offense base amount.
+CREATE TABLE violation_fine_schedule (
+    violation_type VARCHAR(100) NOT NULL,
+    base_fine_amount DECIMAL(10,2) NOT NULL,
+    legal_basis VARCHAR(100) NOT NULL,
+    CONSTRAINT pk_fine_schedule PRIMARY KEY (violation_type)
+);
+
+INSERT INTO violation_fine_schedule (violation_type, base_fine_amount, legal_basis) VALUES
+('Illegal parking',                             1000.00,  'MMDA OVR Code 04 / LGU ordinances'),
+('Violation of loading zones',                  1000.00,  'R.A. 4136 / LGU ordinances'),
+('Obstruction to traffic',                      1000.00,  'MMDA OVR Code 05'),
+('Colorum tricycles',                           5000.00,  'LTFRB / LGU franchise rules'),
+('50/50 scheme',                                5000.00,  'LTFRB regulations'),
+('Non display of Not-for-hire',                 1000.00,  'R.A. 4136 / LTO AO'),
+('Violation of one way street',                 1000.00,  'R.A. 4136 Sec. 43'),
+('Driving under the influence of liquor',      20000.00,  'R.A. 10586 Sec. 12'),
+('Truck ban',                                   5000.00,  'MMDA / LGU truck ban ordinances'),
+('No drivers license',                          3000.00,  'R.A. 4136 Sec. 20 / JAO 2014-01'),
+('No professional drivers license',             3000.00,  'R.A. 4136 Sec. 20'),
+('Expired drivers license',                     1000.00,  'R.A. 4136 Sec. 20 / JAO 2014-01'),
+('No seatbelt',                                 1000.00,  'R.A. 8750 Sec. 5'),
+('Noisy muffler',                               5000.00,  'R.A. 4136 Sec. 34'),
+('Disobedience to traffic officer',             1000.00,  'R.A. 4136 Sec. 52'),
+('Disregarding traffic sign/signal',             150.00,  'MMDA OVR Code 06 / R.A. 4136 Sec. 42'),
+('Discourteous and disrespectful conduct to passer', 1000.00, 'LTO AO / LGU ordinances'),
+('Others',                                      1000.00,  'R.A. 4136 / JAO 2014-01'),
+('Untidy attire of driver',                     1000.00,  'LTO AO for PUV drivers'),
+('Reckless driving',                            2000.00,  'R.A. 4136 Sec. 48 / JAO 2014-01'),
+('No U-turn',                                   1000.00,  'R.A. 4136 Sec. 43'),
+('No interior light',                           1000.00,  'R.A. 4136 Sec. 34'),
+('Over speeding',                               2000.00,  'R.A. 4136 Sec. 35 / JAO 2014-01'),
+('No safety helmet',                            1500.00,  'R.A. 10054 Sec. 5'),
+('Unauthorized driver',                         3000.00,  'R.A. 4136 Sec. 20'),
+('Not posting of current passenger fare matrix',1000.00,  'LTFRB / LGU franchise rules'),
+('Refusal to convey passenger',                 1000.00,  'R.A. 4136 Sec. 56 / LTFRB rules'),
+('No overloading',                              5000.00,  'R.A. 4136 Sec. 32 / JAO 2014-01'),
+('No Mayor permit',                             1000.00,  'LGU ordinances'),
+('Overcharging',                                1000.00,  'LTFRB / LGU franchise rules'),
+('Without proper light',                        5000.00,  'R.A. 4136 Sec. 34'),
+('Jaywalking',                                   150.00,  'MMDA / LGU pedestrian ordinances'),
+('Expired TCT',                                 5000.00,  'LTFRB franchise rules'),
+('Driving through funeral or other processions',1000.00,  'R.A. 4136 Sec. 45'),
+('Smoking inside PUV',                          1000.00,  'R.A. 9211 / LGU ordinances'),
+('Violation of emission standard',              2000.00,  'R.A. 8749 / RA 4136 Sec. 34');
+
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
     officer VARCHAR(100),
@@ -75,7 +122,6 @@ CREATE TABLE traffic_violation (
     violation_location_city VARCHAR(100) NOT NULL,
     violation_location_region VARCHAR(100) NOT NULL,
     violation_date DATE NOT NULL,
-    fine_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     payment_status ENUM('Paid', 'Unpaid', 'Waived') NOT NULL DEFAULT 'Unpaid',
     license_number VARCHAR(13) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
@@ -89,47 +135,32 @@ CREATE TABLE traffic_violation (
 -- violation types based on the generalized UOVR (Uniform Ordinance Violation Receipt)
 CREATE TABLE violation_type (
     uovr_number VARCHAR(20) NOT NULL,
-    violation_type ENUM(
-        'Illegal parking',
-        'Violation of loading zones',
-        'Obstruction to traffic',
-        'Colorum tricycles',
-        '50/50 scheme',
-        'Non display of Not-for-hire',
-        'Violation of one way street',
-        'Driving under the influence of liquor',
-        'Truck ban',
-        'No drivers license',
-        'No professional drivers license',
-        'Expired drivers license',
-        'No seatbelt',
-        'Noisy muffler',
-        'Disobedience to traffic officer',
-        'Disregarding traffic sign/signal',
-        'Discourteous and disrespectful conduct to passer',
-        'Others',
-        'Untidy attire of driver',
-        'Reckless driving',
-        'No U-turn',
-        'No interior light',
-        'Over speeding',
-        'No safety helmet',
-        'Unauthorized driver',
-        'Not posting of current passenger fare matrix',
-        'Refusal to convey passenger',
-        'No overloading',
-        'No Mayor permit',
-        'Overcharging',
-        'Without proper light',
-        'Jaywalking',
-        'Expired TCT',
-        'Driving through funeral or other processions',
-        'Smoking inside PUV',
-        'Violation of emission standard'
-    ) NOT NULL,
+    violation_type VARCHAR(100) NOT NULL,
     CONSTRAINT pk_violation_type PRIMARY KEY (uovr_number, violation_type),
-    CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
+    CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number),
+    CONSTRAINT fk_vtype_fine_schedule FOREIGN KEY (violation_type) REFERENCES violation_fine_schedule(violation_type)
 );
+
+-- summary view: total fine per incident, derived from the fine schedule
+CREATE OR REPLACE VIEW v_violation_summary AS
+SELECT
+    tv.uovr_number,
+    tv.violation_date,
+    tv.violation_location_city,
+    tv.violation_location_region,
+    tv.violation_status,
+    tv.payment_status,
+    tv.license_number,
+    tv.plate_number,
+    tv.officer,
+    SUM(vfs.base_fine_amount) AS total_fine_amount
+FROM traffic_violation tv
+JOIN violation_type vt ON tv.uovr_number = vt.uovr_number
+JOIN violation_fine_schedule vfs ON vt.violation_type = vfs.violation_type
+GROUP BY
+    tv.uovr_number, tv.violation_date, tv.violation_location_city,
+    tv.violation_location_region, tv.violation_status, tv.payment_status,
+    tv.license_number, tv.plate_number, tv.officer;
 
 -- triggers
 
@@ -384,23 +415,22 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 -- Prefix codes (issuing authority/region): M=MMDA (Metro Manila), C=Cebu, D=Davao, B=Baguio, I=Iloilo
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
-    violation_location_region, violation_date, fine_amount,
     payment_status, license_number, plate_number, registration_number) VALUES
-('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 1000.00, 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2020-016'),
-('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 500.00, 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
-('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 2000.00, 'Waived', 'N01-22-123456', 'ADR-9012', NULL),
-('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 1500.00, 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
-('C22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
-('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 1000.00, 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
-('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 3000.00, 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2022-023'),
-('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2022-024'),
-('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2019-025'),
-('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 500.00, 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2023-026'),
-('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 1500.00, 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
-('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 500.00, 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
-('C25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 1000.00, 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
-('M25-0000014-4', 'Pending', 'Manila', 'NCR', '2025-08-10', 2000.00, 'Unpaid', 'N14-20-445566', 'AXB-2468', 'REG-2025-014'),
-('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-11-15', 1000.00, 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
+('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2020-016'),
+('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
+('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 'Waived', 'N01-22-123456', 'ADR-9012', NULL),
+('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
+('C22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
+('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
+('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2022-023'),
+('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2022-024'),
+('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2019-025'),
+('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2023-026'),
+('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
+('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
+('C25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
+('M25-0000014-4', 'Pending', 'Manila', 'NCR', '2025-08-10', 'Unpaid', 'N14-20-445566', 'AXB-2468', 'REG-2025-014'),
+('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-11-15', 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
  
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 
@@ -452,7 +482,8 @@ SELECT * FROM driver
 WHERE license_status IN ('Expired', 'Suspended');
  
 -- View all traffic violations committed by a given driver within a specified date range.
-SELECT * FROM traffic_violation
+-- uses v_violation_summary to include total_fine_amount derived from the fine schedule.
+SELECT * FROM v_violation_summary
 WHERE license_number = @license_number
 AND violation_date BETWEEN @start_date AND @end_date;
  
