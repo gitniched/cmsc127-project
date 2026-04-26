@@ -1,6 +1,8 @@
 DROP DATABASE IF EXISTS trafficviolation;
 CREATE DATABASE trafficviolation;
 USE trafficviolation;
+
+SET @lto_renewal_override = 0;
  
 CREATE TABLE driver (
     license_number VARCHAR(13) NOT NULL,
@@ -13,7 +15,7 @@ CREATE TABLE driver (
     license_type ENUM('Student Permit', 'Non-Professional', 'Professional') NOT NULL,
     license_status ENUM('Active', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
-    license_expiry_date DATE NOT NULL,
+    license_expiry_date DATE NOT NULL DEFAULT '9999-12-31',
     CONSTRAINT pk_driver PRIMARY KEY (license_number)
 );
  
@@ -42,15 +44,22 @@ CREATE TABLE vehicle (
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
+    conduction_sticker VARCHAR(15) DEFAULT NULL,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
-    CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number)
+    CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
+    CONSTRAINT chk_plate_format CHECK (
+        plate_number REGEXP '^[A-Z]{3}-[0-9]{4}$'  -- current standard (cars, post-2018)
+        OR plate_number REGEXP '^[A-Z]{3}-[0-9]{3}$'  -- legacy (cars, pre-2018)
+        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{4}$'  -- current standard (motorcycles, post-2018)
+        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{3}$'  -- legacy (motorcycles, pre-2018)
+    )
 );
  
 CREATE TABLE vehicle_registration (
     registration_number VARCHAR(20) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
     registration_date DATE NOT NULL,
-    expiration_date DATE NOT NULL,
+    expiration_date DATE NOT NULL DEFAULT '9999-12-31',
     registration_status ENUM('Active', 'Expired', 'Suspended') NOT NULL,
     CONSTRAINT pk_vehicle_registration PRIMARY KEY (registration_number),
     CONSTRAINT fk_registration_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
@@ -68,6 +77,7 @@ FROM vehicle_registration vr
 JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
  
+-- standardized LTO fine schedule per violation type (first offense amounts).
 -- source: R.A. 4136, JAO 2014-01, R.A. 10054, R.A. 8750, R.A. 10586, R.A. 10913.
 -- fines may escalate on repeat offenses; this table stores the first-offense base amount.
 CREATE TABLE violation_fine_schedule (
@@ -196,12 +206,92 @@ BEGIN
     END IF;
 END$$
 
--- auto-compute registration expiry (1 year)
+-- auto-compute registration expiry based on LTO staggered renewal schedule.
+-- the last digit of the plate number determines the renewal month:
+--   1 → January,  2 → February,  3 → March,  4 → April,
+--   5 → May,      6 → June,      7 → July,   8 → August,
+--   9 → September, 0 → October
+-- expiry is set to the last day of the renewal month in the year following registration.
+-- source: LTO staggered registration renewal system per plate ending.
 CREATE TRIGGER trg_registration_before_insert
 BEFORE INSERT ON vehicle_registration
 FOR EACH ROW
 BEGIN
-    SET NEW.expiration_date = DATE_ADD(NEW.registration_date, INTERVAL 1 YEAR);
+    DECLARE v_plate_last_char CHAR(1);
+    DECLARE v_renewal_month INT;
+    DECLARE v_renewal_year INT;
+
+    SET v_plate_last_char = RIGHT(NEW.plate_number, 1);
+
+    SET v_renewal_month = CASE v_plate_last_char
+        WHEN '1' THEN 1
+        WHEN '2' THEN 2
+        WHEN '3' THEN 3
+        WHEN '4' THEN 4
+        WHEN '5' THEN 5
+        WHEN '6' THEN 6
+        WHEN '7' THEN 7
+        WHEN '8' THEN 8
+        WHEN '9' THEN 9
+        WHEN '0' THEN 10
+        -- non-numeric ending (e.g. legacy plates ending in a letter): default to 12 months flat
+        ELSE NULL
+    END;
+
+    IF v_renewal_month IS NULL THEN
+        SET NEW.expiration_date = DATE_ADD(NEW.registration_date, INTERVAL 1 YEAR);
+    ELSE
+        -- renewal year: if registration month is already past the renewal month, push to next year + 1
+        IF MONTH(NEW.registration_date) <= v_renewal_month THEN
+            SET v_renewal_year = YEAR(NEW.registration_date) + 1;
+        ELSE
+            SET v_renewal_year = YEAR(NEW.registration_date) + 2;
+        END IF;
+        -- last day of the renewal month in the computed year
+        SET NEW.expiration_date = LAST_DAY(STR_TO_DATE(CONCAT(v_renewal_year, '-', LPAD(v_renewal_month, 2, '0'), '-01'), '%Y-%m-%d'));
+    END IF;
+END$$
+
+-- block logically impossible combinations of violation_status and payment_status on insert
+CREATE TRIGGER trg_violation_before_insert
+BEFORE INSERT ON traffic_violation
+FOR EACH ROW
+BEGIN
+    IF NEW.violation_status = 'Dismissed' AND NEW.payment_status = 'Paid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a dismissed violation cannot be marked as paid';
+    END IF;
+
+    IF NEW.violation_status = 'Contested' AND NEW.payment_status = 'Paid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a contested violation cannot be marked as paid while still contested';
+    END IF;
+
+    IF NEW.violation_status = 'Resolved' AND NEW.payment_status = 'Unpaid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a resolved violation must have payment_status of Paid or Waived';
+    END IF;
+END$$
+
+-- block logically impossible combinations of violation_status and payment_status on update
+CREATE TRIGGER trg_violation_before_update
+BEFORE UPDATE ON traffic_violation
+FOR EACH ROW
+BEGIN
+    IF NEW.violation_status = 'Dismissed' AND NEW.payment_status = 'Paid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a dismissed violation cannot be marked as paid';
+    END IF;
+
+    IF NEW.violation_status = 'Contested' AND NEW.payment_status = 'Paid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a contested violation cannot be marked as paid while still contested';
+    END IF;
+
+    IF NEW.violation_status = 'Resolved' AND NEW.payment_status = 'Unpaid' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: a resolved violation must have payment_status of Paid or Waived';
+    END IF;
 END$$
 
 -- suspend license if driver reaches 3 or more pending violations within the current license period
@@ -415,6 +505,7 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 -- Prefix codes (issuing authority/region): M=MMDA (Metro Manila), C=Cebu, D=Davao, B=Baguio, I=Iloilo
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
+    violation_location_region, violation_date,
     payment_status, license_number, plate_number, registration_number) VALUES
 ('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2020-016'),
 ('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
