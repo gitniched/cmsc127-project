@@ -315,14 +315,14 @@ INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_da
 ('N08-23-890123', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Quezon Blvd, Quezon City', 'Non-Professional', 'Active', '2023-02-14'),
 ('N09-22-901234', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Burgos St, General Santos City', 'Professional', 'Active', '2022-10-05'),
 ('N10-10-012345', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Mabini St, Legazpi City', 'Professional', 'Revoked', '2010-12-01'),
-('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Active', '2025-04-15'),
+('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Expired', '2025-04-15'),
 ('S02-25-222222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
 ('S03-23-333333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20'),
 ('N11-22-112233', 'Ramon', 'Cruz', 'Diego', '1993-07-14', 'M', '22 Dapitan St, Manila', 'Non-Professional', 'Active', '2022-03-20'),
 ('N12-21-223344', 'Maria', 'Santos', 'Luz', '1998-05-30', 'F', '77 Sto. Tomas St, Quezon City', 'Non-Professional', 'Active', '2021-08-10'),
-('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Active', '2019-06-05'),
-('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Active', '2020-07-15'),
-('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Active', '2019-11-03');
+('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Expired', '2019-06-05'),
+('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Expired', '2020-07-15'),
+('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Expired', '2019-11-03');
 
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
@@ -360,7 +360,7 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2022-008', 'BFM-9900', '2022-11-30', 'Expired'),
 ('REG-2024-009', 'PKR-0011', '2024-07-22', 'Expired'),
 ('REG-2024-010', 'ADR-9012', '2024-05-14', 'Suspended'),
-('REG-2025-011', 'ANK-1234', '2025-03-20', 'Active'),
+('REG-2025-011', 'ANK-1234', '2025-03-20', 'Expired'),
 ('REG-2024-012', 'ABT-5678', '2024-08-10', 'Expired'),
 ('REG-2025-013', 'WMK-9012', '2025-06-05', 'Active'),
 ('REG-2025-014', 'AXB-2468', '2025-07-15', 'Active'),
@@ -368,7 +368,14 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2020-016', 'ABK-1234', '2020-01-05', 'Expired'),
 ('REG-2021-017', 'ACM-5678', '2021-05-10', 'Expired'),
 ('REG-2021-018', 'AET-3456', '2021-09-20', 'Expired'),
-('REG-2022-019', 'AFN-7890', '2022-03-01', 'Expired');
+('REG-2022-019', 'AFN-7890', '2022-03-01', 'Expired'),
+('REG-2022-023', 'TDR-5566', '2022-11-10', 'Expired'),
+('REG-2022-024', 'TCN-7788', '2022-12-01', 'Expired'),
+('REG-2019-025', 'BFM-9900', '2019-08-15', 'Expired'),
+('REG-2023-026', 'PKR-0011', '2023-06-15', 'Expired'),
+('REG-2025-020', 'ATK-4411', '2025-04-10', 'Expired'),
+('REG-2023-021', 'ATR-7722', '2023-08-22', 'Expired'),
+('REG-2025-022', 'ATC-5533', '2025-02-14', 'Expired');
 
 -- uovr number format: [prefix][YY]-[7-digit sequential]-[1-digit checksum]
 -- Prefix codes (issuing authority/region): M=MMDA (Metro Manila), C=Cebu, D=Davao, B=Baguio, I=Iloilo
@@ -382,15 +389,15 @@ INSERT INTO traffic_violation (
 ('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 1500.00, 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
 ('C22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
 ('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 1000.00, 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
-('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 3000.00, 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2023-007'),
-('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2025-006'),
-('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2022-008'),
-('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 500.00, 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2024-009'),
+('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 3000.00, 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2022-023'),
+('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2022-024'),
+('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2019-025'),
+('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 500.00, 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2023-026'),
 ('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 1500.00, 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
 ('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 500.00, 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
 ('C25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 1000.00, 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
 ('M25-0000014-4', 'Pending', 'Manila', 'NCR', '2025-08-10', 2000.00, 'Unpaid', 'N14-20-445566', 'AXB-2468', 'REG-2025-014'),
-('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-10-22', 1000.00, 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
+('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-11-15', 1000.00, 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
  
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
 
