@@ -229,11 +229,24 @@ BEGIN
         SET MESSAGE_TEXT = 'error: applicant must be at least 18 years old for a Professional license';
     END IF;
 
-    -- auto-compute expiry: Student Permit = 1 year, all others = 5 years
+    -- auto-compute expiry:
+    -- Student Permit = 1 year from issue date
+    -- Non-Professional / Professional = birth month/day in the 5th year after issuance
+    --   per IRR RA 10930 Section 9.3.1: "valid for five (5) years reckoned from the date of birth"
+    --   e.g. issued 2022-03-10, born 1990-06-15 → expiry = 2027-06-15
+    --   edge case: Feb 29 birthdays fall back to Feb 28 via LAST_DAY guard
     IF NEW.license_type = 'Student Permit' THEN
         SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
     ELSE
-        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+        SET NEW.license_expiry_date = DATE(CONCAT(
+            YEAR(NEW.license_issue_date) + 5, '-',
+            LPAD(MONTH(NEW.birth_date), 2, '0'), '-',
+            LPAD(LEAST(DAY(NEW.birth_date),
+                DAY(LAST_DAY(DATE(CONCAT(
+                    YEAR(NEW.license_issue_date) + 5, '-',
+                    LPAD(MONTH(NEW.birth_date), 2, '0'), '-01'
+                ))))), 2, '0')
+        ));
     END IF;
 END$$
 
@@ -263,7 +276,16 @@ BEGIN
             IF NEW.license_type = 'Student Permit' THEN
                 SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
             ELSE
-                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+                -- birth-date-reckoned expiry per IRR RA 10930 Section 9.3.1
+                SET NEW.license_expiry_date = DATE(CONCAT(
+                    YEAR(NEW.license_issue_date) + 5, '-',
+                    LPAD(MONTH(NEW.birth_date), 2, '0'), '-',
+                    LPAD(LEAST(DAY(NEW.birth_date),
+                        DAY(LAST_DAY(DATE(CONCAT(
+                            YEAR(NEW.license_issue_date) + 5, '-',
+                            LPAD(MONTH(NEW.birth_date), 2, '0'), '-01'
+                        ))))), 2, '0')
+                ));
             END IF;
         ELSEIF NEW.license_expiry_date <> OLD.license_expiry_date THEN
             SET NEW.license_expiry_date = OLD.license_expiry_date;
@@ -480,7 +502,29 @@ BEGIN
             END IF;
 
             SET v_new_issue_date = CURDATE();
-            SET v_new_expiry_date = DATE_ADD(v_new_issue_date, INTERVAL v_renewal_years YEAR);
+
+            -- birth-date-reckoned expiry per IRR RA 10930 Section 9.3.1 and 9.4
+            -- expiry falls on driver's birth month/day, v_renewal_years after new issue date
+            BEGIN
+                DECLARE v_birth_month INT;
+                DECLARE v_birth_day INT;
+                DECLARE v_expiry_year INT;
+                DECLARE v_days_in_month INT;
+
+                SELECT MONTH(birth_date), DAY(birth_date)
+                INTO v_birth_month, v_birth_day
+                FROM driver WHERE license_number = p_license_number;
+
+                SET v_expiry_year = YEAR(v_new_issue_date) + v_renewal_years;
+                SET v_days_in_month = DAY(LAST_DAY(DATE(CONCAT(
+                    v_expiry_year, '-', LPAD(v_birth_month, 2, '0'), '-01'
+                ))));
+                SET v_new_expiry_date = DATE(CONCAT(
+                    v_expiry_year, '-',
+                    LPAD(v_birth_month, 2, '0'), '-',
+                    LPAD(LEAST(v_birth_day, v_days_in_month), 2, '0')
+                ));
+            END;
 
             UPDATE driver
             SET license_issue_date = v_new_issue_date,
