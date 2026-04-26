@@ -120,7 +120,6 @@ CREATE TABLE violation_fine_schedule (
 );
 
 INSERT INTO violation_fine_schedule (violation_type, base_fine_amount, legal_basis) VALUES
-('Illegal parking',                             1000.00,  'MMDA OVR Code 04 / LGU ordinances'),
 ('Violation of loading zones',                  1000.00,  'R.A. 4136 / LGU ordinances'),
 ('Obstruction to traffic',                      1000.00,  'MMDA OVR Code 05'),
 ('Colorum tricycles',                           5000.00,  'LTFRB / LGU franchise rules'),
@@ -137,9 +136,8 @@ INSERT INTO violation_fine_schedule (violation_type, base_fine_amount, legal_bas
 ('Disobedience to traffic officer',             1000.00,  'R.A. 4136 Sec. 52'),
 ('Disregarding traffic sign/signal',             150.00,  'MMDA OVR Code 06 / R.A. 4136 Sec. 42'),
 ('Discourteous and disrespectful conduct to passer', 1000.00, 'LTO AO / LGU ordinances'),
-('Others',                                      1000.00,  'R.A. 4136 / JAO 2014-01'),
 ('Untidy attire of driver',                     1000.00,  'LTO AO for PUV drivers'),
-('Reckless driving',                            2000.00,  'R.A. 4136 Sec. 48 / JAO 2014-01'),
+('Reckless driving',                            500.00,   'R.A. 4136 Sec. 48 / JAO 2014-01'),
 ('No U-turn',                                   1000.00,  'R.A. 4136 Sec. 43'),
 ('No interior light',                           1000.00,  'R.A. 4136 Sec. 34'),
 ('Over speeding',                               2000.00,  'R.A. 4136 Sec. 35 / JAO 2014-01'),
@@ -156,6 +154,22 @@ INSERT INTO violation_fine_schedule (violation_type, base_fine_amount, legal_bas
 ('Driving through funeral or other processions',1000.00,  'R.A. 4136 Sec. 45'),
 ('Smoking inside PUV',                          1000.00,  'R.A. 9211 / LGU ordinances'),
 ('Violation of emission standard',              2000.00,  'R.A. 8749 / RA 4136 Sec. 34');
+('Driving against traffic',                     2000.00,   'MMDA Reg. No. 97-003 / OVR Code 023A'),
+('Illegal counterflow',                         2000.00, 'MMDA Reg. No. 97-003 / OVR Code 023B'),
+('Anti-Distracted Driving Act violation',       5000.00, 'R.A. 10913 / MMDA OVR Code 222'),
+('No contact overspeeding',                     1200.00, 'MMDA Reg. No. 11-001 / OVR Code 201'),
+('Overspeeding physical apprehension',          1200.00, 'MMDA MC No. 11-001 / OVR Code 201P'),
+('Illegal parking (attended)',                  1000.00, 'MMDA Reg. No. 18-008 / OVR Code 226'),
+('Illegal parking (unattended)',                2000.00, 'MMDA Reg. No. 18-008 / OVR Code 224'),
+('Unified Vehicular Volume Reduction Program',   300.00, 'MMDA OVR Code 176'),
+('Failure to use seatbelt',                      250.00, 'R.A. 8750 / MMDA OVR Code 194'),
+('Children safety on motorcycle',               1500.00, 'R.A. 10666 / MMDA OVR Code 228'),
+('No ICC/PS mark sticker on helmet',            3000.00, 'MMDA Res. 12-01-2012 / OVR Code 219J'),
+('Smoke belching',                               200.00, 'MMDA OVR Code 171'),
+('Driving without license',                      750.00, 'MMDA OVR Code 053'),
+('Driving with suspended drivers license',       300.00, 'MMDA OVR Code 055'),
+('Driving with revoked drivers license',         300.00, 'MMDA OVR Code 056'),
+('Using motor vehicle in commission of crime', 10000.00, 'MMDA OVR Code 067');
 
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
