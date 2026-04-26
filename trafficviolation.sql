@@ -154,7 +154,11 @@ FOR EACH ROW
 BEGIN
     IF @lto_renewal_override != 1 THEN
         IF NEW.license_issue_date <> OLD.license_issue_date THEN
-            SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+            IF NEW.license_type = 'Student Permit' THEN
+                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
+            ELSE
+                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+            END IF;
         ELSEIF NEW.license_expiry_date <> OLD.license_expiry_date THEN
             SET NEW.license_expiry_date = OLD.license_expiry_date;
         END IF;
@@ -199,7 +203,9 @@ BEGIN
     END IF;
 END$$
 
--- renew license: 10 years if no violations in current period, else 5 years
+-- renew license:
+-- student permit: always 1 year, blocked if unpaid violations exist
+-- non-professional/professional: 10 years if no violations in current period, else 5 years
 CREATE PROCEDURE sp_renew_license(
     IN p_license_number VARCHAR(13),
     OUT p_message VARCHAR(255)
@@ -222,15 +228,13 @@ BEGIN
 
     IF v_status IS NULL THEN
         SET p_message = CONCAT('error: no driver found with license number ', p_license_number);
-    ELSEIF v_license_type = 'Student Permit' THEN
-        SET p_message = 'error: student permits cannot be renewed. driver must reapply for a non-professional license';
     ELSEIF v_status = 'Revoked' THEN
         SET p_message = 'error: revoked licenses cannot be renewed';
     ELSEIF v_status = 'Suspended' THEN
         SET p_message = 'error: suspended licenses cannot be renewed until the suspension period is served';
     ELSEIF v_issue_date > CURDATE() THEN
         SET p_message = 'error: license_issue_date is in the future, please correct the record before renewing';
-    ELSEIF DATEDIFF(CURDATE(), v_expiry_date) > 730 THEN
+    ELSEIF v_license_type != 'Student Permit' AND DATEDIFF(CURDATE(), v_expiry_date) > 730 THEN
         SET p_message = 'error: license expired over 2 years ago. driver must retake written and practical exams before renewal';
     ELSE
         SELECT COUNT(*) INTO v_unpaid_count
@@ -241,6 +245,25 @@ BEGIN
 
         IF v_unpaid_count > 0 THEN
             SET p_message = CONCAT('error: driver has ', v_unpaid_count, ' unsettled fine(s). settle all unpaid violations before renewing');
+        ELSEIF v_license_type = 'Student Permit' THEN
+            SET v_new_issue_date = CURDATE();
+            SET v_new_expiry_date = DATE_ADD(v_new_issue_date, INTERVAL 1 YEAR);
+
+            UPDATE driver
+            SET license_issue_date = v_new_issue_date,
+                license_status = 'Active'
+            WHERE license_number = p_license_number;
+
+            SET @lto_renewal_override = 1;
+            UPDATE driver
+            SET license_expiry_date = v_new_expiry_date
+            WHERE license_number = p_license_number;
+            SET @lto_renewal_override = 0;
+
+            SET p_message = CONCAT(
+                'student permit ', p_license_number, ' renewed for 1 year. ',
+                'new expiry: ', DATE_FORMAT(v_new_expiry_date, '%Y-%m-%d')
+            );
         ELSE
             SELECT COUNT(*) INTO v_violation_count
             FROM traffic_violation
