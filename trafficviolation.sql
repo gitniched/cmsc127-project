@@ -11,7 +11,7 @@ CREATE TABLE driver (
     sex CHAR(1) NOT NULL,
     address VARCHAR(255) NOT NULL,
     license_type ENUM('Student Permit', 'Non-Professional', 'Professional') NOT NULL,
-    license_status ENUM('Active', 'Expired', 'Suspended', 'Revoked') NOT NULL,
+    license_status ENUM('Valid', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
     license_expiry_date DATE NOT NULL,
     CONSTRAINT pk_driver PRIMARY KEY (license_number)
@@ -193,7 +193,7 @@ BEGIN
         UPDATE driver
         SET license_status = 'Suspended'
         WHERE license_number = NEW.license_number
-          AND license_status = 'Active';
+          AND license_status = 'Valid';
     END IF;
 END$$
 
@@ -257,7 +257,7 @@ BEGIN
 
             UPDATE driver
             SET license_issue_date = v_new_issue_date,
-                license_status = 'Active'
+                license_status = 'Valid'
             WHERE license_number = p_license_number;
 
             SET @lto_renewal_override = 1;
@@ -280,24 +280,24 @@ DELIMITER ;
 -- dummy tables
 
 INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
-('N01-22-123456', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2022-05-10'),
-('N02-22-234567', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2022-11-22'),
+('N01-22-123456', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Valid', '2022-05-10'),
+('N02-22-234567', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Valid', '2022-11-22'),
 ('N03-15-345678', 'Michael', 'Jordan', 'Jeffrey', '1975-02-17', 'M', '789 Colon St, Cebu City', 'Professional', 'Expired', '2015-03-14'),
-('N04-21-456789', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Ilustre St, Davao City', 'Non-Professional', 'Active', '2021-07-01'),
+('N04-21-456789', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Ilustre St, Davao City', 'Non-Professional', 'Valid', '2021-07-01'),
 ('N05-18-567890', 'Bruce', 'Wayne', 'Thomas', '1982-10-24', 'M', '1007 Session Rd, Baguio City', 'Professional', 'Suspended', '2018-01-15'),
-('N06-22-678901', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Iznart St, Iloilo City', 'Non-Professional', 'Active', '2022-09-09'),
-('N07-22-789012', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Corrales Ave, Cagayan de Oro', 'Professional', 'Active', '2022-06-30'),
-('N08-23-890123', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Quezon Blvd, Quezon City', 'Non-Professional', 'Active', '2023-02-14'),
-('N09-22-901234', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Burgos St, General Santos City', 'Professional', 'Active', '2022-10-05'),
+('N06-22-678901', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Iznart St, Iloilo City', 'Non-Professional', 'Valid', '2022-09-09'),
+('N07-22-789012', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Corrales Ave, Cagayan de Oro', 'Professional', 'Valid', '2022-06-30'),
+('N08-23-890123', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Quezon Blvd, Quezon City', 'Non-Professional', 'Valid', '2023-02-14'),
+('N09-22-901234', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Burgos St, General Santos City', 'Professional', 'Valid', '2022-10-05'),
 ('N10-10-012345', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Mabini St, Legazpi City', 'Professional', 'Revoked', '2010-12-01'),
-('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Active', '2025-04-15'),
-('S02-25-222222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
+('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Valid', '2025-04-15'),
+('S02-25-222222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Valid', '2025-05-08'),
 ('S03-23-333333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20'),
-('N11-22-112233', 'Ramon', 'Cruz', 'Diego', '1993-07-14', 'M', '22 Dapitan St, Manila', 'Non-Professional', 'Active', '2022-03-20'),
-('N12-21-223344', 'Maria', 'Santos', 'Luz', '1998-05-30', 'F', '77 Sto. Tomas St, Quezon City', 'Non-Professional', 'Active', '2021-08-10'),
-('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Active', '2019-06-05'),
-('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Active', '2020-07-15'),
-('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Active', '2019-11-03');
+('N11-22-112233', 'Ramon', 'Cruz', 'Diego', '1993-07-14', 'M', '22 Dapitan St, Manila', 'Non-Professional', 'Valid', '2022-03-20'),
+('N12-21-223344', 'Maria', 'Santos', 'Luz', '1998-05-30', 'F', '77 Sto. Tomas St, Quezon City', 'Non-Professional', 'Valid', '2021-08-10'),
+('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Valid', '2019-06-05'),
+('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Valid', '2020-07-15'),
+('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Valid', '2019-11-03');
 
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
