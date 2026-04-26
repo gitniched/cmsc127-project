@@ -208,44 +208,16 @@ GROUP BY
 
 DELIMITER $$
 
--- auto-compute expiry on insert
+-- validates minimum age and auto-computes license expiry on insert.
+-- minimum ages per LTO requirements: Student Permit = 16, Non-Professional = 17, Professional = 18.
 CREATE TRIGGER trg_driver_before_insert
-BEFORE INSERT ON driver
-FOR EACH ROW
-BEGIN
-    IF NEW.license_type = 'Student Permit' THEN
-        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
-    ELSE
-        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
-    END IF;
-END$$
-
--- block direct edits to expiry, allow renewal override via session var
-CREATE TRIGGER trg_driver_before_update
-BEFORE UPDATE ON driver
-FOR EACH ROW
-BEGIN
-    IF @lto_renewal_override != 1 THEN
-        IF NEW.license_issue_date <> OLD.license_issue_date THEN
-            IF NEW.license_type = 'Student Permit' THEN
-                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
-            ELSE
-                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
-            END IF;
-        ELSEIF NEW.license_expiry_date <> OLD.license_expiry_date THEN
-            SET NEW.license_expiry_date = OLD.license_expiry_date;
-        END IF;
-    END IF;
-END$$
-
--- validate minimum age on insert
-CREATE TRIGGER trg_driver_age_before_insert
 BEFORE INSERT ON driver
 FOR EACH ROW
 BEGIN
     DECLARE v_age INT;
     SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, NEW.license_issue_date);
 
+    -- validate minimum age per license type
     IF NEW.license_type = 'Student Permit' AND v_age < 16 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'error: applicant must be at least 16 years old for a Student Permit';
@@ -256,16 +228,25 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'error: applicant must be at least 18 years old for a Professional license';
     END IF;
+
+    -- auto-compute expiry: Student Permit = 1 year, all others = 5 years
+    IF NEW.license_type = 'Student Permit' THEN
+        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
+    ELSE
+        SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+    END IF;
 END$$
 
--- re-validate minimum age when license_type is upgraded (e.g. Student Permit → Non-Professional)
-CREATE TRIGGER trg_driver_age_before_update
+-- validates minimum age on license type upgrade and manages expiry on update.
+-- also blocks direct edits to expiry unless the renewal override session var is set.
+CREATE TRIGGER trg_driver_before_update
 BEFORE UPDATE ON driver
 FOR EACH ROW
 BEGIN
     DECLARE v_age INT;
     SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, CURDATE());
 
+    -- re-validate minimum age only when license_type is being changed
     IF NEW.license_type <> OLD.license_type THEN
         IF NEW.license_type = 'Non-Professional' AND v_age < 17 THEN
             SIGNAL SQLSTATE '45000'
@@ -273,6 +254,19 @@ BEGIN
         ELSEIF NEW.license_type = 'Professional' AND v_age < 18 THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'error: driver must be at least 18 years old to upgrade to a Professional license';
+        END IF;
+    END IF;
+
+    -- manage expiry: recompute if issue date changed, block direct edits otherwise
+    IF @lto_renewal_override != 1 THEN
+        IF NEW.license_issue_date <> OLD.license_issue_date THEN
+            IF NEW.license_type = 'Student Permit' THEN
+                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
+            ELSE
+                SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 5 YEAR);
+            END IF;
+        ELSEIF NEW.license_expiry_date <> OLD.license_expiry_date THEN
+            SET NEW.license_expiry_date = OLD.license_expiry_date;
         END IF;
     END IF;
 END$$
