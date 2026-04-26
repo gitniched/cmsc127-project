@@ -86,7 +86,7 @@ CREATE TABLE traffic_violation (
     CONSTRAINT fk_violation_registration FOREIGN KEY (registration_number) REFERENCES vehicle_registration(registration_number)
 );
  
--- traffic violations that are based on the actual traffic violation receipt (TVR)
+-- violation types based on the generalized UOVR (Uniform Ordinance Violation Receipt)
 CREATE TABLE violation_type (
     uovr_number VARCHAR(20) NOT NULL,
     violation_type ENUM(
@@ -345,7 +345,8 @@ INSERT INTO vehicle_registration (registration_number, plate_number, registratio
 ('REG-2021-018', 'AET-3456', '2021-09-20', 'Expired'),
 ('REG-2022-019', 'AFN-7890', '2022-03-01', 'Expired');
 
--- uovr number format: [M/G/D/B][YY]-[7-digit sequential]-[1-digit checksum] M=Manila, G=GMA, D=Davao, B=Baguio. checksum is mod 10 of the sequential number. sequential numbers are unique across all regions and reset every year.
+-- uovr number format: [prefix][YY]-[7-digit sequential]-[1-digit checksum]
+-- Prefix codes (issuing authority/region): M=MMDA (Metro Manila), C=Cebu, D=Davao, B=Baguio, I=Iloilo
 INSERT INTO traffic_violation (
     uovr_number, violation_status, violation_location_city,
     violation_location_region, violation_date, fine_amount,
@@ -354,15 +355,15 @@ INSERT INTO traffic_violation (
 ('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 500.00, 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
 ('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 2000.00, 'Waived', 'N01-22-123456', 'ADR-9012', NULL),
 ('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 1500.00, 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
-('G22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
+('C22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 2500.00, 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
 ('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 1000.00, 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
 ('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 3000.00, 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2023-007'),
 ('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 1000.00, 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2025-006'),
-('F20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2022-008'),
+('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 2000.00, 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2022-008'),
 ('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 500.00, 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2024-009'),
 ('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 1500.00, 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
 ('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 500.00, 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
-('G25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 1000.00, 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
+('C25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 1000.00, 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
 ('M25-0000014-4', 'Pending', 'Manila', 'NCR', '2025-08-10', 2000.00, 'Unpaid', 'N14-20-445566', 'AXB-2468', 'REG-2025-014'),
 ('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-10-22', 1000.00, 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
  
@@ -371,7 +372,7 @@ INSERT INTO violation_type (uovr_number, violation_type) VALUES
 ('M25-0000011-1', 'No safety helmet'),
 ('M25-0000011-1', 'Over speeding'),
 ('M24-0000012-2', 'No safety helmet'),
-('G25-0000013-3', 'Reckless driving'),
+('C25-0000013-3', 'Reckless driving'),
 ('M25-0000014-4', 'Smoking inside PUV'),
 ('M25-0000014-4', 'Refusal to convey passenger'),
 ('M25-0000015-5', 'Overcharging'),
@@ -381,14 +382,14 @@ INSERT INTO violation_type (uovr_number, violation_type) VALUES
 ('M22-0000003-3', 'Expired drivers license'),
 ('M22-0000003-3', 'No drivers license'),
 ('M21-0000004-4', 'Disregarding traffic sign/signal'),
-('G22-0000005-5', 'Reckless driving'),
-('G22-0000005-5', 'No seatbelt'),
-('G22-0000005-5', 'Disobedience to traffic officer'),
+('C22-0000005-5', 'Reckless driving'),
+('C22-0000005-5', 'No seatbelt'),
+('C22-0000005-5', 'Disobedience to traffic officer'),
 ('D22-0000006-6', 'No seatbelt'),
 ('B23-0000007-7', 'Disobedience to traffic officer'),
 ('B23-0000007-7', 'Obstruction to traffic'),
 ('M23-0000008-8', 'Over speeding'),
-('F20-0000009-9', 'Expired drivers license'),
+('I20-0000009-9', 'Expired drivers license'),
 ('M24-0000010-0', 'Violation of one way street'),
 ('M24-0000010-0', 'Disregarding traffic sign/signal');
 
