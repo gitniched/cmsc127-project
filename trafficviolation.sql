@@ -271,6 +271,22 @@ BEGIN
     END IF;
 END$$
 
+CREATE TRIGGER trg_dl_code_before_insert
+BEFORE INSERT ON driver_dl_code
+FOR EACH ROW
+BEGIN
+    DECLARE v_license_type ENUM('Student Permit', 'Non-Professional', 'Professional');
+
+    SELECT license_type INTO v_license_type
+    FROM driver
+    WHERE license_number = NEW.license_number;
+
+    IF v_license_type = 'Student Permit' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: DL codes cannot be assigned to Student Permit holders';
+    END IF;
+END$$
+
 -- auto-compute registration expiry based on LTO staggered renewal schedule.
 -- the last digit of the plate number determines the renewal month:
 --   1 → January,  2 → February,  3 → March,  4 → April,
@@ -531,10 +547,6 @@ INSERT INTO driver_dl_code (license_number, dl_code, vehicle_category) VALUES
 ('N09-22-901234', 'C',  'N3'),
 ('N10-10-012345', 'B',  'M1'),   -- Tony Stark: professional, revoked
 ('N10-10-012345', 'D',  'M3'),
--- Student Permit holders: restricted to B (M1) only
-('S01-25-111111', 'B',  'M1'),   -- Carlo Reyes
-('S02-25-222222', 'B',  'M1'),   -- Liza Santos
-('S03-23-333333', 'B',  'M1'),   -- Ramon Villanueva
 -- motorcycle owners: hold A (L3) in addition to B
 ('N11-22-112233', 'A',  'L3'),   -- Ramon Cruz: motorcycle owner
 ('N11-22-112233', 'B',  'M1'),
