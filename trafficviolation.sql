@@ -38,7 +38,7 @@ CREATE TABLE vehicle (
     model VARCHAR(50) NOT NULL,
     engine_number VARCHAR(20) NOT NULL,
     chassis_number VARCHAR(20) NOT NULL,
-    vehicle_type VARCHAR(20) NOT NULL,
+    vehicle_type ENUM('Sedan', 'Hatchback', 'Coupe', 'SUV', 'Van', 'Pickup Truck', 'Motorcycle', 'Tricycle', 'Jeepney', 'Bus', 'Truck', 'Trailer') NOT NULL,
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
@@ -347,7 +347,10 @@ INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, v
 ('ABT-5678', 'Yamaha', 'Mio Gear', 'ENG-02002', 'CHAS-02002', 'Motorcycle', 2022, 'Blue', 'N12-21-223344'),
 ('WMK-9012', 'Honda', 'XRM 125', 'ENG-02003', 'CHAS-02003', 'Motorcycle', 2019, 'Black', 'N13-19-334455'),
 ('AXB-2468', 'Hino', 'FB Bus', 'ENG-03001', 'CHAS-03001', 'Bus', 2020, 'Yellow', 'N14-20-445566'),
-('AJP-1357', 'Sarao', 'Jeepney', 'ENG-03002', 'CHAS-03002', 'Jeepney', 2019, 'Multicolor', 'N15-19-556677');
+('AJP-1357', 'Sarao', 'Jeepney', 'ENG-03002', 'CHAS-03002', 'Jeepney', 2019, 'Multicolor', 'N15-19-556677'),
+('ATK-4411', 'Mitsubishi', 'Strada', 'ENG-04001', 'CHAS-04001', 'Pickup Truck', 2021, 'White', 'N05-18-567890'),
+('ATR-7722', 'Isuzu', 'Giga Trailer', 'ENG-04002', 'CHAS-04002', 'Trailer', 2018, 'Gray', 'N14-20-445566'),
+('ATC-5533', 'Honda', 'TMX Supremo', 'ENG-04003', 'CHAS-04003', 'Tricycle', 2020, 'Blue', 'N15-19-556677');
 
 INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
 ('REG-2026-001', 'ABK-1234', '2026-03-10', 'Active'),
