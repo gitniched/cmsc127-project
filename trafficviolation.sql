@@ -76,7 +76,6 @@ CREATE TABLE vehicle (
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
     -- conduction sticker: issued to newly purchased vehicles before permanent plates are released.
-    -- format: YYYY-NNNNNN (e.g., 2024-001234). NULL once a permanent plate has been assigned.
     conduction_sticker VARCHAR(15) DEFAULT NULL,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
@@ -165,9 +164,6 @@ CREATE TABLE traffic_violation (
     violation_location_city VARCHAR(100) NOT NULL,
     violation_location_region VARCHAR(100) NOT NULL,
     violation_date DATE NOT NULL,
-    -- fine_amount is not stored directly; it is derived by summing base_fine_amount
-    -- from violation_fine_schedule for each violation_type linked to this uovr_number.
-    -- use the v_violation_summary view to retrieve total fine per incident.
     payment_status ENUM('Paid', 'Unpaid', 'Waived') NOT NULL DEFAULT 'Unpaid',
     license_number VARCHAR(13) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
