@@ -80,12 +80,11 @@ CREATE TABLE vehicle (
     conduction_sticker VARCHAR(15) DEFAULT NULL,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
-    -- plate format: current LTO standard (post-2018) is AAA-1234 (3 letters, hyphen, 4 digits).
-    -- legacy format (pre-2018) is AAA-123 (3 letters, hyphen, 3 digits).
-    -- both formats are accepted to accommodate older registered vehicles.
     CONSTRAINT chk_plate_format CHECK (
-        plate_number REGEXP '^[A-Z]{3}-[0-9]{4}$'
-        OR plate_number REGEXP '^[A-Z]{3}-[0-9]{3}$'
+        plate_number REGEXP '^[A-Z]{3}-[0-9]{4}$'  -- current standard (cars, post-2018)
+        OR plate_number REGEXP '^[A-Z]{3}-[0-9]{3}$'  -- legacy (cars, pre-2018)
+        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{4}$'  -- current standard (motorcycles, post-2018)
+        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{3}$'  -- legacy (motorcycles, pre-2018)
     )
 );
  
