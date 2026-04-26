@@ -212,7 +212,6 @@ END$$
 --   5 → May,      6 → June,      7 → July,   8 → August,
 --   9 → September, 0 → October
 -- expiry is set to the last day of the renewal month in the year following registration.
--- source: LTO staggered registration renewal system per plate ending.
 CREATE TRIGGER trg_registration_before_insert
 BEFORE INSERT ON vehicle_registration
 FOR EACH ROW
@@ -295,7 +294,6 @@ BEGIN
 END$$
 
 -- suspend license if driver reaches 3 or more pending violations within the current license period
--- uses GREATEST(expiry, CURDATE()) to include post-expiry violations, mirroring sp_renew_license
 -- suspends both Active and Expired licenses, blocking renewal for repeat offenders
 CREATE TRIGGER trg_violation_after_insert
 AFTER INSERT ON traffic_violation
