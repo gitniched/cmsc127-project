@@ -34,6 +34,37 @@ SELECT
     license_expiry_date
 FROM driver;
  
+-- driver DL codes: a driver may hold multiple codes simultaneously.
+-- vehicle_category specifies the subcategory within each DL code per LTO classification:
+--   A  → L1 (2-wheel ≤50kph), L2 (3-wheel ≤50kph), L3 (2-wheel >50kph)
+--   A1 → L4 (sidecar >50kph), L5 (3-wheel symm >50kph), L6 (4-wheel ≤350kg ≤45kph), L7 (4-wheel ≤550kg ≤45kph)
+--   B  → M1 (passenger ≤8 seats, GVW ≤5000kg)
+--   B1 → M2 (passenger >8 seats, GVW ≤5000kg)
+--   B2 → N1 (goods, GVW ≤3500kg)
+--   C  → N2 (goods, GVW 3500–12000kg), N3 (goods, GVW >12000kg)
+--   D  → M3 (passenger >8 seats, GVW >5000kg)
+--   BE → O1 (trailer GVW ≤750kg), O2 (trailer GVW 750–3500kg)
+--   CE → O3 (trailer GVW 3500–10000kg), O4 (trailer GVW >10000kg)
+CREATE TABLE driver_dl_code (
+    license_number VARCHAR(13) NOT NULL,
+    dl_code ENUM('A', 'A1', 'B', 'B1', 'B2', 'C', 'D', 'BE', 'CE') NOT NULL,
+    vehicle_category ENUM('L1','L2','L3','L4','L5','L6','L7','M1','M2','M3','N1','N2','N3','O1','O2','O3','O4') NOT NULL,
+    CONSTRAINT pk_driver_dl_code PRIMARY KEY (license_number, dl_code),
+    CONSTRAINT fk_dl_code_driver FOREIGN KEY (license_number) REFERENCES driver(license_number),
+    -- enforces that the vehicle_category belongs to the correct DL code group
+    CONSTRAINT chk_dl_category CHECK (
+        (dl_code = 'A'  AND vehicle_category IN ('L1', 'L2', 'L3')) OR
+        (dl_code = 'A1' AND vehicle_category IN ('L4', 'L5', 'L6', 'L7')) OR
+        (dl_code = 'B'  AND vehicle_category = 'M1') OR
+        (dl_code = 'B1' AND vehicle_category = 'M2') OR
+        (dl_code = 'B2' AND vehicle_category = 'N1') OR
+        (dl_code = 'C'  AND vehicle_category IN ('N2', 'N3')) OR
+        (dl_code = 'D'  AND vehicle_category = 'M3') OR
+        (dl_code = 'BE' AND vehicle_category IN ('O1', 'O2')) OR
+        (dl_code = 'CE' AND vehicle_category IN ('O3', 'O4'))
+    )
+);
+
 CREATE TABLE vehicle (
     plate_number VARCHAR(10) NOT NULL,
     make VARCHAR(50) NOT NULL,
@@ -44,14 +75,17 @@ CREATE TABLE vehicle (
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
+    -- conduction sticker: issued to newly purchased vehicles before permanent plates are released.
+    -- format: YYYY-NNNNNN (e.g., 2024-001234). NULL once a permanent plate has been assigned.
     conduction_sticker VARCHAR(15) DEFAULT NULL,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
+    -- plate format: current LTO standard (post-2018) is AAA-1234 (3 letters, hyphen, 4 digits).
+    -- legacy format (pre-2018) is AAA-123 (3 letters, hyphen, 3 digits).
+    -- both formats are accepted to accommodate older registered vehicles.
     CONSTRAINT chk_plate_format CHECK (
-        plate_number REGEXP '^[A-Z]{3}-[0-9]{4}$'  -- current standard (cars, post-2018)
-        OR plate_number REGEXP '^[A-Z]{3}-[0-9]{3}$'  -- legacy (cars, pre-2018)
-        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{4}$'  -- current standard (motorcycles, post-2018)
-        OR plate_number REGEXP '^[A-Z]{2}-[0-9]{3}$'  -- legacy (motorcycles, pre-2018)
+        plate_number REGEXP '^[A-Z]{3}-[0-9]{4}$'
+        OR plate_number REGEXP '^[A-Z]{3}-[0-9]{3}$'
     )
 );
  
@@ -132,6 +166,9 @@ CREATE TABLE traffic_violation (
     violation_location_city VARCHAR(100) NOT NULL,
     violation_location_region VARCHAR(100) NOT NULL,
     violation_date DATE NOT NULL,
+    -- fine_amount is not stored directly; it is derived by summing base_fine_amount
+    -- from violation_fine_schedule for each violation_type linked to this uovr_number.
+    -- use the v_violation_summary view to retrieve total fine per incident.
     payment_status ENUM('Paid', 'Unpaid', 'Waived') NOT NULL DEFAULT 'Unpaid',
     license_number VARCHAR(13) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
@@ -206,12 +243,52 @@ BEGIN
     END IF;
 END$$
 
+-- validate minimum age on insert
+CREATE TRIGGER trg_driver_age_before_insert
+BEFORE INSERT ON driver
+FOR EACH ROW
+BEGIN
+    DECLARE v_age INT;
+    SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, NEW.license_issue_date);
+
+    IF NEW.license_type = 'Student Permit' AND v_age < 16 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: applicant must be at least 16 years old for a Student Permit';
+    ELSEIF NEW.license_type = 'Non-Professional' AND v_age < 17 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: applicant must be at least 17 years old for a Non-Professional license';
+    ELSEIF NEW.license_type = 'Professional' AND v_age < 18 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: applicant must be at least 18 years old for a Professional license';
+    END IF;
+END$$
+
+-- re-validate minimum age when license_type is upgraded (e.g. Student Permit → Non-Professional)
+CREATE TRIGGER trg_driver_age_before_update
+BEFORE UPDATE ON driver
+FOR EACH ROW
+BEGIN
+    DECLARE v_age INT;
+    SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, CURDATE());
+
+    IF NEW.license_type <> OLD.license_type THEN
+        IF NEW.license_type = 'Non-Professional' AND v_age < 17 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'error: driver must be at least 17 years old to upgrade to a Non-Professional license';
+        ELSEIF NEW.license_type = 'Professional' AND v_age < 18 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'error: driver must be at least 18 years old to upgrade to a Professional license';
+        END IF;
+    END IF;
+END$$
+
 -- auto-compute registration expiry based on LTO staggered renewal schedule.
 -- the last digit of the plate number determines the renewal month:
 --   1 → January,  2 → February,  3 → March,  4 → April,
 --   5 → May,      6 → June,      7 → July,   8 → August,
 --   9 → September, 0 → October
 -- expiry is set to the last day of the renewal month in the year following registration.
+-- source: LTO staggered registration renewal system per plate ending.
 CREATE TRIGGER trg_registration_before_insert
 BEFORE INSERT ON vehicle_registration
 FOR EACH ROW
@@ -294,6 +371,7 @@ BEGIN
 END$$
 
 -- suspend license if driver reaches 3 or more pending violations within the current license period
+-- uses GREATEST(expiry, CURDATE()) to include post-expiry violations, mirroring sp_renew_license
 -- suspends both Active and Expired licenses, blocking renewal for repeat offenders
 CREATE TRIGGER trg_violation_after_insert
 AFTER INSERT ON traffic_violation
@@ -443,6 +521,43 @@ INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_da
 ('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Expired', '2020-07-15'),
 ('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Expired', '2019-11-03');
 
+
+-- driver DL codes: assigned based on each driver's license type and the vehicles they own
+INSERT INTO driver_dl_code (license_number, dl_code, vehicle_category) VALUES
+-- Non-Professional drivers: typically hold B (M1) for passenger cars
+('N01-22-123456', 'B',  'M1'),   -- John Doe: car + truck owner, also has C
+('N01-22-123456', 'C',  'N2'),
+('N02-22-234567', 'B',  'M1'),   -- Jane Austen: professional, car + SUV
+('N02-22-234567', 'B1', 'M2'),
+('N03-15-345678', 'B',  'M1'),   -- Michael Jordan: professional, expired
+('N03-15-345678', 'C',  'N2'),
+('N04-21-456789', 'B',  'M1'),   -- Sarah Connor: non-pro
+('N05-18-567890', 'B',  'M1'),   -- Bruce Wayne: professional, suspended
+('N05-18-567890', 'B2', 'N1'),
+('N06-22-678901', 'B',  'M1'),   -- Clark Kent: non-pro
+('N07-22-789012', 'B',  'M1'),   -- Diana Prince: professional
+('N07-22-789012', 'B1', 'M2'),
+('N08-23-890123', 'B',  'M1'),   -- Peter Parker: non-pro
+('N09-22-901234', 'B',  'M1'),   -- Natasha Romanoff: professional
+('N09-22-901234', 'C',  'N3'),
+('N10-10-012345', 'B',  'M1'),   -- Tony Stark: professional, revoked
+('N10-10-012345', 'D',  'M3'),
+-- Student Permit holders: restricted to B (M1) only
+('S01-25-111111', 'B',  'M1'),   -- Carlo Reyes
+('S02-25-222222', 'B',  'M1'),   -- Liza Santos
+('S03-23-333333', 'B',  'M1'),   -- Ramon Villanueva
+-- motorcycle owners: hold A (L3) in addition to B
+('N11-22-112233', 'A',  'L3'),   -- Ramon Cruz: motorcycle owner
+('N11-22-112233', 'B',  'M1'),
+('N12-21-223344', 'A',  'L3'),   -- Maria Santos: motorcycle owner
+('N12-21-223344', 'B',  'M1'),
+('N13-19-334455', 'A',  'L3'),   -- Jose Ramos: motorcycle owner
+('N13-19-334455', 'B',  'M1'),
+-- PUV/heavy vehicle drivers
+('N14-20-445566', 'D',  'M3'),   -- Eduardo Reyes: bus driver
+('N14-20-445566', 'CE', 'O3'),
+('N15-19-556677', 'A1', 'L5'),   -- Roberto Garcia: jeepney/tricycle driver
+('N15-19-556677', 'D',  'M3');
 
 INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
 ('ABK-1234', 'Toyota', 'Vios', 'ENG-00123', 'CHAS-00123', 'Sedan', 2018, 'Black', 'N01-22-123456'),
