@@ -1,6 +1,6 @@
 # trafficviolation — Database Documentation
 
-This document explains the schema, business logic, triggers, stored procedure, and report queries in `trafficviolation.sql`. It is written for someone who did not author the file.
+This document explains the schema, business logic, triggers, stored procedure, and report queries in `trafficviolation.sql`.
 
 ---
 
