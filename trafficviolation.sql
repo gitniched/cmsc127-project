@@ -3,7 +3,7 @@ CREATE DATABASE trafficviolation;
 USE trafficviolation;
 
 SET @lto_renewal_override = 0;
- 
+
 CREATE TABLE driver (
     license_number VARCHAR(13) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE driver (
     license_expiry_date DATE NOT NULL DEFAULT '9999-12-31',
     CONSTRAINT pk_driver PRIMARY KEY (license_number)
 );
- 
+
 CREATE VIEW v_driver AS
 SELECT
     license_number,
@@ -33,37 +33,6 @@ SELECT
     license_issue_date,
     license_expiry_date
 FROM driver;
- 
--- driver DL codes: a driver may hold multiple codes simultaneously.
--- vehicle_category specifies the subcategory within each DL code per LTO classification:
---   A  → L1 (2-wheel ≤50kph), L2 (3-wheel ≤50kph), L3 (2-wheel >50kph)
---   A1 → L4 (sidecar >50kph), L5 (3-wheel symm >50kph), L6 (4-wheel ≤350kg ≤45kph), L7 (4-wheel ≤550kg ≤45kph)
---   B  → M1 (passenger ≤8 seats, GVW ≤5000kg)
---   B1 → M2 (passenger >8 seats, GVW ≤5000kg)
---   B2 → N1 (goods, GVW ≤3500kg)
---   C  → N2 (goods, GVW 3500–12000kg), N3 (goods, GVW >12000kg)
---   D  → M3 (passenger >8 seats, GVW >5000kg)
---   BE → O1 (trailer GVW ≤750kg), O2 (trailer GVW 750–3500kg)
---   CE → O3 (trailer GVW 3500–10000kg), O4 (trailer GVW >10000kg)
-CREATE TABLE driver_dl_code (
-    license_number VARCHAR(13) NOT NULL,
-    dl_code ENUM('A', 'A1', 'B', 'B1', 'B2', 'C', 'D', 'BE', 'CE') NOT NULL,
-    vehicle_category ENUM('L1','L2','L3','L4','L5','L6','L7','M1','M2','M3','N1','N2','N3','O1','O2','O3','O4') NOT NULL,
-    CONSTRAINT pk_driver_dl_code PRIMARY KEY (license_number, dl_code),
-    CONSTRAINT fk_dl_code_driver FOREIGN KEY (license_number) REFERENCES driver(license_number),
-    -- enforces that the vehicle_category belongs to the correct DL code group
-    CONSTRAINT chk_dl_category CHECK (
-        (dl_code = 'A'  AND vehicle_category IN ('L1', 'L2', 'L3')) OR
-        (dl_code = 'A1' AND vehicle_category IN ('L4', 'L5', 'L6', 'L7')) OR
-        (dl_code = 'B'  AND vehicle_category = 'M1') OR
-        (dl_code = 'B1' AND vehicle_category = 'M2') OR
-        (dl_code = 'B2' AND vehicle_category = 'N1') OR
-        (dl_code = 'C'  AND vehicle_category IN ('N2', 'N3')) OR
-        (dl_code = 'D'  AND vehicle_category = 'M3') OR
-        (dl_code = 'BE' AND vehicle_category IN ('O1', 'O2')) OR
-        (dl_code = 'CE' AND vehicle_category IN ('O3', 'O4'))
-    )
-);
 
 CREATE TABLE vehicle (
     plate_number VARCHAR(10) NOT NULL,
@@ -75,8 +44,6 @@ CREATE TABLE vehicle (
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
-    -- conduction sticker: issued to newly purchased vehicles before permanent plates are released.
-    conduction_sticker VARCHAR(15) DEFAULT NULL,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
     CONSTRAINT chk_plate_format CHECK (
@@ -86,7 +53,7 @@ CREATE TABLE vehicle (
         OR plate_number REGEXP '^[A-Z]{2}-[0-9]{3}$'  -- legacy (motorcycles, pre-2018)
     )
 );
- 
+
 CREATE TABLE vehicle_registration (
     registration_number VARCHAR(20) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
@@ -96,7 +63,7 @@ CREATE TABLE vehicle_registration (
     CONSTRAINT pk_vehicle_registration PRIMARY KEY (registration_number),
     CONSTRAINT fk_registration_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
 );
- 
+
 CREATE OR REPLACE VIEW v_active_registrations AS
 SELECT
     vr.registration_number,
@@ -108,68 +75,6 @@ SELECT
 FROM vehicle_registration vr
 JOIN vehicle v ON vr.plate_number = v.plate_number
 WHERE vr.registration_status = 'Active';
- 
--- standardized LTO fine schedule per violation type (first offense amounts).
--- source: R.A. 4136, JAO 2014-01, R.A. 10054, R.A. 8750, R.A. 10586, R.A. 10913.
--- fines may escalate on repeat offenses; this table stores the first-offense base amount.
-CREATE TABLE violation_fine_schedule (
-    violation_type VARCHAR(100) NOT NULL,
-    base_fine_amount DECIMAL(10,2) NOT NULL,
-    legal_basis VARCHAR(100) NOT NULL,
-    CONSTRAINT pk_fine_schedule PRIMARY KEY (violation_type)
-);
-
-INSERT INTO violation_fine_schedule (violation_type, base_fine_amount, legal_basis) VALUES
-('Violation of loading zones',                  1000.00,  'R.A. 4136 / LGU ordinances'),
-('Obstruction to traffic',                      1000.00,  'MMDA OVR Code 05'),
-('Colorum tricycles',                           5000.00,  'LTFRB / LGU franchise rules'),
-('50/50 scheme',                                5000.00,  'LTFRB regulations'),
-('Non display of Not-for-hire',                 1000.00,  'R.A. 4136 / LTO AO'),
-('Violation of one way street',                 1000.00,  'R.A. 4136 Sec. 43'),
-('Driving under the influence of liquor',      20000.00,  'R.A. 10586 Sec. 12'),
-('Truck ban',                                   5000.00,  'MMDA / LGU truck ban ordinances'),
-('No drivers license',                          3000.00,  'R.A. 4136 Sec. 20 / JAO 2014-01'),
-('No professional drivers license',             3000.00,  'R.A. 4136 Sec. 20'),
-('Expired drivers license',                     1000.00,  'R.A. 4136 Sec. 20 / JAO 2014-01'),
-('No seatbelt',                                 1000.00,  'R.A. 8750 Sec. 5'),
-('Noisy muffler',                               5000.00,  'R.A. 4136 Sec. 34'),
-('Disobedience to traffic officer',             1000.00,  'R.A. 4136 Sec. 52'),
-('Disregarding traffic sign/signal',             150.00,  'MMDA OVR Code 06 / R.A. 4136 Sec. 42'),
-('Discourteous and disrespectful conduct to passer', 1000.00, 'LTO AO / LGU ordinances'),
-('Untidy attire of driver',                     1000.00,  'LTO AO for PUV drivers'),
-('Reckless driving',                            500.00,   'R.A. 4136 Sec. 48 / JAO 2014-01'),
-('No U-turn',                                   1000.00,  'R.A. 4136 Sec. 43'),
-('No interior light',                           1000.00,  'R.A. 4136 Sec. 34'),
-('Over speeding',                               2000.00,  'R.A. 4136 Sec. 35 / JAO 2014-01'),
-('No safety helmet',                            1500.00,  'R.A. 10054 Sec. 5'),
-('Unauthorized driver',                         3000.00,  'R.A. 4136 Sec. 20'),
-('Not posting of current passenger fare matrix',1000.00,  'LTFRB / LGU franchise rules'),
-('Refusal to convey passenger',                 1000.00,  'R.A. 4136 Sec. 56 / LTFRB rules'),
-('No overloading',                              5000.00,  'R.A. 4136 Sec. 32 / JAO 2014-01'),
-('No Mayor permit',                             1000.00,  'LGU ordinances'),
-('Overcharging',                                1000.00,  'LTFRB / LGU franchise rules'),
-('Without proper light',                        5000.00,  'R.A. 4136 Sec. 34'),
-('Jaywalking',                                   150.00,  'MMDA / LGU pedestrian ordinances'),
-('Expired TCT',                                 5000.00,  'LTFRB franchise rules'),
-('Driving through funeral or other processions',1000.00,  'R.A. 4136 Sec. 45'),
-('Smoking inside PUV',                          1000.00,  'R.A. 9211 / LGU ordinances'),
-('Violation of emission standard',              2000.00,  'R.A. 8749 / RA 4136 Sec. 34');
-('Driving against traffic',                     2000.00,   'MMDA Reg. No. 97-003 / OVR Code 023A'),
-('Illegal counterflow',                         2000.00, 'MMDA Reg. No. 97-003 / OVR Code 023B'),
-('Anti-Distracted Driving Act violation',       5000.00, 'R.A. 10913 / MMDA OVR Code 222'),
-('No contact overspeeding',                     1200.00, 'MMDA Reg. No. 11-001 / OVR Code 201'),
-('Overspeeding physical apprehension',          1200.00, 'MMDA MC No. 11-001 / OVR Code 201P'),
-('Illegal parking (attended)',                  1000.00, 'MMDA Reg. No. 18-008 / OVR Code 226'),
-('Illegal parking (unattended)',                2000.00, 'MMDA Reg. No. 18-008 / OVR Code 224'),
-('Unified Vehicular Volume Reduction Program',   300.00, 'MMDA OVR Code 176'),
-('Failure to use seatbelt',                      250.00, 'R.A. 8750 / MMDA OVR Code 194'),
-('Children safety on motorcycle',               1500.00, 'R.A. 10666 / MMDA OVR Code 228'),
-('No ICC/PS mark sticker on helmet',            3000.00, 'MMDA Res. 12-01-2012 / OVR Code 219J'),
-('Smoke belching',                               200.00, 'MMDA OVR Code 171'),
-('Driving without license',                      750.00, 'MMDA OVR Code 053'),
-('Driving with suspended drivers license',       300.00, 'MMDA OVR Code 055'),
-('Driving with revoked drivers license',         300.00, 'MMDA OVR Code 056'),
-('Using motor vehicle in commission of crime', 10000.00, 'MMDA OVR Code 067');
 
 CREATE TABLE traffic_violation (
     uovr_number VARCHAR(20) NOT NULL,
@@ -187,36 +92,66 @@ CREATE TABLE traffic_violation (
     CONSTRAINT fk_violation_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number),
     CONSTRAINT fk_violation_registration FOREIGN KEY (registration_number) REFERENCES vehicle_registration(registration_number)
 );
- 
--- violation types based on the generalized UOVR (Uniform Ordinance Violation Receipt)
+
+-- traffic violations that are based on the actual traffic violation receipt (TVR) and IRR-RA10930
 CREATE TABLE violation_type (
     uovr_number VARCHAR(20) NOT NULL,
-    violation_type VARCHAR(100) NOT NULL,
+    violation_type ENUM(
+        'Illegal parking (attended)',
+        'Illegal parking (unattended)',
+        'Violation of loading zones',
+        'Obstruction to traffic',
+        'Colorum tricycles',
+        '50/50 scheme',
+        'Non display of Not-for-hire',
+        'Violation of one way street',
+        'Driving under the influence of liquor',
+        'Truck ban',
+        'No drivers license',
+        'No professional drivers license',
+        'Expired drivers license',
+        'No seatbelt',
+        'Noisy muffler',
+        'Disobedience to traffic officer',
+        'Disregarding traffic sign/signal',
+        'Discourteous and disrespectful conduct to passer',
+        'Others',
+        'Untidy attire of driver',
+        'Reckless driving',
+        'No U-turn',
+        'No interior light',
+        'Over speeding',
+        'No safety helmet',
+        'Unauthorized driver',
+        'Not posting of current passenger fare matrix',
+        'Refusal to convey passenger',
+        'No overloading',
+        'No Mayor permit',
+        'Overcharging',
+        'Without proper light',
+        'Jaywalking',
+        'Expired TCT',
+        'Driving through funeral or other processions',
+        'Smoking inside PUV',
+        'Violation of emission standard',
+        'Driving against traffic',
+        'Illegal counterflow',
+        'Anti-Distracted Driving Act violation',
+        'No contact overspeeding',
+        'Overspeeding physical apprehension',
+        'Unified Vehicular Volume Reduction Program',
+        'Failure to use seatbelt',
+        'Children safety on motorcycle',
+        'No ICC/PS mark sticker on helmet',
+        'Smoke belching',
+        'Driving without license',
+        'Driving with suspended drivers license',
+        'Driving with revoked drivers license',
+        'Using motor vehicle in commission of crime'
+    ) NOT NULL,
     CONSTRAINT pk_violation_type PRIMARY KEY (uovr_number, violation_type),
-    CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number),
-    CONSTRAINT fk_vtype_fine_schedule FOREIGN KEY (violation_type) REFERENCES violation_fine_schedule(violation_type)
+    CONSTRAINT fk_vtype_violation FOREIGN KEY (uovr_number) REFERENCES traffic_violation(uovr_number)
 );
-
--- summary view: total fine per incident, derived from the fine schedule
-CREATE OR REPLACE VIEW v_violation_summary AS
-SELECT
-    tv.uovr_number,
-    tv.violation_date,
-    tv.violation_location_city,
-    tv.violation_location_region,
-    tv.violation_status,
-    tv.payment_status,
-    tv.license_number,
-    tv.plate_number,
-    tv.officer,
-    SUM(vfs.base_fine_amount) AS total_fine_amount
-FROM traffic_violation tv
-JOIN violation_type vt ON tv.uovr_number = vt.uovr_number
-JOIN violation_fine_schedule vfs ON vt.violation_type = vfs.violation_type
-GROUP BY
-    tv.uovr_number, tv.violation_date, tv.violation_location_city,
-    tv.violation_location_region, tv.violation_status, tv.payment_status,
-    tv.license_number, tv.plate_number, tv.officer;
 
 -- triggers
 
@@ -247,7 +182,7 @@ BEGIN
     -- Student Permit = 1 year from issue date
     -- Non-Professional / Professional = birth month/day in the 5th year after issuance
     --   per IRR RA 10930 Section 9.3.1: "valid for five (5) years reckoned from the date of birth"
-    --   e.g. issued 2022-03-10, born 1990-06-15 → expiry = 2027-06-15
+    --   e.g. issued 2022-03-10, born 1990-06-15 -> expiry = 2027-06-15
     --   edge case: Feb 29 birthdays fall back to Feb 28 via LAST_DAY guard
     IF NEW.license_type = 'Student Permit' THEN
         SET NEW.license_expiry_date = DATE_ADD(NEW.license_issue_date, INTERVAL 1 YEAR);
@@ -307,27 +242,11 @@ BEGIN
     END IF;
 END$$
 
-CREATE TRIGGER trg_dl_code_before_insert
-BEFORE INSERT ON driver_dl_code
-FOR EACH ROW
-BEGIN
-    DECLARE v_license_type ENUM('Student Permit', 'Non-Professional', 'Professional');
-
-    SELECT license_type INTO v_license_type
-    FROM driver
-    WHERE license_number = NEW.license_number;
-
-    IF v_license_type = 'Student Permit' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'error: DL codes cannot be assigned to Student Permit holders';
-    END IF;
-END$$
-
 -- auto-compute registration expiry based on LTO staggered renewal schedule.
 -- the last digit of the plate number determines the renewal month:
---   1 → January,  2 → February,  3 → March,  4 → April,
---   5 → May,      6 → June,      7 → July,   8 → August,
---   9 → September, 0 → October
+--   1 -> January,  2 -> February,  3 -> March,  4 -> April,
+--   5 -> May,      6 -> June,      7 -> July,   8 -> August,
+--   9 -> September, 0 -> October
 -- expiry is set to the last day of the renewal month in the year following registration.
 -- source: LTO staggered registration renewal system per plate ending.
 CREATE TRIGGER trg_registration_before_insert
@@ -411,9 +330,9 @@ BEGIN
     END IF;
 END$$
 
--- suspend license if driver reaches 3 or more pending violations within the current license period
--- uses GREATEST(expiry, CURDATE()) to include post-expiry violations, mirroring sp_renew_license
--- suspends both Active and Expired licenses, blocking renewal for repeat offenders
+-- suspend license if driver reaches 3 or more pending violations within the current license period.
+-- uses GREATEST(v_expiry_date, CURDATE()) to include post-expiry violations, mirroring sp_renew_license.
+-- suspends both Active and Expired licenses, blocking renewal for repeat offenders.
 CREATE TRIGGER trg_violation_after_insert
 AFTER INSERT ON traffic_violation
 FOR EACH ROW
@@ -444,6 +363,7 @@ END$$
 -- renew license:
 -- student permit: always 1 year, blocked if unpaid violations exist
 -- non-professional/professional: 10 years if no violations in current period, else 5 years
+-- birth-date-reckoned expiry per IRR RA 10930 Section 9.3.1 and 9.4
 CREATE PROCEDURE sp_renew_license(
     IN p_license_number VARCHAR(13),
     OUT p_message VARCHAR(255)
@@ -562,212 +482,194 @@ END$$
 
 DELIMITER ;
 
--- dummy tables
+-- dummy data
 
-INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES
-('N01-22-123456', 'John', 'Doe', 'Smith', '1985-06-15', 'M', '123 Maple St, Manila', 'Non-Professional', 'Active', '2022-05-10'),
-('N02-22-234567', 'Jane', 'Austen', 'Rose', '1990-08-20', 'F', '456 Oak Ave, Makati', 'Professional', 'Active', '2022-11-22'),
-('N03-15-345678', 'Michael', 'Jordan', 'Jeffrey', '1975-02-17', 'M', '789 Colon St, Cebu City', 'Professional', 'Expired', '2015-03-14'),
-('N04-21-456789', 'Sarah', 'Connor', 'Ann', '1988-12-05', 'F', '321 Ilustre St, Davao City', 'Non-Professional', 'Active', '2021-07-01'),
-('N05-18-567890', 'Bruce', 'Wayne', 'Thomas', '1982-10-24', 'M', '1007 Session Rd, Baguio City', 'Professional', 'Suspended', '2018-01-15'),
-('N06-22-678901', 'Clark', 'Kent', 'Joseph', '1992-04-18', 'M', '344 Iznart St, Iloilo City', 'Non-Professional', 'Active', '2022-09-09'),
-('N07-22-789012', 'Diana', 'Prince', 'Marie', '1987-03-22', 'F', '890 Corrales Ave, Cagayan de Oro', 'Professional', 'Active', '2022-06-30'),
-('N08-23-890123', 'Peter', 'Parker', 'Benjamin', '1995-08-10', 'M', '20 Quezon Blvd, Quezon City', 'Non-Professional', 'Active', '2023-02-14'),
-('N09-22-901234', 'Natasha', 'Romanoff', 'Alianovna', '1984-11-22', 'F', '500 Burgos St, General Santos City', 'Professional', 'Active', '2022-10-05'),
-('N10-10-012345', 'Tony', 'Stark', 'Edward', '1970-05-29', 'M', '108 Mabini St, Legazpi City', 'Professional', 'Revoked', '2010-12-01'),
-('S01-25-111111', 'Carlo', 'Reyes', NULL, '2007-03-10', 'M', '12 Sampaguita St, Caloocan', 'Student Permit', 'Expired', '2025-04-15'),
-('S02-25-222222', 'Liza', 'Santos', 'Marie', '2006-09-24', 'F', '88 Mabini Ave, Paranaque', 'Student Permit', 'Active', '2025-05-08'),
-('S03-23-333333', 'Ramon', 'Villanueva', 'Cruz', '2005-11-02', 'M', '45 Rizal Blvd, Marikina', 'Student Permit', 'Expired', '2023-06-20'),
-('N11-22-112233', 'Ramon', 'Cruz', 'Diego', '1993-07-14', 'M', '22 Dapitan St, Manila', 'Non-Professional', 'Active', '2022-03-20'),
-('N12-21-223344', 'Maria', 'Santos', 'Luz', '1998-05-30', 'F', '77 Sto. Tomas St, Quezon City', 'Non-Professional', 'Active', '2021-08-10'),
-('N13-19-334455', 'Jose', 'Ramos', 'Antonio', '1988-02-11', 'M', '5 Mabolo St, Cebu City', 'Professional', 'Expired', '2019-06-05'),
-('N14-20-445566', 'Eduardo', 'Reyes', 'Manuel', '1980-04-22', 'M', '88 Rizal Ave, Manila', 'Professional', 'Expired', '2020-07-15'),
-('N15-19-556677', 'Roberto', 'Garcia', 'Santos', '1975-09-18', 'M', '34 Bonifacio St, Quezon City', 'Professional', 'Expired', '2019-11-03');
+INSERT INTO driver (
+    license_number, first_name, last_name, middle_name,
+    birth_date, sex, address,
+    license_type, license_status, license_issue_date
+) VALUES
+('N01-23-100001', 'Ana',     'Reyes',     'Garcia',    '1995-03-12', 'F', '14 Mabini St, Manila',               'Non-Professional', 'Active',    '2023-01-20'),
+('N02-22-200002', 'Marco',   'Santos',    'Bautista',  '1988-07-04', 'M', '8 Rizal Ave, Quezon City',           'Professional',     'Active',    '2022-06-15'),
+('N03-24-300003', 'Lara',    'Cruz',      'Ocampo',    '2000-11-29', 'F', '55 Del Pilar St, Cebu City',         'Non-Professional', 'Active',    '2024-09-05'),
+('N04-21-400004', 'Ben',     'Villanueva','Reyes',     '1979-02-28', 'M', '20 Burgos St, Davao City',           'Professional',     'Active',    '2021-02-01'),
+('N05-23-500005', 'Celia',   'Flores',    'Luna',      '1997-08-15', 'F', '77 Aurora Blvd, Pasig',              'Non-Professional', 'Active',    '2023-11-10'),
+('N06-21-600006', 'Andres',  'Torres',    'Manalac',   '1983-05-09', 'M', '33 Abad Santos St, Manila',          'Professional',     'Active',    '2021-03-25'),
+('N07-22-700007', 'Rosa',    'Dela Cruz', 'Natividad', '1990-09-17', 'F', '12 Magsaysay Ave, Iloilo City',      'Professional',     'Active',    '2022-07-08'),
+('N08-20-800008', 'Felix',   'Navarro',   'Torres',    '1985-06-30', 'M', '5 Roxas Blvd, Manila',               'Professional',     'Active',    '2020-04-12'),
+('N09-19-900009', 'Ramon',   'Abad',      'Cruz',      '1980-04-22', 'M', '9 Bonifacio St, Iloilo City',        'Non-Professional', 'Expired',   '2019-03-10'),
+('N10-17-101010', 'Dolores', 'Mendoza',   'Santos',    '1982-12-01', 'F', '22 Quezon Blvd, Baguio City',        'Professional',     'Expired',   '2017-11-05'),
+('N11-10-111111', 'Victor',  'Tan',       'Lim',       '1975-10-08', 'M', '88 Session Rd, Baguio City',         'Professional',     'Revoked',   '2010-09-01'),
+('S01-25-121212', 'Gio',     'dela Cruz', NULL,        '2007-05-20', 'M', '3 Sampaguita Lane, Marikina',        'Student Permit',   'Active',    '2025-06-01'),
+('S02-26-131313', 'Nina',    'Tan',       'Santos',    '2006-09-14', 'F', '101 Katipunan Ave, Quezon City',     'Student Permit',   'Active',    '2026-01-10');
 
+INSERT INTO vehicle (
+    plate_number, make, model, engine_number, chassis_number,
+    vehicle_type, year, color, owner_license_number
+) VALUES
+('ABD-1234', 'Toyota',     'Vios',        'ENG-10001', 'CHAS-10001', 'Sedan',        2021, 'White',       'N01-23-100001'),
+('BCE-5677', 'Honda',      'Jazz',        'ENG-10002', 'CHAS-10002', 'Hatchback',    2020, 'Blue',        'N02-22-200002'),
+('BCF-4567', 'Ford',       'Everest',     'ENG-10003', 'CHAS-10003', 'SUV',          2019, 'Black',       'N02-22-200002'),
+('BDG-5672', 'Mitsubishi', 'Strada',      'ENG-10004', 'CHAS-10004', 'Pickup Truck', 2020, 'Silver',      'N02-22-200002'),
+('CEH-6789', 'BMW',        '3 Series',    'ENG-10005', 'CHAS-10005', 'Coupe',        2023, 'Matte Black', 'N03-24-300003'),
+('DFJ-7895', 'Toyota',     'HiAce',       'ENG-10006', 'CHAS-10006', 'Van',          2018, 'Pearl White', 'N04-21-400004'),
+('EGK-8903', 'Nissan',     'Almera',      'ENG-10007', 'CHAS-10007', 'Sedan',        2022, 'Red',         'N05-23-500005'),
+('FHL-9016', 'Sarao',      'Jeepney',     'ENG-10008', 'CHAS-10008', 'Jeepney',      2019, 'Multicolor',  'N06-21-600006'),
+('AT-5533',  'Kawasaki',   'Barako',      'ENG-10009', 'CHAS-10009', 'Tricycle',     2020, 'Blue',        'N06-21-600006'),
+('GJM-0128', 'Hino',       'FB Bus',      'ENG-10010', 'CHAS-10010', 'Bus',          2020, 'Yellow',      'N07-22-700007'),
+('GHK-3453', 'Isuzu',      'Forward',     'ENG-10011', 'CHAS-10011', 'Truck',        2018, 'White',       'N07-22-700007'),
+('ATR-7722', 'Utility',    'Flatbed',     'ENG-10012', 'CHAS-10012', 'Trailer',      2017, 'Gray',        'N07-22-700007'),
+('HKN-1230', 'Chevrolet',  'Trailblazer', 'ENG-10013', 'CHAS-10013', 'SUV',          2020, 'Dark Gray',   'N08-20-800008'),
+('FHL-3455', 'Kia',        'Soluto',      'ENG-10014', 'CHAS-10014', 'Sedan',        2017, 'Gray',        'N09-19-900009'),
+('GJM-9018', 'Hyundai',    'Accent',      'ENG-10015', 'CHAS-10015', 'Sedan',        2016, 'Beige',       'N10-17-101010'),
+('JLP-2345', 'BMW',        'M3',          'ENG-10016', 'CHAS-10016', 'Sedan',        2023, 'Matte Black', 'N11-10-111111'),
+('GH-1231',  'Honda',      'Click 125i',  'ENG-10017', 'CHAS-10017', 'Motorcycle',   2024, 'Green',       'S01-25-121212'),
+('AC-7773',  'Yamaha',     'Mio Gear',    'ENG-10018', 'CHAS-10018', 'Motorcycle',   2022, 'Red',         'N01-23-100001');
 
--- driver DL codes: assigned based on each driver's license type and the vehicles they own
-INSERT INTO driver_dl_code (license_number, dl_code, vehicle_category) VALUES
--- Non-Professional drivers: typically hold B (M1) for passenger cars
-('N01-22-123456', 'B',  'M1'),   -- John Doe: car + truck owner, also has C
-('N01-22-123456', 'C',  'N2'),
-('N02-22-234567', 'B',  'M1'),   -- Jane Austen: professional, car + SUV
-('N02-22-234567', 'B1', 'M2'),
-('N03-15-345678', 'B',  'M1'),   -- Michael Jordan: professional, expired
-('N03-15-345678', 'C',  'N2'),
-('N04-21-456789', 'B',  'M1'),   -- Sarah Connor: non-pro
-('N05-18-567890', 'B',  'M1'),   -- Bruce Wayne: professional, suspended
-('N05-18-567890', 'B2', 'N1'),
-('N06-22-678901', 'B',  'M1'),   -- Clark Kent: non-pro
-('N07-22-789012', 'B',  'M1'),   -- Diana Prince: professional
-('N07-22-789012', 'B1', 'M2'),
-('N08-23-890123', 'B',  'M1'),   -- Peter Parker: non-pro
-('N09-22-901234', 'B',  'M1'),   -- Natasha Romanoff: professional
-('N09-22-901234', 'C',  'N3'),
-('N10-10-012345', 'B',  'M1'),   -- Tony Stark: professional, revoked
-('N10-10-012345', 'D',  'M3'),
--- motorcycle owners: hold A (L3) in addition to B
-('N11-22-112233', 'A',  'L3'),   -- Ramon Cruz: motorcycle owner
-('N11-22-112233', 'B',  'M1'),
-('N12-21-223344', 'A',  'L3'),   -- Maria Santos: motorcycle owner
-('N12-21-223344', 'B',  'M1'),
-('N13-19-334455', 'A',  'L3'),   -- Jose Ramos: motorcycle owner
-('N13-19-334455', 'B',  'M1'),
--- PUV/heavy vehicle drivers
-('N14-20-445566', 'D',  'M3'),   -- Eduardo Reyes: bus driver
-('N14-20-445566', 'CE', 'O3'),
-('N15-19-556677', 'A1', 'L5'),   -- Roberto Garcia: jeepney/tricycle driver
-('N15-19-556677', 'D',  'M3');
+INSERT INTO vehicle_registration (
+    registration_number, plate_number, registration_date, registration_status
+) VALUES
+-- ABD-1234 (ends 4 -> Apr): history + active
+('REG-2022-001', 'ABD-1234', '2022-02-10', 'Expired'),
+('REG-2026-002', 'ABD-1234', '2026-02-15', 'Active'),
+-- BCE-5677 (ends 7 -> Jul): registered Aug, month past renewal -> expiry Jul of year+2
+('REG-2024-003', 'BCE-5677', '2024-08-20', 'Active'),
+-- BCF-4567 (ends 7 -> Jul): registered Aug, month past renewal -> expiry Jul of year+2
+('REG-2024-004', 'BCF-4567', '2024-08-01', 'Active'),
+-- BDG-5672 (ends 2 -> Feb): registered Jan -> expiry Feb of year+1
+('REG-2025-005', 'BDG-5672', '2025-01-05', 'Active'),
+-- CEH-6789 (ends 9 -> Sep): registered Sep -> expiry Sep of year+1
+('REG-2025-006', 'CEH-6789', '2025-09-01', 'Active'),
+-- DFJ-7895 (ends 5 -> May): registered Jun, month past renewal -> expiry May of year+2
+('REG-2024-007', 'DFJ-7895', '2024-06-10', 'Active'),
+-- EGK-8903 (ends 3 -> Mar): registered Feb -> expiry Mar of year+1
+('REG-2025-008', 'EGK-8903', '2025-02-20', 'Active'),
+-- FHL-9016 (ends 6 -> Jun): registered May -> expiry Jun of year+1
+('REG-2024-009', 'FHL-9016', '2024-05-10', 'Active'),
+-- AT-5533 (ends 3 -> Mar): registered Feb -> expiry Mar of year+1
+('REG-2025-010', 'AT-5533',  '2025-02-15', 'Active'),
+-- GJM-0128 (ends 8 -> Aug): registered Jul -> expiry Aug of year+1
+('REG-2025-011', 'GJM-0128', '2025-07-20', 'Active'),
+-- GHK-3453 (ends 3 -> Mar): registered Mar -> expiry Mar of year+1
+('REG-2025-012', 'GHK-3453', '2025-03-01', 'Active'),
+-- ATR-7722 (ends 2 -> Feb): registered Jan -> expiry Feb of year+1
+('REG-2025-013', 'ATR-7722', '2025-01-20', 'Active'),
+-- HKN-1230 (ends 0 -> Oct): expired — owner suspended, stopped renewing
+('REG-2022-014', 'HKN-1230', '2022-09-15', 'Expired'),
+-- FHL-3455 (ends 5 -> May): expired — owner license expired
+('REG-2022-015', 'FHL-3455', '2022-04-10', 'Expired'),
+-- GJM-9018 (ends 8 -> Aug): expired — owner license expired
+('REG-2022-016', 'GJM-9018', '2022-07-20', 'Expired'),
+-- JLP-2345 (ends 5 -> May): expired — owner revoked
+('REG-2023-017', 'JLP-2345', '2023-04-01', 'Expired'),
+-- GH-1231 (ends 1 -> Jan): motorcycle, registered Jan -> expiry Jan of year+1
+('REG-2025-018', 'GH-1231',  '2025-01-15', 'Active'),
+-- AC-7773 (ends 3 -> Mar): motorcycle, registered Feb -> expiry Mar of year+1
+('REG-2025-019', 'AC-7773',  '2025-02-10', 'Active'),
+-- BCF-4567: suspended registration (separate incident)
+('REG-2024-020', 'BCF-4567', '2024-01-05', 'Suspended');
 
-INSERT INTO vehicle (plate_number, make, model, engine_number, chassis_number, vehicle_type, year, color, owner_license_number) VALUES
-('ABK-1234', 'Toyota', 'Vios', 'ENG-00123', 'CHAS-00123', 'Sedan', 2018, 'Black', 'N01-22-123456'),
-('ACM-5678', 'Toyota', 'Fortuner', 'ENG-00234', 'CHAS-00234', 'SUV', 2020, 'White', 'N01-22-123456'),
-('ADR-9012', 'Ford', 'Ranger', 'ENG-00345', 'CHAS-00345', 'Truck', 2019, 'Red', 'N01-22-123456'),
-('AET-3456', 'Mitsubishi', 'Montero', 'ENG-00456', 'CHAS-00456', 'SUV', 2021, 'Silver', 'N02-22-234567'),
-('AFN-7890', 'Honda', 'Civic', 'ENG-00567', 'CHAS-00567', 'Sedan', 2017, 'Black', 'N02-22-234567'),
-('AGP-2345', 'Nissan', 'Urvan', 'ENG-01345', 'CHAS-01345', 'Van', 2019, 'White', 'N08-23-890123'),
-('WBK-6789', 'Hyundai', 'Tucson', 'ENG-00678', 'CHAS-00678', 'SUV', 2022, 'Blue', 'N03-15-345678'),
-('TDR-5566', 'Suzuki', 'Swift', 'ENG-00789', 'CHAS-00789', 'Hatchback', 2015, 'Yellow', 'N04-21-456789'),
-('TCN-7788', 'Kia', 'Rio', 'ENG-00890', 'CHAS-00890', 'Sedan', 2016, 'Green', 'N04-21-456789'),
-('BFM-9900', 'Chevrolet', 'Trailblazer', 'ENG-00901', 'CHAS-00901', 'SUV', 2018, 'Gray', 'N05-18-567890'),
-('PKR-0011', 'Audi', 'R8', 'ENG-01012', 'CHAS-01012', 'Coupe', 2023, 'Red', 'N06-22-678901'),
-('SBN-2233', 'BMW', 'X5', 'ENG-01123', 'CHAS-01123', 'SUV', 2022, 'White', 'N07-22-789012'),
-('SCT-3344', 'BMW', 'M3', 'ENG-01234', 'CHAS-01234', 'Sedan', 2020, 'Blue', 'N07-22-789012'),
-('QDM-6677', 'Mazda', '3', 'ENG-01456', 'CHAS-01456', 'Sedan', 2021, 'Red', 'N09-22-901234'),
-('QER-8899', 'Subaru', 'Crosstrek', 'ENG-01567', 'CHAS-01567', 'SUV', 2023, 'Orange', 'N09-22-901234'),
-('LBK-1100', 'Mercedes', 'S-Class', 'ENG-01678', 'CHAS-01678', 'Sedan', 2023, 'Black', 'N10-10-012345'),
-('LCT-9988', 'Porsche', '911', 'ENG-01789', 'CHAS-01789', 'Coupe', 2022, 'Silver', 'N10-10-012345'),
-('ANK-1234', 'Honda', 'Click 125i', 'ENG-02001', 'CHAS-02001', 'Motorcycle', 2021, 'Red', 'N11-22-112233'),
-('ABT-5678', 'Yamaha', 'Mio Gear', 'ENG-02002', 'CHAS-02002', 'Motorcycle', 2022, 'Blue', 'N12-21-223344'),
-('WMK-9012', 'Honda', 'XRM 125', 'ENG-02003', 'CHAS-02003', 'Motorcycle', 2019, 'Black', 'N13-19-334455'),
-('AXB-2468', 'Hino', 'FB Bus', 'ENG-03001', 'CHAS-03001', 'Bus', 2020, 'Yellow', 'N14-20-445566'),
-('AJP-1357', 'Sarao', 'Jeepney', 'ENG-03002', 'CHAS-03002', 'Jeepney', 2019, 'Multicolor', 'N15-19-556677'),
-('ATK-4411', 'Mitsubishi', 'Strada', 'ENG-04001', 'CHAS-04001', 'Pickup Truck', 2021, 'White', 'N05-18-567890'),
-('ATR-7722', 'Isuzu', 'Giga Trailer', 'ENG-04002', 'CHAS-04002', 'Trailer', 2018, 'Gray', 'N14-20-445566'),
-('ATC-5533', 'Honda', 'TMX Supremo', 'ENG-04003', 'CHAS-04003', 'Tricycle', 2020, 'Blue', 'N15-19-556677');
-
-INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES
-('REG-2026-001', 'ABK-1234', '2026-03-10', 'Active'),
-('REG-2025-002', 'ACM-5678', '2025-08-20', 'Active'),
-('REG-2026-003', 'AET-3456', '2026-01-15', 'Active'),
-('REG-2025-004', 'AFN-7890', '2025-06-30', 'Active'),
-('REG-2022-020', 'WBK-6789', '2022-07-01', 'Expired'),
-('REG-2025-006', 'TCN-7788', '2025-09-05', 'Active'),
-('REG-2023-007', 'TDR-5566', '2023-04-18', 'Expired'),
-('REG-2022-008', 'BFM-9900', '2022-11-30', 'Expired'),
-('REG-2024-009', 'PKR-0011', '2024-07-22', 'Expired'),
-('REG-2024-010', 'ADR-9012', '2024-05-14', 'Suspended'),
-('REG-2025-011', 'ANK-1234', '2025-03-20', 'Expired'),
-('REG-2024-012', 'ABT-5678', '2024-08-10', 'Expired'),
-('REG-2025-013', 'WMK-9012', '2025-06-05', 'Active'),
-('REG-2025-014', 'AXB-2468', '2025-07-15', 'Active'),
-('REG-2025-015', 'AJP-1357', '2025-11-03', 'Active'),
-('REG-2020-016', 'ABK-1234', '2020-01-05', 'Expired'),
-('REG-2021-017', 'ACM-5678', '2021-05-10', 'Expired'),
-('REG-2021-018', 'AET-3456', '2021-09-20', 'Expired'),
-('REG-2022-019', 'AFN-7890', '2022-03-01', 'Expired'),
-('REG-2022-023', 'TDR-5566', '2022-11-10', 'Expired'),
-('REG-2022-024', 'TCN-7788', '2022-12-01', 'Expired'),
-('REG-2019-025', 'BFM-9900', '2019-08-15', 'Expired'),
-('REG-2023-026', 'PKR-0011', '2023-06-15', 'Expired'),
-('REG-2025-020', 'ATK-4411', '2025-04-10', 'Expired'),
-('REG-2023-021', 'ATR-7722', '2023-08-22', 'Expired'),
-('REG-2025-022', 'ATC-5533', '2025-02-14', 'Expired');
-
--- uovr number format: [prefix][YY]-[7-digit sequential]-[1-digit checksum]
--- Prefix codes (issuing authority/region): M=MMDA (Metro Manila), C=Cebu, D=Davao, B=Baguio, I=Iloilo
 INSERT INTO traffic_violation (
-    uovr_number, violation_status, violation_location_city,
+    uovr_number, officer, violation_status, violation_location_city,
     violation_location_region, violation_date,
-    payment_status, license_number, plate_number, registration_number) VALUES
-('M20-0000001-1', 'Resolved', 'Manila', 'NCR', '2020-03-15', 'Paid', 'N01-22-123456', 'ABK-1234', 'REG-2020-016'),
-('M21-0000002-2', 'Resolved', 'Makati', 'NCR', '2021-07-22', 'Paid', 'N01-22-123456', 'ACM-5678', 'REG-2021-017'),
-('M22-0000003-3', 'Dismissed', 'Quezon City', 'NCR', '2022-02-10', 'Waived', 'N01-22-123456', 'ADR-9012', NULL),
-('M21-0000004-4', 'Resolved', 'Pasig', 'NCR', '2021-11-30', 'Paid', 'N02-22-234567', 'AET-3456', 'REG-2021-018'),
-('C22-0000005-5', 'Resolved', 'Cebu City', 'Region VII', '2022-05-18', 'Paid', 'N02-22-234567', 'AFN-7890', 'REG-2022-019'),
-('D22-0000006-6', 'Contested', 'Davao City', 'Region XI', '2022-09-04', 'Unpaid', 'N03-15-345678', 'WBK-6789', 'REG-2022-020'),
-('B23-0000007-7', 'Pending', 'Baguio City', 'CAR', '2023-01-19', 'Unpaid', 'N04-21-456789', 'TDR-5566', 'REG-2022-023'),
-('M23-0000008-8', 'Resolved', 'Taguig', 'NCR', '2023-09-25', 'Paid', 'N04-21-456789', 'TCN-7788', 'REG-2022-024'),
-('I20-0000009-9', 'Resolved', 'Iloilo City', 'Region VI', '2020-06-11', 'Paid', 'N05-18-567890', 'BFM-9900', 'REG-2019-025'),
-('M24-0000010-0', 'Pending', 'Mandaluyong', 'NCR', '2024-02-07', 'Unpaid', 'N06-22-678901', 'PKR-0011', 'REG-2023-026'),
-('M25-0000011-1', 'Pending', 'Manila', 'NCR', '2025-06-15', 'Unpaid', 'N11-22-112233', 'ANK-1234', 'REG-2025-011'),
-('M24-0000012-2', 'Resolved', 'Quezon City', 'NCR', '2024-09-20', 'Paid', 'N12-21-223344', 'ABT-5678', 'REG-2024-012'),
-('C25-0000013-3', 'Pending', 'Cebu City', 'Region VII', '2025-11-03', 'Unpaid', 'N13-19-334455', 'WMK-9012', 'REG-2025-013'),
-('M25-0000014-4', 'Pending', 'Manila', 'NCR', '2025-08-10', 'Unpaid', 'N14-20-445566', 'AXB-2468', 'REG-2025-014'),
-('M25-0000015-5', 'Resolved', 'Quezon City', 'NCR', '2025-11-15', 'Paid', 'N15-19-556677', 'AJP-1357', 'REG-2025-015');
- 
+    payment_status, license_number, plate_number, registration_number
+) VALUES
+('M23-0000001-1', 'PO1 Santos',    'Resolved',  'Manila',      'NCR',        '2023-06-10', 'Paid',   'N01-23-100001', 'ABD-1234',  'REG-2022-001'),
+('M24-0000002-2', 'PO2 Reyes',     'Resolved',  'Manila',      'NCR',        '2024-02-20', 'Waived', 'N01-23-100001', 'AC-7773',   'REG-2025-019'),
+('M22-0000003-3', 'PO3 Garcia',    'Dismissed', 'Quezon City', 'NCR',        '2022-09-18', 'Waived', 'N02-22-200002', 'BCF-4567',  NULL),
+('M24-0000004-4', 'PO1 Bautista',  'Contested', 'Caloocan',    'NCR',        '2024-03-22', 'Unpaid', 'N02-22-200002', 'BDG-5672',  'REG-2025-005'),
+('C25-0000005-5', 'PO2 Uy',        'Pending',   'Cebu City',   'Region VII', '2025-02-14', 'Unpaid', 'N03-24-300003', 'CEH-6789',  'REG-2025-006'),
+('D22-0000006-6', 'PO1 Castillo',  'Resolved',  'Davao City',  'Region XI',  '2022-04-11', 'Paid',   'N04-21-400004', 'DFJ-7895',  'REG-2024-007'),
+('M24-0000007-7', 'PO2 Dela Cruz', 'Pending',   'Pasig',       'NCR',        '2024-05-30', 'Unpaid', 'N05-23-500005', 'EGK-8903',  'REG-2025-008'),
+('M25-0000008-8', 'PO1 Flores',    'Pending',   'Mandaluyong', 'NCR',        '2025-01-18', 'Unpaid', 'N05-23-500005', 'EGK-8903',  'REG-2025-008'),
+('M23-0000009-9', 'PO3 Navarro',   'Resolved',  'Manila',      'NCR',        '2023-08-05', 'Paid',   'N06-21-600006', 'FHL-9016',  'REG-2024-009'),
+('M24-0000010-0', 'PO2 Torres',    'Resolved',  'Manila',      'NCR',        '2024-06-18', 'Paid',   'N07-22-700007', 'GJM-0128',  'REG-2025-011'),
+('M25-0000011-1', 'PO1 Cruz',      'Pending',   'Manila',      'NCR',        '2025-03-10', 'Unpaid', 'N07-22-700007', 'GHK-3453',  'REG-2025-012'),
+('M21-0000012-2', 'PO3 Lim',       'Pending',   'Manila',      'NCR',        '2021-07-14', 'Unpaid', 'N08-20-800008', 'HKN-1230',  'REG-2022-014'),
+('M22-0000013-3', 'PO2 Santos',    'Pending',   'Makati',      'NCR',        '2022-11-03', 'Unpaid', 'N08-20-800008', 'HKN-1230',  'REG-2022-014'),
+-- This 3rd pending insert fires trg_violation_after_insert -> Felix Navarro auto-suspended
+('M24-0000014-4', 'PO1 Reyes',     'Pending',   'Taguig',      'NCR',        '2024-08-19', 'Unpaid', 'N08-20-800008', 'HKN-1230',  'REG-2022-014'),
+('I24-0000015-5', 'PO3 Hernandez', 'Pending',   'Iloilo City', 'Region VI',  '2024-03-22', 'Unpaid', 'N09-19-900009', 'FHL-3455',  NULL),
+('M25-0000016-6', 'PO2 Villanueva','Pending',   'Marikina',    'NCR',        '2025-09-14', 'Unpaid', 'S01-25-121212', 'GH-1231',   'REG-2025-018');
+
 INSERT INTO violation_type (uovr_number, violation_type) VALUES
-
-('M25-0000011-1', 'No safety helmet'),
-('M25-0000011-1', 'Over speeding'),
-('M24-0000012-2', 'No safety helmet'),
-('C25-0000013-3', 'Reckless driving'),
-('M25-0000014-4', 'Smoking inside PUV'),
-('M25-0000014-4', 'Refusal to convey passenger'),
-('M25-0000015-5', 'Overcharging'),
-('M20-0000001-1', 'Over speeding'),
-('M20-0000001-1', 'Reckless driving'),
-('M21-0000002-2', 'Illegal parking'),
-('M22-0000003-3', 'Expired drivers license'),
+('M23-0000001-1', 'Reckless driving'),
+('M23-0000001-1', 'No seatbelt'),
+('M24-0000002-2', 'Noisy muffler'),
 ('M22-0000003-3', 'No drivers license'),
-('M21-0000004-4', 'Disregarding traffic sign/signal'),
-('C22-0000005-5', 'Reckless driving'),
-('C22-0000005-5', 'No seatbelt'),
-('C22-0000005-5', 'Disobedience to traffic officer'),
-('D22-0000006-6', 'No seatbelt'),
-('B23-0000007-7', 'Disobedience to traffic officer'),
-('B23-0000007-7', 'Obstruction to traffic'),
-('M23-0000008-8', 'Over speeding'),
-('I20-0000009-9', 'Expired drivers license'),
-('M24-0000010-0', 'Violation of one way street'),
-('M24-0000010-0', 'Disregarding traffic sign/signal');
-
+('M24-0000004-4', 'Over speeding'),
+('C25-0000005-5', 'Illegal parking (attended)'),
+('D22-0000006-6', 'Violation of loading zones'),
+('M24-0000007-7', 'Disregarding traffic sign/signal'),
+('M25-0000008-8', 'Violation of one way street'),
+('M23-0000009-9', 'Overcharging'),
+('M24-0000010-0', 'Smoking inside PUV'),
+('M24-0000010-0', 'Refusal to convey passenger'),
+('M25-0000011-1', 'Truck ban'),
+('M21-0000012-2', 'Driving under the influence of liquor'),
+('M22-0000013-3', 'Obstruction to traffic'),
+('M24-0000014-4', 'Over speeding'),
+('M24-0000014-4', 'Disobedience to traffic officer'),
+('I24-0000015-5', 'Expired drivers license'),
+('M25-0000016-6', 'No safety helmet');
 
 -- reports to be generated
 
 -- View all registered drivers filtered by: License type, License status, Age range, Sex
-SELECT * FROM v_driver WHERE (@license_type IS NULL OR license_type = @license_type) 
-    AND (@license_status IS NULL OR license_status = @license_status) 
-    AND (@age_min IS NULL OR @age_max IS NULL OR age BETWEEN @age_min 
-    AND @age_max) 
+SELECT * FROM v_driver WHERE (@license_type IS NULL OR license_type = @license_type)
+    AND (@license_status IS NULL OR license_status = @license_status)
+    AND (@age_min IS NULL OR @age_max IS NULL OR age BETWEEN @age_min
+    AND @age_max)
     AND (@sex IS NULL OR sex = @sex);
- 
+
 -- View all vehicles owned by a given driver
 SELECT v.* FROM vehicle v WHERE v.owner_license_number = @license_number;
- 
+
 -- View all vehicles with expired registrations as of a given date
-SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status 
-    FROM vehicle v JOIN vehicle_registration vr ON v.plate_number = vr.plate_number 
+SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
+    FROM vehicle v JOIN vehicle_registration vr ON v.plate_number = vr.plate_number
     WHERE vr.expiration_date < @as_of_date
     AND vr.registration_status = 'Expired';
 
--- View all drivers with expired or suspended licenses.
+-- View all drivers with expired or suspended licenses
 SELECT * FROM driver
 WHERE license_status IN ('Expired', 'Suspended');
- 
--- View all traffic violations committed by a given driver within a specified date range.
--- uses v_violation_summary to include total_fine_amount derived from the fine schedule.
-SELECT * FROM v_violation_summary
-WHERE license_number = @license_number
-AND violation_date BETWEEN @start_date AND @end_date;
- 
--- View the total number of violations per violation type for a given year.
+
+-- View all traffic violations committed by a given driver within a specified date range
+SELECT
+    tv.uovr_number,
+    tv.officer,
+    tv.violation_status,
+    tv.violation_location_city,
+    tv.violation_location_region,
+    tv.violation_date,
+    tv.payment_status,
+    tv.plate_number,
+    tv.registration_number,
+    vt.violation_type
+FROM traffic_violation tv
+JOIN violation_type vt ON tv.uovr_number = vt.uovr_number
+WHERE tv.license_number = @license_number
+AND tv.violation_date BETWEEN @start_date AND @end_date;
+
+-- View the total number of violations per violation type for a given year
 SELECT vt.violation_type, COUNT(*) AS total_violations FROM violation_type vt
-JOIN traffic_violation tv 
+JOIN traffic_violation tv
 ON vt.uovr_number = tv.uovr_number
 WHERE YEAR(tv.violation_date) = @year
 GROUP BY vt.violation_type
 ORDER BY total_violations DESC;
- 
--- View all vehicles involved in violations within a given city or region.
+
+-- View all vehicles involved in violations within a given city or region
 SELECT DISTINCT v.* FROM vehicle v
-JOIN traffic_violation tv 
+JOIN traffic_violation tv
 ON v.plate_number = tv.plate_number
 WHERE tv.violation_location_city = @city
 OR tv.violation_location_region = @region;
 
 -- View all vehicles of each driver
-SELECT d.license_number, d.license_type, CONCAT(d.first_name, ' ', d.last_name) AS full_name, 
-v.plate_number, v.make, v.model, v.year, v.vehicle_type 
+SELECT d.license_number, d.license_type, CONCAT(d.first_name, ' ', d.last_name) AS full_name,
+v.plate_number, v.make, v.model, v.year, v.vehicle_type
 FROM driver d LEFT JOIN vehicle v on d.license_number = v.owner_license_number
 ORDER BY d.license_number;
 
