@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import pool from 'config/mariadb';
-import { VDriver, Driver } from './driver.model';
+import { VDriver, Driver } from '@shared/types/type';
 
 export const addDriver = async (req: Request, res: Response) => {
     const data: Driver = req.body;
