@@ -8,6 +8,8 @@ const pool = mariadb.createPool({
     user: process.env.MARIADB_USER || 'root',
     password: process.env.MARIADB_PASSWORD,
     database: process.env.MARIADB_DATABASE,
+    insertIdAsNumber: true,
+    bigIntAsNumber: true,
     connectionLimit: 5
 });
 

@@ -8,7 +8,7 @@ export const addDriver = async (req: Request, res: Response) => {
 
     try {
         conn = await pool.getConnection();
-        const query = 'INSERT INTO drivers (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO driver (license_number, first_name, last_name, middle_name, birth_date, sex, address, license_type, license_status, license_issue_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         const values= [
             data.license_number,
@@ -24,7 +24,7 @@ export const addDriver = async (req: Request, res: Response) => {
         ];  
         const result = await conn.query(query, values);
 
-        res.status(201).json({ message: 'Driver added successfully', driverId: result.insertId });
+        res.status(201).json({ message: 'Driver added successfully', driverId: Number(result.insertId) });
     } catch (error) {
         console.error('Error adding driver:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -80,7 +80,7 @@ export const deleteDriver = async (req: Request, res: Response) => {
         if(result.affectedRows === 0) {
             return res.status(404).json({ message: 'Driver not found' });
         }
-
+        res.status(200).json({ message: 'Driver deleted successfully' });
     } catch (error) {
         console.error('Error deleting driver:', error);
         return res.status(500).json({ message: 'Internal server error' });
