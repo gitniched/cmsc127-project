@@ -628,7 +628,7 @@ SELECT v.* FROM vehicle v WHERE v.owner_license_number = @license_number;
 -- View all vehicles with expired registrations as of a given date
 SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
     FROM vehicle v JOIN vehicle_registration vr ON v.plate_number = vr.plate_number
-    WHERE vr.expiration_date < 2024-05-01
+    WHERE vr.expiration_date < @as_of_date
     AND vr.registration_status = 'Expired';
 
 -- View all drivers with expired or suspended licenses
