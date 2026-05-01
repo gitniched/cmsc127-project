@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import driverRoutes from './features/drivers/driver.route';
+import driverRouter from './features/drivers/driver.route';
+import vehicleRouter from './features/vehicles/vehicle.route';
 
 dotenv.config();
 
@@ -9,7 +10,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-app.use('/drivers', driverRoutes);
+app.use('/drivers', driverRouter);
+app.use('/vehicles', vehicleRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

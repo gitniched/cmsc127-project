@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { addDriver, updateDriver, deleteDriver, getDriver } from './driver.controllers';
 
-const router = Router();
+const driverRouter = Router();
 
-router.post('/add-driver', addDriver);
-router.put('/update-driver/:license_number', updateDriver);
-router.delete('/delete-driver/:license_number', deleteDriver);
-router.get('/get-drivers', getDriver);
+driverRouter.post('/add-driver', addDriver);
+driverRouter.put('/update-driver/:license_number', updateDriver);
+driverRouter.delete('/delete-driver/:license_number', deleteDriver);
+driverRouter.get('/get-drivers', getDriver);
 
-export default router;
+export default driverRouter;
