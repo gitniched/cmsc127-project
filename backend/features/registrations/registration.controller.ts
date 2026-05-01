@@ -77,6 +77,7 @@ export const getRegistration = async (req: Request, res: Response) => {
             query += ' WHERE ' + filteredWith.join(' AND ');
         }
 
+        // to be tested
         const validSortColumns = ['registration_date', 'registration_status', 'registration_number', 'plate_number'];
         const sortBy = queryParams.sortBy as string;
         const order = (queryParams.order as string)?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
