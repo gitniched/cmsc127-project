@@ -29,7 +29,7 @@ export const addRegistration = async(req:Request, res: Response) => {
     }
 };
 
-export const updateRegistration = async (req: Request, res: Response) => {
+export const renewRegistration = async (req: Request, res: Response) => {
     const plate_number = req.params.plate_number;
     const { registration_date } = req.body;
     let conn;
@@ -96,3 +96,5 @@ export const getRegistration = async (req: Request, res: Response) => {
         if (conn) conn.release();
     }
 };
+
+export default{ getRegistration, renewRegistration, addRegistration };
