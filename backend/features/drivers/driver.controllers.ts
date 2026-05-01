@@ -24,7 +24,6 @@ export const addDriver = async (req: Request, res: Response) => {
         ];  
         const result = await conn.query(query, values);
 
-        res.status(201).json({ message: 'Driver added successfully', driverId: Number(result.insertId) });
     } catch (error) {
         console.error('Error adding driver:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -111,6 +110,14 @@ export const getDriver = async (req: Request, res: Response) => {
 
         if (filteredWith.length > 0) {
             query += ' WHERE ' + filteredWith.join(' AND ');
+        }
+
+        const validSortColumns = ['license_number',  'age', ' license_issue_date', 'birth_date'];
+        const sortBy = queryParams.sortBy as string;
+        const order = (queryParams.order as string)?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+        if (sortBy && validSortColumns.includes(sortBy)) {
+            query += ` ORDER BY ${sortBy} ${order}`;
         }
 
         const rows: VDriver[] = await conn.query(query, values);

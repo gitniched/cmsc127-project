@@ -97,6 +97,7 @@ export const getVehicleByOwnerDriverLicense = async (req: Request, res: Response
         if(results.length === 0) {
             return res.status(404).json({ message: 'No vehicles found for the given owner license number' });
         }
+        
 
         res.status(200).json(results);
     } catch (error) {
