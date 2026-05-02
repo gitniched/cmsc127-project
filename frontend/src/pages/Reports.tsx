@@ -1,14 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Layout from '../components/ui/Layout';
 import ReportRunner, { defaultParams } from '../components/reports/ReportRunner';
 import ReportTable from '../components/reports/ReportTable';
 import type { ReportId, ReportParams, Report1Params, Report2Params, Report3Params, Report5Params, Report6Params, Report7Params } from '../components/reports/ReportRunner';
-import type { ReportRow, Report1Row, Report2Row, Report3Row, Report4Row, Report5Row, Report6Row, Report7Row } from '../components/reports/ReportTable';
-import { mockDrivers } from '../mock/drivers';
-import { mockVehicles } from '../mock/vehicles';
-import { mockRegistrations } from '../mock/registrations';
-import { mockViolations } from '../mock/violations';
-import { LicenseStatus } from '../constants/enums';
+import type { ReportRow } from '../components/reports/ReportTable';
+import {
+  useReport1,
+  useReport2,
+  useReport3,
+  useReport4,
+  useReport5,
+  useReport6,
+  useReport7,
+} from '../hooks/useReports';
+import { useState } from 'react';
 
 const REPORT_TABS: { id: ReportId; label: string }[] = [
   { id: 1, label: 'Drivers' },
@@ -22,96 +27,6 @@ const REPORT_TABS: { id: ReportId; label: string }[] = [
 
 const AUTO_RUN_REPORTS: ReportId[] = [1, 3, 4, 6];
 
-function runReport1(params: Report1Params): Report1Row[] {
-  return mockDrivers.filter((d) => {
-    if (params.license_type   && d.license_type   !== params.license_type)   return false;
-    if (params.license_status && d.license_status !== params.license_status) return false;
-    if (params.sex            && d.sex            !== params.sex)            return false;
-    if (params.age_min !== '' && d.age < params.age_min)                     return false;
-    if (params.age_max !== '' && d.age > params.age_max)                     return false;
-    return true;
-  });
-}
-
-function runReport2(params: Report2Params): Report2Row[] {
-  return mockVehicles.filter((v) => v.owner_license_number === params.license_number);
-}
-
-function runReport3(params: Report3Params): Report3Row[] {
-  const asOf = new Date(params.as_of_date);
-  const expiredPlates = new Set(
-    mockRegistrations
-      .filter((r) => new Date(r.expiration_date) < asOf)
-      .map((r) => r.plate_number)
-  );
-  const latestExpiry: Record<string, string> = {};
-  mockRegistrations.forEach((r) => {
-    if (expiredPlates.has(r.plate_number)) {
-      if (!latestExpiry[r.plate_number] || r.expiration_date > latestExpiry[r.plate_number]) {
-        latestExpiry[r.plate_number] = r.expiration_date;
-      }
-    }
-  });
-  return mockVehicles
-    .filter((v) => expiredPlates.has(v.plate_number))
-    .map((v) => ({ ...v, expired_registration_date: latestExpiry[v.plate_number] ?? '' }));
-}
-
-function runReport4(): Report4Row[] {
-  return mockDrivers.filter(
-    (d) => d.license_status === LicenseStatus.Expired || d.license_status === LicenseStatus.Suspended
-  );
-}
-
-function runReport5(params: Report5Params): Report5Row[] {
-  return mockViolations.filter((v) => {
-    if (v.license_number !== params.license_number) return false;
-    if (params.start_date && v.violation_date < params.start_date) return false;
-    if (params.end_date   && v.violation_date > params.end_date)   return false;
-    return true;
-  });
-}
-
-function runReport6(params: Report6Params): Report6Row[] {
-  if (params.year === '') return [];
-  const year = String(params.year);
-  const counts: Record<string, { total_count: number; total_fine: number }> = {};
-  mockViolations
-    .filter((v) => v.violation_date.startsWith(year))
-    .forEach((v) => {
-      v.violation_types.forEach((vt) => {
-        if (!counts[vt.violation_type]) {
-          counts[vt.violation_type] = { total_count: 0, total_fine: 0 };
-        }
-        counts[vt.violation_type].total_count += 1;
-        counts[vt.violation_type].total_fine  += vt.base_fine;
-      });
-    });
-  return Object.entries(counts).map(([violation_type, agg]) => ({
-    violation_type,
-    ...agg,
-  }));
-}
-
-function runReport7(params: Report7Params): Report7Row[] {
-  const city   = params.city.toLowerCase();
-  const region = params.region.toLowerCase();
-  const violationsByPlate: Record<string, number> = {};
-  mockViolations
-    .filter((v) => {
-      const matchCity   = city   ? v.violation_location_city.toLowerCase().includes(city)     : false;
-      const matchRegion = region ? v.violation_location_region.toLowerCase().includes(region) : false;
-      return matchCity || matchRegion;
-    })
-    .forEach((v) => {
-      violationsByPlate[v.plate_number] = (violationsByPlate[v.plate_number] ?? 0) + 1;
-    });
-  const plates = new Set(Object.keys(violationsByPlate));
-  return mockVehicles
-    .filter((v) => plates.has(v.plate_number))
-    .map((v) => ({ ...v, violation_count: violationsByPlate[v.plate_number] }));
-}
-
 function buildEmptyMessage(reportId: ReportId, params: ReportParams): string {
   switch (reportId) {
     case 1: {
@@ -120,11 +35,9 @@ function buildEmptyMessage(reportId: ReportId, params: ReportParams): string {
       if (p.license_type)   parts.push(`type "${p.license_type}"`);
       if (p.license_status) parts.push(`status "${p.license_status}"`);
       if (p.sex)            parts.push(p.sex === 'M' ? 'sex "Male"' : 'sex "Female"');
-      if (p.age_min !== '' || p.age_max !== '') {
-        if (p.age_min !== '' && p.age_max !== '') parts.push(`age ${p.age_min}–${p.age_max}`);
-        else if (p.age_min !== '')                parts.push(`age ≥ ${p.age_min}`);
-        else                                      parts.push(`age ≤ ${p.age_max}`);
-      }
+      if (p.age_min !== undefined && p.age_max !== undefined) parts.push(`age ${p.age_min}–${p.age_max}`);
+      else if (p.age_min !== undefined)                       parts.push(`age ≥ ${p.age_min}`);
+      else if (p.age_max !== undefined)                       parts.push(`age ≤ ${p.age_max}`);
       return parts.length > 0
         ? `No drivers found matching ${parts.join(', ')}.`
         : 'No drivers found.';
@@ -161,74 +74,76 @@ function buildEmptyMessage(reportId: ReportId, params: ReportParams): string {
   }
 }
 
-interface TabState {
-  params:   ReportParams;
-  rows:     ReportRow[];
-  hasRun:   boolean;
-  loading:  boolean;
-}
-
-function emptyTabState(reportId: ReportId): TabState {
-  return { params: defaultParams(reportId), rows: [], hasRun: false, loading: false };
-}
-
-const initialTabState = (): Record<ReportId, TabState> => ({
-  1: emptyTabState(1),
-  2: emptyTabState(2),
-  3: emptyTabState(3),
-  4: emptyTabState(4),
-  5: emptyTabState(5),
-  6: emptyTabState(6),
-  7: emptyTabState(7),
-});
-
-function executeReport(reportId: ReportId, params: ReportParams): ReportRow[] {
-  switch (reportId) {
-    case 1: return runReport1(params as Report1Params);
-    case 2: return runReport2(params as Report2Params);
-    case 3: return runReport3(params as Report3Params);
-    case 4: return runReport4();
-    case 5: return runReport5(params as Report5Params);
-    case 6: return runReport6(params as Report6Params);
-    case 7: return runReport7(params as Report7Params);
-  }
-}
-
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportId>(1);
-  const [tabState, setTabState]   = useState<Record<ReportId, TabState>>(initialTabState);
-  const autoRanRef                = useRef<Set<ReportId>>(new Set());
+
+  const [params, setParams] = useState<Record<ReportId, ReportParams>>({
+    1: defaultParams(1),
+    2: defaultParams(2),
+    3: defaultParams(3),
+    4: defaultParams(4),
+    5: defaultParams(5),
+    6: defaultParams(6),
+    7: defaultParams(7),
+  });
+
+  const [hasRun, setHasRun] = useState<Record<ReportId, boolean>>({
+    1: false, 2: false, 3: false, 4: false,
+    5: false, 6: false, 7: false,
+  });
+
+  const r1 = useReport1();
+  const r2 = useReport2();
+  const r3 = useReport3();
+  const r4 = useReport4();
+  const r5 = useReport5();
+  const r6 = useReport6();
+  const r7 = useReport7();
+
+  const reports = { 1: r1, 2: r2, 3: r3, 4: r4, 5: r5, 6: r6, 7: r7 } as const;
+
+  const autoRanRef = useRef<Set<ReportId>>(new Set());
 
   useEffect(() => {
     if (AUTO_RUN_REPORTS.includes(activeTab) && !autoRanRef.current.has(activeTab)) {
       autoRanRef.current.add(activeTab);
-      handleRun(activeTab, tabState[activeTab].params);
+      handleRun(activeTab, params[activeTab]);
     }
   }, [activeTab]);
 
-  function handleRun(reportId: ReportId, params: ReportParams) {
-    setTabState((prev) => ({
-      ...prev,
-      [reportId]: { ...prev[reportId], params, loading: true },
-    }));
-
-    setTimeout(() => {
-      const rows = executeReport(reportId, params);
-      setTabState((prev) => ({
-        ...prev,
-        [reportId]: { ...prev[reportId], rows, hasRun: true, loading: false },
-      }));
-    }, 200);
+  function handleRun(reportId: ReportId, p: ReportParams) {
+    setHasRun((prev) => ({ ...prev, [reportId]: true }));
+    switch (reportId) {
+      case 1: {
+        const p1 = p as Report1Params;
+        r1.run({
+          ...p1,
+          age_min: p1.age_min === '' ? undefined : p1.age_min,
+          age_max: p1.age_max === '' ? undefined : p1.age_max,
+        });
+        break;
+      }
+      case 2: r2.run(p as Report2Params); break;
+      case 3: r3.run(p as Report3Params); break;
+      case 4: r4.run(); break;
+      case 5: r5.run(p as Report5Params); break;
+      case 6: {
+        const p6 = p as Report6Params;
+        if (p6.year === '') break;
+        r6.run({ year: p6.year });
+        break;
+      }
+      case 7: r7.run(p as Report7Params); break;
+    }
   }
 
-  function handleParamsChange(reportId: ReportId, params: ReportParams) {
-    setTabState((prev) => ({
-      ...prev,
-      [reportId]: { ...prev[reportId], params },
-    }));
+  function handleParamsChange(reportId: ReportId, p: ReportParams) {
+    setParams((prev) => ({ ...prev, [reportId]: p }));
   }
 
-  const current = tabState[activeTab];
+  const current      = reports[activeTab];
+  const currentRows  = current.rows as ReportRow[];
+  const currentHasRun = hasRun[activeTab];
 
   return (
     <Layout>
@@ -240,7 +155,7 @@ export default function Reports() {
 
         <div className="flex gap-1 border-b border-border overflow-x-auto">
           {REPORT_TABS.map((tab) => {
-            const state = tabState[tab.id];
+            const state = reports[tab.id];
             return (
               <button
                 key={tab.id}
@@ -255,7 +170,7 @@ export default function Reports() {
               >
                 <span className="text-ink-faint mr-0.5 text-xs">{tab.id}</span>
                 {tab.label}
-                {state.hasRun && (
+                {hasRun[tab.id] && !state.loading && (
                   <span
                     className={[
                       'inline-flex items-center justify-center rounded-full px-1.5 min-w-[1.25rem] h-5 text-xs font-semibold',
@@ -275,11 +190,17 @@ export default function Reports() {
         <div className="flex flex-col gap-6">
           <ReportRunner
             reportId={activeTab}
-            params={current.params}
-            onParamsChange={(params) => handleParamsChange(activeTab, params)}
-            onRun={(params) => handleRun(activeTab, params)}
+            params={params[activeTab]}
+            onParamsChange={(p) => handleParamsChange(activeTab, p)}
+            onRun={(p) => handleRun(activeTab, p)}
             loading={current.loading}
           />
+
+          {current.error && (
+            <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+              {current.error}
+            </div>
+          )}
 
           {current.loading && (
             <div className="flex items-center justify-center py-12 text-sm text-ink-muted gap-2">
@@ -296,22 +217,25 @@ export default function Reports() {
             </div>
           )}
 
-          {!current.loading && current.hasRun && (
+          {!current.loading && !current.error && currentHasRun && (
             <ReportTable
               reportId={activeTab}
-              rows={current.rows}
-              emptyMessage={buildEmptyMessage(activeTab, current.params)}
+              rows={currentRows}
+              emptyMessage={buildEmptyMessage(activeTab, params[activeTab])}
             />
           )}
 
-          {!current.loading && !current.hasRun && !AUTO_RUN_REPORTS.includes(activeTab) && (
+          {!current.loading && !currentHasRun && !AUTO_RUN_REPORTS.includes(activeTab) && (
             <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-ink-faint">
                 <rect x="4" y="6" width="24" height="20" rx="2" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M4 11h24" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M10 17h12M10 21h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
-              <p className="text-sm text-ink-muted">Fill in the parameters above and click <span className="font-medium text-ink">Run Report</span> to see results.</p>
+              <p className="text-sm text-ink-muted">
+                Fill in the parameters above and click{' '}
+                <span className="font-medium text-ink">Run Report</span> to see results.
+              </p>
             </div>
           )}
         </div>
