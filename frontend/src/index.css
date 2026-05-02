@@ -30,8 +30,9 @@
   --color-ink-muted:  #475569;
   --color-ink-faint:  #94a3b8;
  
-  --font-sans: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-sans: 'Instrument Sans', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --font-display: 'Syne', sans-serif;
  
   --radius-sm:  4px;
   --radius-md:  8px;
@@ -59,6 +60,16 @@
   body {
     margin: 0;
     min-height: 100vh;
+    background-image: url('/src/assets/background.gif');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
 
   :focus-visible {
