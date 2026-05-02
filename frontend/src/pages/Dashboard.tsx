@@ -75,9 +75,40 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-8">
+      <style>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+          border-radius: 12px;
+        }
+        .glass-card-header {
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .glass-card-footer {
+          border-top: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .glass-divider {
+          border-top: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .glass-quick-link {
+          background: rgba(255, 255, 255, 0.35);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          border-radius: 10px;
+          transition: background 120ms ease, border-color 120ms ease;
+        }
+        .glass-quick-link:hover {
+          background: rgba(255, 255, 255, 0.55);
+          border-color: rgba(147, 197, 253, 0.8);
+        }
+      `}</style>
+      <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-8">
 
-        <div>
+        <div className="glass-card px-6 py-4 self-start">
           <h1 className="text-2xl font-bold text-ink tracking-tight">Dashboard</h1>
           <p className="text-sm text-ink-muted mt-1">
             Overview of drivers, vehicles, registrations, and violations.
@@ -110,7 +141,9 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-ink">Quick Links</h2>
+              <div className="glass-card px-4 py-2 self-start">
+                <h2 className="text-base font-semibold text-ink">Quick Links</h2>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Drivers',    route: ROUTES.drivers    },
@@ -122,9 +155,8 @@ export default function Dashboard() {
                     key={route}
                     onClick={() => navigate(route)}
                     className={[
-                      'bg-surface border border-border rounded-lg px-4 py-4',
+                      'glass-quick-link px-4 py-4',
                       'text-sm font-medium text-ink text-center',
-                      'hover:bg-surface-inset hover:border-brand-300 transition-colors duration-150',
                     ].join(' ')}
                   >
                     {label}
@@ -135,8 +167,8 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              <div className="bg-surface border border-border rounded-lg flex flex-col">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+              <div className="glass-card flex flex-col">
+                <div className="px-5 py-4 glass-card-header flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-ink">Expired Licenses</h2>
                   <span className="text-xs font-medium text-danger-600 bg-danger-50 ring-1 ring-danger-200 px-2 py-0.5 rounded">
                     {expiredLicenseDrivers.length}
@@ -145,7 +177,7 @@ export default function Dashboard() {
                 {expiredLicenseDrivers.length === 0 ? (
                   <p className="px-5 py-6 text-sm text-ink-faint">No expired licenses.</p>
                 ) : (
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-y divide-white/40">
                     {expiredLicenseDrivers.map((driver) => (
                       <li key={driver.license_number} className="px-5 py-3 flex items-center justify-between gap-3">
                         <div className="flex flex-col gap-0.5 min-w-0">
@@ -161,13 +193,13 @@ export default function Dashboard() {
                     ))}
                   </ul>
                 )}
-                <div className="px-5 py-3 border-t border-border mt-auto">
+                <div className="px-5 py-3 glass-card-footer mt-auto">
                   <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.drivers)}>View all drivers →</Button>
                 </div>
               </div>
 
-              <div className="bg-surface border border-border rounded-lg flex flex-col">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+              <div className="glass-card flex flex-col">
+                <div className="px-5 py-4 glass-card-header flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-ink">Expired Registrations</h2>
                   <span className="text-xs font-medium text-danger-600 bg-danger-50 ring-1 ring-danger-200 px-2 py-0.5 rounded">
                     {expiredRegistrationVehicles.length}
@@ -176,7 +208,7 @@ export default function Dashboard() {
                 {expiredRegistrationVehicles.length === 0 ? (
                   <p className="px-5 py-6 text-sm text-ink-faint">No expired registrations.</p>
                 ) : (
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-y divide-white/40">
                     {expiredRegistrationVehicles.map((v) => (
                       <li key={v.plate_number} className="px-5 py-3 flex items-center justify-between gap-3">
                         <div className="flex flex-col gap-0.5 min-w-0">
@@ -192,13 +224,13 @@ export default function Dashboard() {
                     ))}
                   </ul>
                 )}
-                <div className="px-5 py-3 border-t border-border mt-auto">
+                <div className="px-5 py-3 glass-card-footer mt-auto">
                   <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.vehicles)}>View all vehicles →</Button>
                 </div>
               </div>
 
-              <div className="bg-surface border border-border rounded-lg flex flex-col">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+              <div className="glass-card flex flex-col">
+                <div className="px-5 py-4 glass-card-header flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-ink">Approaching Suspension</h2>
                   <span className="text-xs font-medium text-amber-700 bg-amber-50 ring-1 ring-amber-200 px-2 py-0.5 rounded">
                     {approachingSuspensionDrivers.length}
@@ -207,7 +239,7 @@ export default function Dashboard() {
                 {approachingSuspensionDrivers.length === 0 ? (
                   <p className="px-5 py-6 text-sm text-ink-faint">No drivers approaching suspension.</p>
                 ) : (
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-y divide-white/40">
                     {approachingSuspensionDrivers.map((d) => (
                       <li key={d.license_number} className="px-5 py-3 flex items-center justify-between gap-3">
                         <div className="flex flex-col gap-0.5 min-w-0">
@@ -221,7 +253,7 @@ export default function Dashboard() {
                     ))}
                   </ul>
                 )}
-                <div className="px-5 py-3 border-t border-border mt-auto">
+                <div className="px-5 py-3 glass-card-footer mt-auto">
                   <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.violations)}>View all violations →</Button>
                 </div>
               </div>
