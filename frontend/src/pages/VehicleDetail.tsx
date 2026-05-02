@@ -8,81 +8,99 @@ import VehicleForm from '../components/vehicles/VehicleForm';
 import RegistrationTable from '../components/registrations/RegistrationTable';
 import RegistrationForm from '../components/registrations/RegistrationForm';
 import ViolationTable from '../components/violations/ViolationTable';
-import { mockVehicles } from '../mock/vehicles';
-import { mockDrivers } from '../mock/drivers';
-import { mockRegistrations } from '../mock/registrations';
-import { mockViolations } from '../mock/violations';
-import type { VehicleWithOwner, CreateVehicleDTO } from '../types/vehicle';
-import type { CreateRegistrationDTO } from '../types/registration';
-import type { VehicleRegistration } from '../types/registration';
-import { getFullName } from '../types/driver';
+import { useVehicle } from '../hooks/useVehicles';
+import { useDrivers } from '../hooks/useDrivers';
+import { useRegistrations } from '../hooks/useRegistrations';
+import { useViolations } from '../hooks/useViolations';
+import type { CreateVehicleDTO } from '../types/vehicle.types';
+import type { CreateRegistrationDTO } from '../types/registration.types';
+import { getFullName } from '../types/driver.types';
 import { buildRoute, ROUTES } from '../constants/routes';
 
 export default function VehicleDetail() {
   const { plateNumber } = useParams<{ plateNumber: string }>();
   const navigate        = useNavigate();
 
-  const [vehicles, setVehicles]           = useState(mockVehicles);
-  const [registrations, setRegistrations] = useState<VehicleRegistration[]>(mockRegistrations);
-  const [editOpen, setEditOpen]           = useState(false);
-  const [regFormOpen, setRegFormOpen]     = useState(false);
-  const [deleteOpen, setDeleteOpen]       = useState(false);
+  const { vehicle, loading, error, refetch: refetchVehicle, edit: editVehicle, remove: removeVehicle } =
+    useVehicle(plateNumber);
+  const { drivers }    = useDrivers();
+  const { registrations, loading: regsLoading, error: regsError, add: addRegistration } =
+    useRegistrations(plateNumber ? { plate_number: plateNumber } : undefined);
+  const { violations, loading: violationsLoading, error: violationsError } =
+    useViolations(plateNumber ? { plate_number: plateNumber } : undefined);
 
-  const vehicle = vehicles.find((v) => v.plate_number === plateNumber);
+  const [editOpen, setEditOpen]       = useState(false);
+  const [regFormOpen, setRegFormOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen]   = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [saveError, setSaveError]     = useState<string | null>(null);
 
-  if (!vehicle) {
+  if (loading) {
     return (
       <Layout>
-        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
-          <p className="text-sm text-ink-muted">Vehicle not found.</p>
-          <Button variant="ghost" onClick={() => navigate(ROUTES.vehicles)}>
-            ← Back to Vehicles
-          </Button>
+        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex items-center gap-2 text-sm text-ink-muted">
+          <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+          Loading vehicle…
         </div>
       </Layout>
     );
   }
 
-  const vehicleRegistrations = registrations
-    .filter((r) => r.plate_number === vehicle.plate_number)
-    .sort((a, b) => b.registration_date.localeCompare(a.registration_date));
-
-  const vehicleViolations = mockViolations.filter(
-    (v) => v.plate_number === vehicle.plate_number
-  );
-
-  const owner = mockDrivers.find((d) => d.license_number === vehicle.owner_license_number);
-
-  function handleEditSubmit(data: CreateVehicleDTO) {
-    const driver = mockDrivers.find((d) => d.license_number === data.owner_license_number);
-    setVehicles((prev) =>
-      prev.map((v) =>
-        v.plate_number === data.plate_number
-          ? { ...v, ...data, owner_name: driver ? getFullName(driver) : data.owner_license_number }
-          : v
-      )
+  if (error || !vehicle) {
+    return (
+      <Layout>
+        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
+          <p className="text-sm text-danger-600">{error ?? 'Vehicle not found.'}</p>
+          <Button variant="ghost" onClick={() => navigate(ROUTES.vehicles)}>← Back to Vehicles</Button>
+        </div>
+      </Layout>
     );
-    setEditOpen(false);
   }
 
-  function handleAddRegistration(data: CreateRegistrationDTO) {
-    const newReg: VehicleRegistration = {
-      ...data,
-      expiration_date: '',
-    };
-    setRegistrations((prev) => [newReg, ...prev]);
-    setRegFormOpen(false);
+  const owner = drivers.find((d) => d.license_number === vehicle.owner_license_number);
+
+  async function handleEditSubmit(data: CreateVehicleDTO) {
+    setSaveError(null);
+    setSaving(true);
+    try {
+      await editVehicle(data);
+      await refetchVehicle();
+      setEditOpen(false);
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to update vehicle');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleDelete() {
-    setVehicles((prev) => prev.filter((v) => v.plate_number !== vehicle!.plate_number));
-    navigate(ROUTES.vehicles);
+  async function handleAddRegistration(data: CreateRegistrationDTO) {
+    setSaveError(null);
+    setSaving(true);
+    try {
+      await addRegistration(data);
+      setRegFormOpen(false);
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to add registration');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const vehicleAsWithOwner: VehicleWithOwner = {
-    ...vehicle,
-    owner_name: vehicle.owner_name ?? (owner ? getFullName(owner) : vehicle.owner_license_number),
-  };
+  async function handleDelete() {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await removeVehicle();
+      navigate(ROUTES.vehicles);
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to delete vehicle');
+      setSaving(false);
+      setDeleteOpen(false);
+    }
+  }
 
   return (
     <Layout>
@@ -95,47 +113,36 @@ export default function VehicleDetail() {
         </div>
 
         <div className="bg-surface border border-border rounded-lg p-6 flex flex-col gap-6">
-
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-bold text-ink tracking-tight">
-                {vehicle.make} {vehicle.model}
-              </h1>
+              <h1 className="text-2xl font-bold text-ink tracking-tight">{vehicle.make} {vehicle.model}</h1>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-xs text-ink-muted bg-surface-inset border border-border px-2 py-0.5 rounded">
-                  {vehicle.plate_number}
-                </span>
+                <span className="font-mono text-xs text-ink-muted bg-surface-inset border border-border px-2 py-0.5 rounded">{vehicle.plate_number}</span>
                 <Badge status={vehicle.vehicle_type} />
                 <span className="text-xs text-ink-muted">{vehicle.year}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="ghost" onClick={() => setEditOpen(true)}>Edit Vehicle</Button>
+              <Button variant="ghost" onClick={() => { setSaveError(null); setEditOpen(true); }}>Edit Vehicle</Button>
               <Button variant="primary" onClick={() => setRegFormOpen(true)}>Add Registration</Button>
               <Button variant="danger" onClick={() => setDeleteOpen(true)}>Delete Vehicle</Button>
             </div>
           </div>
 
+          {saveError && (
+            <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+              {saveError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 border-t border-border pt-5">
-            <div>
-              <p className="text-xs font-medium text-ink-muted mb-0.5">Engine Number</p>
-              <p className="text-sm font-mono text-ink">{vehicle.engine_number}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-ink-muted mb-0.5">Chassis Number</p>
-              <p className="text-sm font-mono text-ink">{vehicle.chassis_number}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-ink-muted mb-0.5">Color</p>
-              <p className="text-sm text-ink">{vehicle.color}</p>
-            </div>
+            <div><p className="text-xs font-medium text-ink-muted mb-0.5">Engine Number</p><p className="text-sm font-mono text-ink">{vehicle.engine_number}</p></div>
+            <div><p className="text-xs font-medium text-ink-muted mb-0.5">Chassis Number</p><p className="text-sm font-mono text-ink">{vehicle.chassis_number}</p></div>
+            <div><p className="text-xs font-medium text-ink-muted mb-0.5">Color</p><p className="text-sm text-ink">{vehicle.color}</p></div>
             <div>
               <p className="text-xs font-medium text-ink-muted mb-0.5">Owner</p>
               {owner ? (
-                <Link
-                  to={buildRoute.driverProfile(owner.license_number)}
-                  className="text-sm text-brand-600 hover:underline"
-                >
+                <Link to={buildRoute.driverProfile(owner.license_number)} className="text-sm text-brand-600 hover:underline">
                   {getFullName(owner)}
                 </Link>
               ) : (
@@ -145,28 +152,58 @@ export default function VehicleDetail() {
           </div>
         </div>
 
-        <RegistrationTable
-          registrations={vehicleRegistrations}
-          onAdd={() => setRegFormOpen(true)}
-        />
+        {regsLoading ? (
+          <div className="flex items-center gap-2 text-sm text-ink-muted py-2">
+            <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Loading registrations…
+          </div>
+        ) : regsError ? (
+          <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+            {regsError}
+          </div>
+        ) : (
+          <RegistrationTable
+            registrations={registrations}
+            onAdd={() => setRegFormOpen(true)}
+          />
+        )}
 
         <div className="flex flex-col gap-3">
           <h2 className="text-base font-semibold text-ink">Violations</h2>
-          <ViolationTable
-            violations={vehicleViolations}
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
+          {violationsLoading ? (
+            <div className="flex items-center gap-2 text-sm text-ink-muted py-2">
+              <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Loading violations…
+            </div>
+          ) : violationsError ? (
+            <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+              {violationsError}
+            </div>
+          ) : (
+            <ViolationTable
+              violations={violations}
+              onEdit={() => {}}
+              onDelete={() => {}}
+            />
+          )}
         </div>
 
       </div>
 
       <VehicleForm
         open={editOpen}
-        onClose={() => setEditOpen(false)}
+        onClose={() => { setSaveError(null); setEditOpen(false); }}
         onSubmit={handleEditSubmit}
-        initial={vehicleAsWithOwner}
-        drivers={mockDrivers}
+        initial={vehicle}
+        drivers={drivers}
+        saveError={saveError}
+        saving={saving}
       />
 
       <RegistrationForm
@@ -176,12 +213,7 @@ export default function VehicleDetail() {
         plateNumber={vehicle.plate_number}
       />
 
-      <Modal
-        open={deleteOpen}
-        title="Delete Vehicle"
-        onClose={() => setDeleteOpen(false)}
-        size="sm"
-      >
+      <Modal open={deleteOpen} title="Delete Vehicle" onClose={() => setDeleteOpen(false)} size="sm">
         <div className="flex flex-col gap-6">
           <p className="text-sm text-ink">
             Are you sure you want to delete{' '}
@@ -189,9 +221,14 @@ export default function VehicleDetail() {
             <span className="font-mono text-xs text-ink-muted">({vehicle.plate_number})</span>
             ? This action cannot be undone.
           </p>
+          {saveError && (
+            <p className="text-sm text-danger-600">{saveError}</p>
+          )}
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)} disabled={saving}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete} disabled={saving}>
+              {saving ? 'Deleting…' : 'Delete'}
+            </Button>
           </div>
         </div>
       </Modal>
