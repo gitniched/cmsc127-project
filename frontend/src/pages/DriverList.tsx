@@ -5,18 +5,9 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import DriverTable from '../components/drivers/DriverTable';
 import DriverForm from '../components/drivers/DriverForm';
-import { mockDrivers as initialDrivers } from '../mock/drivers';
-import type { DriverWithAge, CreateDriverDTO } from '../types/driver';
+import { useDrivers } from '../hooks/useDrivers';
+import type { DriverWithAge, CreateDriverDTO } from '../types/driver.types';
 import { buildRoute } from '../constants/routes';
-
-function computeAge(birthDate: string): number {
-  const today = new Date();
-  const dob   = new Date(birthDate);
-  let age     = today.getFullYear() - dob.getFullYear();
-  const m     = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-  return age;
-}
 
 type ModalState =
   | { mode: 'closed' }
@@ -26,50 +17,69 @@ type ModalState =
 
 export default function DriverList() {
   const navigate = useNavigate();
-  const [drivers, setDrivers] = useState<DriverWithAge[]>(initialDrivers);
-  const [modal, setModal]     = useState<ModalState>({ mode: 'closed' });
+  const { drivers, loading, error, add, edit, remove } = useDrivers();
+  const [modal, setModal]       = useState<ModalState>({ mode: 'closed' });
+  const [saving, setSaving]     = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function handleView(driver: DriverWithAge) {
     navigate(buildRoute.driverProfile(driver.license_number));
   }
 
   function handleEdit(driver: DriverWithAge) {
+    setSaveError(null);
     setModal({ mode: 'edit', driver });
   }
 
   function handleDelete(driver: DriverWithAge) {
+    setSaveError(null);
     setModal({ mode: 'delete', driver });
   }
 
-  function handleAddSubmit(data: CreateDriverDTO) {
-    const newDriver: DriverWithAge = {
-      ...data,
-      license_expiry_date: '',
-      age: computeAge(data.birth_date),
-    };
-    setDrivers((prev) => [newDriver, ...prev]);
-    setModal({ mode: 'closed' });
+  async function handleAddSubmit(data: CreateDriverDTO) {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await add(data);
+      setModal({ mode: 'closed' });
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to add driver');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleEditSubmit(data: CreateDriverDTO) {
-    setDrivers((prev) =>
-      prev.map((d) =>
-        d.license_number === data.license_number
-          ? { ...d, ...data, age: computeAge(data.birth_date) }
-          : d
-      )
-    );
-    setModal({ mode: 'closed' });
+  async function handleEditSubmit(data: CreateDriverDTO) {
+    if (modal.mode !== 'edit') return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await edit(data.license_number, data);
+      setModal({ mode: 'closed' });
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to update driver');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (modal.mode !== 'delete') return;
-    setDrivers((prev) => prev.filter((d) => d.license_number !== modal.driver.license_number));
-    setModal({ mode: 'closed' });
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await remove(modal.driver.license_number);
+      setModal({ mode: 'closed' });
+    } catch (err: any) {
+      setSaveError(err.message ?? 'Failed to delete driver');
+    } finally {
+      setSaving(false);
+    }
   }
 
   function closeModal() {
     setModal({ mode: 'closed' });
+    setSaveError(null);
   }
 
   return (
@@ -83,22 +93,42 @@ export default function DriverList() {
               Manage all registered drivers and their license information.
             </p>
           </div>
-          <Button variant="primary" onClick={() => setModal({ mode: 'add' })}>
+          <Button variant="primary" onClick={() => { setSaveError(null); setModal({ mode: 'add' }); }}>
             Add Driver
           </Button>
         </div>
 
-        <DriverTable
-          drivers={drivers}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {loading && (
+          <div className="flex items-center gap-2 text-sm text-ink-muted py-4">
+            <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Loading drivers…
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <DriverTable
+            drivers={drivers}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
 
         <DriverForm
           open={modal.mode === 'add'}
           onClose={closeModal}
           onSubmit={handleAddSubmit}
+          saveError={saveError}
+          saving={saving}
         />
 
         <DriverForm
@@ -106,6 +136,8 @@ export default function DriverList() {
           onClose={closeModal}
           onSubmit={handleEditSubmit}
           initial={modal.mode === 'edit' ? modal.driver : null}
+          saveError={saveError}
+          saving={saving}
         />
 
         <Modal
@@ -126,9 +158,14 @@ export default function DriverList() {
                 </span>
                 ? This action cannot be undone.
               </p>
+              {saveError && (
+                <p className="text-sm text-danger-600">{saveError}</p>
+              )}
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-                <Button variant="danger" onClick={handleConfirmDelete}>Delete</Button>
+                <Button variant="ghost" onClick={closeModal} disabled={saving}>Cancel</Button>
+                <Button variant="danger" onClick={handleConfirmDelete} disabled={saving}>
+                  {saving ? 'Deleting…' : 'Delete'}
+                </Button>
               </div>
             </div>
           )}
