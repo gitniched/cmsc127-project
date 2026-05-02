@@ -114,7 +114,9 @@ export const getDrivers = async (req: Request, res: Response) => {
     let conn;
 
     try {
+        console.log('Attempting to get drivers...');
         conn = await pool.getConnection();
+        console.log('Database connection established');
 
         let query = 'SELECT * FROM v_driver';
         const queryParams = req.query;
@@ -155,11 +157,14 @@ export const getDrivers = async (req: Request, res: Response) => {
             query += ` ORDER BY ${sortBy} ${order}`;
         }
 
+        console.log('Executing query:', query);
         const rows: VDriver[] = await conn.query(query, values);
+        console.log('Query successful, returning', rows.length, 'rows');
         res.status(200).json(rows);
-    }catch (error) {
+    } catch (error: any) {
         console.error('Error retrieving drivers:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        console.error('Error details:', error.message, error.code, error.sqlState);
+        return res.status(500).json({ message: 'Internal server error', details: error.message });
     } finally {
         if (conn) conn.release();
     }
