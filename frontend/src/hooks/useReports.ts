@@ -8,6 +8,8 @@ import {
   getReport6,
   getReport7,
 } from '../api/reports.api';
+import { FINE_SCHEDULE } from '../constants/fineSchedule';
+import type { ViolationTypeEnum } from '../constants/enums';
 
 export type ReportId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -116,11 +118,14 @@ export function useReport6() {
     setState({ rows: [], loading: true, error: null });
     try {
       const raw = await getReport6(params.year);
-      const rows = raw.map((r: any) => ({
-        violation_type: r.violation_type,
-        total_count:    Number(r.total_violations ?? r.total_count ?? 0),
-        total_fine:     0,
-      }));
+      const rows = raw.map((r: any) => {
+        const count = Number(r.total_violations ?? r.total_count ?? 0);
+        return {
+          violation_type: r.violation_type,
+          total_count:    count,
+          total_fine:     (FINE_SCHEDULE[r.violation_type as ViolationTypeEnum] ?? 0) * count,
+        };
+      });
       setState({ rows, loading: false, error: null });
     } catch (err: any) {
       setState({ rows: [], loading: false, error: err.message ?? 'Report failed' });
