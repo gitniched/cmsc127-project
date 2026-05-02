@@ -37,7 +37,7 @@ export default function ViolationDetail() {
   if (loading) {
     return (
       <Layout>
-        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex items-center gap-2 text-sm text-ink-muted">
+        <div className="px-6 py-8 max-w-screen-xl mx-auto flex items-center gap-2 text-sm text-ink-muted">
           <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -51,13 +51,15 @@ export default function ViolationDetail() {
   if (error || !violation) {
     return (
       <Layout>
-        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
+        <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
           <p className="text-sm text-danger-600">{error ?? 'Violation not found.'}</p>
           <Button variant="ghost" onClick={() => navigate(ROUTES.violations)}>← Back to Violations</Button>
         </div>
       </Layout>
     );
   }
+
+  const currentViolation = violation;
 
   async function handleEditSubmit(data: CreateViolationDTO) {
     setSaving(true);
@@ -68,12 +70,12 @@ export default function ViolationDetail() {
         payment_status:   data.payment_status,
       };
 
-      const driverBefore = await getDriverByLicense(violation.license_number).catch(() => null);
+      const driverBefore = await getDriverByLicense(currentViolation.license_number).catch(() => null);
       const statusBefore = driverBefore?.license_status;
 
       await editViolation(update);
 
-      const driverAfter = await getDriverByLicense(violation.license_number).catch(() => null);
+      const driverAfter = await getDriverByLicense(currentViolation.license_number).catch(() => null);
       if (
         statusBefore !== LicenseStatus.Suspended &&
         driverAfter?.license_status === LicenseStatus.Suspended
@@ -105,8 +107,25 @@ export default function ViolationDetail() {
 
   return (
     <Layout>
-      <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
+      <style>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+          border-radius: 12px;
+        }
+        .glass-card-header {
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .glass-divider {
+          border-top: 1px solid rgba(226, 232, 240, 0.7);
+        }
+      `}</style>
+      <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
 
+        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-ink-muted">
           <Link to={ROUTES.violations} className="hover:text-ink transition-colors">Violations</Link>
           <span>/</span>
@@ -120,7 +139,8 @@ export default function ViolationDetail() {
           />
         )}
 
-        <div className="bg-surface border border-border rounded-lg p-6 flex flex-col gap-6">
+        {/* Header card */}
+        <div className="glass-card p-6 flex flex-col gap-6">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold text-ink tracking-tight font-mono">{violation.uovr_number}</h1>
@@ -143,7 +163,8 @@ export default function ViolationDetail() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 border-t border-border pt-5">
+          {/* Location / officer details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 glass-divider pt-5">
             <div>
               <p className="text-xs font-medium text-ink-muted mb-0.5">Date</p>
               <p className="text-sm text-ink">{formatDate(violation.violation_date)}</p>
@@ -162,7 +183,8 @@ export default function ViolationDetail() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 border-t border-border pt-5">
+          {/* Driver / vehicle details */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 glass-divider pt-5">
             <div>
               <p className="text-xs font-medium text-ink-muted mb-0.5">Driver</p>
               <Link
@@ -193,13 +215,14 @@ export default function ViolationDetail() {
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-lg overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
+        {/* Violation types table card */}
+        <div className="glass-card overflow-hidden">
+          <div className="px-5 py-4 glass-card-header">
             <h2 className="text-sm font-semibold text-ink">Violation Types</h2>
           </div>
           <table className="min-w-full">
             <thead>
-              <tr className="border-b border-border bg-surface-inset">
+              <tr className="glass-divider" style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.7)' }}>
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-ink-muted uppercase tracking-wide">
                   Type
                 </th>
@@ -210,7 +233,11 @@ export default function ViolationDetail() {
             </thead>
             <tbody>
               {violation.violation_types.map((vt: ViolationTypeLineItem) => (
-                <tr key={vt.violation_type} className="border-b border-border last:border-0">
+                <tr
+                  key={vt.violation_type}
+                  style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.7)' }}
+                  className="last:border-0"
+                >
                   <td className="px-5 py-3 text-sm text-ink">{vt.violation_type}</td>
                   <td className="px-5 py-3 text-right text-sm text-ink">
                     ₱{vt.base_fine.toLocaleString()}
@@ -219,7 +246,7 @@ export default function ViolationDetail() {
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-surface-inset border-t border-border">
+              <tr style={{ borderTop: '1px solid rgba(226, 232, 240, 0.7)', background: 'rgba(255,255,255,0.2)' }}>
                 <td className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wide">
                   Total Fine
                 </td>
