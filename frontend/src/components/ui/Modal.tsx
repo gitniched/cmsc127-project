@@ -5,7 +5,7 @@ type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface ModalProps {
   open:       boolean;
-  onClose:    () => void;
+  onClose?:   () => void;
   title?:     string;
   size?:      ModalSize;
   children:   ReactNode;
@@ -35,7 +35,7 @@ export default function Modal({
     if (!open) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onClose?.();
     }
 
     document.addEventListener('keydown', onKeyDown);
@@ -63,7 +63,7 @@ export default function Modal({
     >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => onClose?.()}
         aria-hidden="true"
       />
 
@@ -83,7 +83,7 @@ export default function Modal({
             <h2 className="text-base font-semibold text-ink">{title}</h2>
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => onClose?.()}
               aria-label="Close modal"
               className={[
                 'w-8 h-8 flex items-center justify-center rounded-md text-ink-faint',
