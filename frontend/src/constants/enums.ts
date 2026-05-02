@@ -141,7 +141,11 @@ export const PLATE_DIGIT_TO_RENEWAL_MONTH: Record<string, number> = {
 };
 
 export const INVALID_STATUS_COMBOS: Array<{ violation: ViolationStatus; payment: PaymentStatus }> = [
-  { violation: ViolationStatus.Dismissed, payment: PaymentStatus.Paid },
-  { violation: ViolationStatus.Contested, payment: PaymentStatus.Paid },
+  { violation: ViolationStatus.Pending,   payment: PaymentStatus.Paid },
+  { violation: ViolationStatus.Pending,   payment: PaymentStatus.Waived },
   { violation: ViolationStatus.Resolved,  payment: PaymentStatus.Unpaid },
+  { violation: ViolationStatus.Contested, payment: PaymentStatus.Paid },
+  { violation: ViolationStatus.Contested, payment: PaymentStatus.Waived },
+  { violation: ViolationStatus.Dismissed, payment: PaymentStatus.Paid },
+  { violation: ViolationStatus.Dismissed, payment: PaymentStatus.Unpaid },
 ];
