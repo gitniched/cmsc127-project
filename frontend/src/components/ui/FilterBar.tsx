@@ -58,9 +58,14 @@ interface FilterBarProps {
   className?: string;
 }
 
+const inputStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.45)',
+  borderColor: 'rgba(226, 232, 240, 0.9)',
+};
+
 const inputBase = [
   'h-9 px-3 text-sm rounded-md w-full',
-  'bg-surface border border-border text-ink placeholder:text-ink-faint',
+  'border text-ink placeholder:text-ink-faint',
   'outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100',
   'transition-colors duration-150',
 ].join(' ');
@@ -69,10 +74,15 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
   return (
     <div
       className={[
-        'flex flex-wrap items-end gap-3 p-4',
-        'bg-surface border border-border rounded-lg',
+        'flex items-end gap-3 p-4 rounded-lg overflow-x-auto',
         className,
       ].join(' ')}
+      style={{
+        background: 'rgba(255, 255, 255, 0.45)',
+        border: '1px solid rgba(226, 232, 240, 0.9)',
+        backdropFilter: 'blur(16px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
+      }}
     >
       {controls.map((ctrl) => {
         if (ctrl.type === 'search') {
@@ -96,6 +106,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
                 value={ctrl.value}
                 onChange={(e) => ctrl.onChange(e.target.value)}
                 className={inputBase}
+                style={inputStyle}
               >
                 <option value="">All</option>
                 {ctrl.options.map((opt) => (
@@ -119,6 +130,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
                   onChange={(e) => ctrl.onMinChange(e.target.value === '' ? '' : Number(e.target.value))}
                   placeholder={ctrl.minPlaceholder ?? 'Min'}
                   className={[inputBase, 'w-20'].join(' ')}
+                  style={inputStyle}
                 />
                 <span className="text-ink-faint text-xs shrink-0">–</span>
                 <input
@@ -127,6 +139,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
                   onChange={(e) => ctrl.onMaxChange(e.target.value === '' ? '' : Number(e.target.value))}
                   placeholder={ctrl.maxPlaceholder ?? 'Max'}
                   className={[inputBase, 'w-20'].join(' ')}
+                  style={inputStyle}
                 />
               </div>
             </div>
@@ -143,6 +156,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
                   value={ctrl.startValue}
                   onChange={(e) => ctrl.onStartChange(e.target.value)}
                   className={[inputBase, 'w-36'].join(' ')}
+                  style={inputStyle}
                 />
                 <span className="text-ink-faint text-xs shrink-0">–</span>
                 <input
@@ -150,6 +164,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
                   value={ctrl.endValue}
                   onChange={(e) => ctrl.onEndChange(e.target.value)}
                   className={[inputBase, 'w-36'].join(' ')}
+                  style={inputStyle}
                 />
               </div>
             </div>
@@ -163,7 +178,11 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
         <button
           type="button"
           onClick={onReset}
-          className="h-9 px-3 text-sm text-ink-muted hover:text-ink border border-border rounded-md hover:bg-surface-inset transition-colors duration-150 shrink-0"
+          className="h-9 px-3 text-sm text-ink-muted hover:text-ink rounded-md transition-colors duration-150 shrink-0"
+          style={{
+            background: 'rgba(255,255,255,0.3)',
+            border: '1px solid rgba(226,232,240,0.9)',
+          }}
         >
           Reset
         </button>
