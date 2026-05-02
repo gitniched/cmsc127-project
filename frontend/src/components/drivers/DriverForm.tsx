@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Driver, DriverWithAge, CreateDriverDTO } from '../../types/driver';
+import type { Driver, DriverWithAge, CreateDriverDTO } from '../../types/driver.types';
 import { LicenseType, LicenseStatus } from '../../constants/enums';
 import {
   Sex,
@@ -11,10 +11,12 @@ import {
 } from '../../constants/enums';
 
 interface DriverFormProps {
-  open:     boolean;
-  onClose:  () => void;
-  onSubmit: (data: CreateDriverDTO) => void;
-  initial?: DriverWithAge | Driver | null;
+  open:       boolean;
+  onClose:    () => void;
+  onSubmit:   (data: CreateDriverDTO) => void;
+  initial?:   DriverWithAge | Driver | null;
+  saveError?: string | null;
+  saving?:    boolean;
 }
 
 type FormState = {
@@ -58,12 +60,32 @@ function toFormState(d: Driver | DriverWithAge): FormState {
   };
 }
 
-function computeExpiry(birthDate: string, _licenseType: LicenseType): string {
+function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: string): string {
+  if (!issueDate) return '';
+  const issue = new Date(issueDate);
+  if (isNaN(issue.getTime())) return '';
+
+  if (licenseType === LicenseType.StudentPermit) {
+    const expiry = new Date(issueDate);
+    expiry.setFullYear(expiry.getFullYear() + 1);
+    return expiry.toISOString().slice(0, 10);
+  }
+
   if (!birthDate) return '';
   const dob = new Date(birthDate);
   if (isNaN(dob.getTime())) return '';
-  const expiry = new Date(dob);
-  expiry.setFullYear(expiry.getFullYear() + 5);
+
+  const expiryYear = issue.getFullYear() + 5;
+  let month = dob.getMonth(); // 0-indexed
+  let day   = dob.getDate();
+
+  // Feb 29, if birth month/day doesn't exist in expiry year, fall back to Feb 28
+  if (month === 1 && day === 29) {
+    const isLeap = new Date(expiryYear, 1, 29).getMonth() === 1;
+    if (!isLeap) day = 28;
+  }
+
+  const expiry = new Date(expiryYear, month, day);
   return expiry.toISOString().slice(0, 10);
 }
 
@@ -90,7 +112,7 @@ interface FieldError {
   [key: string]: string;
 }
 
-export default function DriverForm({ open, onClose, onSubmit, initial }: DriverFormProps) {
+export default function DriverForm({ open, onClose, onSubmit, initial, saveError, saving }: DriverFormProps) {
   const isEdit = !!initial;
   const [form, setForm]     = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FieldError>({});
@@ -145,7 +167,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial }: DriverF
     });
   }
 
-  const computedExpiry = computeExpiry(form.birth_date, form.license_type);
+  const computedExpiry = computeExpiry(form.birth_date, form.license_type, form.license_issue_date);
 
   return (
     <Modal
@@ -155,14 +177,20 @@ export default function DriverForm({ open, onClose, onSubmit, initial }: DriverF
       size="lg"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            {isEdit ? 'Save Changes' : 'Add Driver'}
+          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Driver'}
           </Button>
         </>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+      <div className="flex flex-col gap-4">
+        {saveError && (
+          <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+            {saveError}
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
         <div>
           <label className={labelBase}>First Name <span className="text-danger-500">*</span></label>
           <input
@@ -293,6 +321,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial }: DriverF
           />
           <p className="mt-1 text-xs text-ink-faint">Auto-computed by trigger</p>
         </div>
+      </div>
       </div>
     </Modal>
   );
