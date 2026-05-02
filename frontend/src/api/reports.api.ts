@@ -1,7 +1,7 @@
 import { apiFetch } from './base.api';
 import type { DriverWithAge } from '@shared/types/driver.types';
 import type { Vehicle } from '@shared/types/vehicle.types';
-import type { ViolationListRow } from './violations';
+import type { ViolationListRow } from './violations.api';
 
 export interface Report3Row extends Vehicle {
     registration_number: string;
@@ -31,8 +31,8 @@ export function getReport1(params: {
     return apiFetch<DriverWithAge[]>(`/reports/1${qs ? `?${qs}` : ''}`);
 }
 
-export function getReport2(licenseNumber: string): Promise<Vehicle[]> {
-    return apiFetch<Vehicle[]>(`/reports/2?license_number=${licenseNumber}`);
+export function getReport2(licenseNumber: string): Promise<VehicleWithOwner[]> {
+    return apiFetch<VehicleWithOwner[]>(`/reports/2?license_number=${licenseNumber}`);
 }
 
 export function getReport3(asOfDate: string): Promise<Report3Row[]> {
@@ -61,7 +61,10 @@ export function getReport6(year: number): Promise<Report6Row[]> {
 
 export function getReport7(params: { city?: string; region?: string }): Promise<Report7Row[]> {
     const p = new URLSearchParams();
-    if (params.city) p.set('city', params.city);
-    if (params.region) p.set('region', params.region);
+    if (params.city) {
+        p.set('city', params.city);
+    } else if (params.region) {
+        p.set('region', params.region);
+    }
     return apiFetch<Report7Row[]>(`/reports/7?${p.toString()}`);
 }

@@ -647,11 +647,14 @@ SELECT
     tv.payment_status,
     tv.plate_number,
     tv.registration_number,
-    vt.violation_type
+    GROUP_CONCAT(vt.violation_type ORDER BY vt.violation_type SEPARATOR ', ') AS violation_types
 FROM traffic_violation tv
 JOIN violation_type vt ON tv.uovr_number = vt.uovr_number
 WHERE tv.license_number = @license_number
-AND tv.violation_date BETWEEN @start_date AND @end_date;
+  AND (@start_date IS NULL OR @end_date IS NULL OR tv.violation_date BETWEEN @start_date AND @end_date)
+GROUP BY tv.uovr_number, tv.officer, tv.violation_status,
+         tv.violation_location_city, tv.violation_location_region,
+         tv.violation_date, tv.payment_status, tv.plate_number, tv.registration_number;
 
 -- View the total number of violations per violation type for a given year
 SELECT vt.violation_type, COUNT(*) AS total_violations FROM violation_type vt
@@ -662,11 +665,19 @@ GROUP BY vt.violation_type
 ORDER BY total_violations DESC;
 
 -- View all vehicles involved in violations within a given city or region
-SELECT DISTINCT v.* FROM vehicle v
-JOIN traffic_violation tv
-ON v.plate_number = tv.plate_number
-WHERE tv.violation_location_city = @city
-OR tv.violation_location_region = @region;
+SELECT
+    v.*,
+    CONCAT(d.first_name, ' ', d.last_name) AS owner_name,
+    d.license_number AS owner_license_number,
+    COUNT(tv.uovr_number) AS violation_count
+FROM vehicle v
+JOIN traffic_violation tv ON v.plate_number = tv.plate_number
+JOIN driver d ON v.owner_license_number = d.license_number
+WHERE (@city IS NULL OR @city = '' OR tv.violation_location_city = @city)
+   OR (@region IS NULL OR @region = '' OR tv.violation_location_region = @region)
+GROUP BY v.plate_number, v.make, v.model, v.engine_number, v.chassis_number,
+         v.vehicle_type, v.year, v.color, v.owner_license_number,
+         owner_name;
 
 -- View all vehicles of each driver
 SELECT d.license_number, d.license_type, CONCAT(d.first_name, ' ', d.last_name) AS full_name,

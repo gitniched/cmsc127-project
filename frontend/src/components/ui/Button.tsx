@@ -17,13 +17,19 @@ const variantClasses: Record<ButtonVariant, string> = {
   danger:
     'bg-danger-500 text-white border border-danger-500 hover:bg-danger-600 hover:border-danger-600 active:bg-danger-700 focus-visible:ring-2 focus-visible:ring-danger-200 disabled:bg-danger-200 disabled:border-danger-200 disabled:text-white',
   ghost:
-    'bg-transparent text-ink-muted border border-border hover:bg-surface-inset hover:text-ink active:bg-border focus-visible:ring-2 focus-visible:ring-brand-300 disabled:opacity-40',
+    'text-ink-muted border border-white/40 hover:text-ink active:bg-white/50 focus-visible:ring-2 focus-visible:ring-brand-300 disabled:opacity-40',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
   sm: 'h-8  px-3   text-xs  gap-1.5',
   md: 'h-9  px-4   text-sm  gap-2',
   lg: 'h-11 px-5   text-sm  gap-2',
+};
+
+const ghostStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.35)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
 };
 
 export default function Button({
@@ -34,6 +40,7 @@ export default function Button({
   children,
   className = '',
   disabled,
+  style,
   ...rest
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -50,6 +57,7 @@ export default function Button({
         sizeClasses[size],
         className,
       ].join(' ')}
+      style={variant === 'ghost' ? { ...ghostStyle, ...style } : style}
     >
       {loading ? (
         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />

@@ -50,7 +50,7 @@ export default function DriverProfile() {
   if (loading) {
     return (
       <Layout>
-        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex items-center gap-2 text-sm text-ink-muted">
+        <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex items-center gap-2 text-sm text-ink-muted">
           <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -64,7 +64,7 @@ export default function DriverProfile() {
   if (error || !driver) {
     return (
       <Layout>
-        <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
+        <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-4">
           <p className="text-sm text-danger-600">{error ?? 'Driver not found.'}</p>
           <Button variant="ghost" onClick={() => navigate(ROUTES.drivers)}>← Back to Drivers</Button>
         </div>
@@ -124,20 +124,33 @@ export default function DriverProfile() {
 
   return (
     <Layout>
-      <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
+      <style>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+          border-radius: 12px;
+        }
+        .glass-divider {
+          border-top: 1px solid rgba(226, 232, 240, 0.7);
+        }
+      `}</style>
+      <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-6">
 
-        <div className="flex items-center gap-2 text-sm text-ink-muted">
+        <div className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
           <Link to={ROUTES.drivers} className="hover:text-ink transition-colors">Drivers</Link>
           <span>/</span>
           <span className="text-ink">{getFullName(driver)}</span>
         </div>
 
-        <div className="bg-surface border border-border rounded-lg p-6 flex flex-col gap-6">
+        <div className="glass-card p-6 flex flex-col gap-6">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold text-ink tracking-tight">{getFullName(driver)}</h1>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-xs text-ink-muted bg-surface-inset border border-border px-2 py-0.5 rounded">{driver.license_number}</span>
+                <span className="font-mono text-xs text-ink-muted bg-white/40 border border-white/60 px-2 py-0.5 rounded">{driver.license_number}</span>
                 <Badge status={driver.license_type} />
                 <Badge status={driver.license_status} />
               </div>
@@ -154,14 +167,14 @@ export default function DriverProfile() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 border-t border-border pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 glass-divider pt-5">
             <div><p className="text-xs font-medium text-ink-muted mb-0.5">Date of Birth</p><p className="text-sm text-ink">{formatDate(driver.birth_date)}</p></div>
             <div><p className="text-xs font-medium text-ink-muted mb-0.5">Age</p><p className="text-sm text-ink">{driver.age}</p></div>
             <div><p className="text-xs font-medium text-ink-muted mb-0.5">Sex</p><p className="text-sm text-ink">{driver.sex === 'M' ? 'Male' : 'Female'}</p></div>
             <div className="sm:col-span-2 lg:col-span-3"><p className="text-xs font-medium text-ink-muted mb-0.5">Address</p><p className="text-sm text-ink">{driver.address}</p></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 border-t border-border pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 glass-divider pt-5">
             <div><p className="text-xs font-medium text-ink-muted mb-0.5">Issue Date</p><p className="text-sm text-ink">{formatDate(driver.license_issue_date)}</p></div>
             <div><p className="text-xs font-medium text-ink-muted mb-0.5">Expiry Date</p><p className="text-sm text-ink">{formatDate(driver.license_expiry_date)}</p></div>
             <div>
@@ -178,7 +191,9 @@ export default function DriverProfile() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-ink">Owned Vehicles</h2>
+          <div className="glass-card px-4 py-2 self-start">
+            <h2 className="text-base font-semibold text-ink">Owned Vehicles</h2>
+          </div>
           {vehiclesLoading ? (
             <div className="flex items-center gap-2 text-sm text-ink-muted py-2">
               <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -192,7 +207,7 @@ export default function DriverProfile() {
               {vehiclesError}
             </div>
           ) : (
-            <div className="bg-surface border border-border rounded-lg overflow-hidden">
+            <div className="glass-card overflow-hidden">
               <Table
                 columns={vehicleColumns}
                 rows={vehicles}
@@ -205,7 +220,9 @@ export default function DriverProfile() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-ink">Violation History</h2>
+          <div className="glass-card px-4 py-2 self-start">
+            <h2 className="text-base font-semibold text-ink">Violation History</h2>
+          </div>
           {violationsLoading ? (
             <div className="flex items-center gap-2 text-sm text-ink-muted py-2">
               <svg className="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -219,7 +236,7 @@ export default function DriverProfile() {
               {violationsError}
             </div>
           ) : (
-            <div className="bg-surface border border-border rounded-lg overflow-hidden">
+            <div className="glass-card overflow-hidden">
               <Table
                 columns={violationColumns}
                 rows={violations}

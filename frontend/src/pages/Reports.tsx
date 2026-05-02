@@ -13,6 +13,7 @@ import {
   useReport6,
   useReport7,
 } from '../hooks/useReports';
+import { useDrivers } from '../hooks/useDrivers';
 import { useState } from 'react';
 
 const REPORT_TABS: { id: ReportId; label: string }[] = [
@@ -76,6 +77,8 @@ function buildEmptyMessage(reportId: ReportId, params: ReportParams): string {
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportId>(1);
+
+  const { drivers } = useDrivers();
 
   const [params, setParams] = useState<Record<ReportId, ReportParams>>({
     1: defaultParams(1),
@@ -141,40 +144,69 @@ export default function Reports() {
     setParams((prev) => ({ ...prev, [reportId]: p }));
   }
 
-  const current      = reports[activeTab];
-  const currentRows  = current.rows as ReportRow[];
+  const current       = reports[activeTab];
+  const currentRows   = current.rows as ReportRow[];
   const currentHasRun = hasRun[activeTab];
 
   return (
     <Layout>
-      <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
-        <div>
+      <style>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+          border-radius: 12px;
+        }
+        .glass-card-header {
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .glass-tab {
+          position: relative;
+          padding: 0.625rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          white-space: nowrap;
+          color: var(--color-ink-muted, #64748b);
+          transition: color 150ms ease, background 150ms ease;
+          border-radius: 8px;
+          flex-shrink: 0;
+        }
+        .glass-tab:hover {
+          color: var(--color-ink, #0f172a);
+          background: rgba(255, 255, 255, 0.4);
+        }
+        .glass-tab.active {
+          color: var(--color-brand-600, #2563eb);
+          background: rgba(255, 255, 255, 0.6);
+          box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
+        }
+      `}</style>
+      <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
+
+        <div className="glass-card px-5 py-4 self-start">
           <h1 className="text-2xl font-bold text-ink tracking-tight">Reports</h1>
           <p className="text-sm text-ink-muted mt-1">Run and export any of the 7 system reports.</p>
         </div>
 
-        <div className="flex gap-1 border-b border-border overflow-x-auto">
+        <div className="glass-card px-3 py-2 flex gap-1 overflow-x-auto">
           {REPORT_TABS.map((tab) => {
-            const state = reports[tab.id];
+            const state    = reports[tab.id];
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={[
-                  'px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-150',
-                  'border-b-2 -mb-px flex items-center gap-1.5',
-                  activeTab === tab.id
-                    ? 'border-brand-500 text-brand-600'
-                    : 'border-transparent text-ink-muted hover:text-ink hover:border-border',
-                ].join(' ')}
+                className={`glass-tab flex items-center gap-1.5 ${isActive ? 'active' : ''}`}
               >
-                <span className="text-ink-faint mr-0.5 text-xs">{tab.id}</span>
+                <span className="text-ink-faint text-xs">{tab.id}</span>
                 {tab.label}
                 {hasRun[tab.id] && !state.loading && (
                   <span
                     className={[
                       'inline-flex items-center justify-center rounded-full px-1.5 min-w-[1.25rem] h-5 text-xs font-semibold',
-                      activeTab === tab.id
+                      isActive
                         ? 'bg-brand-100 text-brand-700'
                         : 'bg-surface-raised text-ink-muted',
                     ].join(' ')}
@@ -188,13 +220,23 @@ export default function Reports() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <ReportRunner
-            reportId={activeTab}
-            params={params[activeTab]}
-            onParamsChange={(p) => handleParamsChange(activeTab, p)}
-            onRun={(p) => handleRun(activeTab, p)}
-            loading={current.loading}
-          />
+          <div className="glass-card overflow-hidden">
+            <div className="px-5 py-4 glass-card-header">
+              <h2 className="text-sm font-semibold text-ink">
+                {REPORT_TABS.find((t) => t.id === activeTab)?.label}
+              </h2>
+            </div>
+            <div className="px-5 py-4">
+              <ReportRunner
+                reportId={activeTab}
+                params={params[activeTab]}
+                onParamsChange={(p) => handleParamsChange(activeTab, p)}
+                onRun={(p) => handleRun(activeTab, p)}
+                loading={current.loading}
+                drivers={drivers}
+              />
+            </div>
+          </div>
 
           {current.error && (
             <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
@@ -218,15 +260,17 @@ export default function Reports() {
           )}
 
           {!current.loading && !current.error && currentHasRun && (
-            <ReportTable
-              reportId={activeTab}
-              rows={currentRows}
-              emptyMessage={buildEmptyMessage(activeTab, params[activeTab])}
-            />
+            <div className="glass-card overflow-hidden">
+              <ReportTable
+                reportId={activeTab}
+                rows={currentRows}
+                emptyMessage={buildEmptyMessage(activeTab, params[activeTab])}
+              />
+            </div>
           )}
 
           {!current.loading && !currentHasRun && !AUTO_RUN_REPORTS.includes(activeTab) && (
-            <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+            <div className="glass-card flex flex-col items-center justify-center py-16 text-center gap-2">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-ink-faint">
                 <rect x="4" y="6" width="24" height="20" rx="2" stroke="currentColor" strokeWidth="1.5" />
                 <path d="M4 11h24" stroke="currentColor" strokeWidth="1.5" />
@@ -239,6 +283,7 @@ export default function Reports() {
             </div>
           )}
         </div>
+
       </div>
     </Layout>
   );

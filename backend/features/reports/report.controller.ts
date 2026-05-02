@@ -55,7 +55,11 @@ export const getReport2 = async (req: Request, res: Response) => {
     try {
         conn = await pool.getConnection();
         const rows = await conn.query(
-            'SELECT * FROM vehicle WHERE owner_license_number = ?',
+            `SELECT v.*,
+                    CONCAT(d.first_name, ' ', d.last_name) AS owner_name
+             FROM vehicle v
+             JOIN driver d ON v.owner_license_number = d.license_number
+             WHERE v.owner_license_number = ?`,
             [license_number]
         );
         res.status(200).json(rows);
@@ -169,7 +173,7 @@ export const getReport6 = async (req: Request, res: Response) => {
     try {
         conn = await pool.getConnection();
         const query = `
-            SELECT vt.violation_type, COUNT(*) AS total_violations
+            SELECT vt.violation_type, CAST(COUNT(*) AS UNSIGNED) AS total_violations
             FROM violation_type vt
             JOIN traffic_violation tv ON vt.uovr_number = tv.uovr_number
             WHERE YEAR(tv.violation_date) = ?
@@ -197,27 +201,29 @@ export const getReport7 = async (req: Request, res: Response) => {
     try {
         conn = await pool.getConnection();
 
-        let query = `
-            SELECT DISTINCT v.*
+        const useCity = Boolean(city);
+        const whereClause = useCity
+            ? 'tv.violation_location_city = ?'
+            : 'tv.violation_location_region = ?';
+        const whereValue = useCity ? city : region;
+
+        const query = `
+            SELECT DISTINCT
+                v.plate_number,
+                v.make,
+                v.model,
+                v.engine_number,
+                v.chassis_number,
+                v.vehicle_type,
+                v.year,
+                v.color,
+                v.owner_license_number
             FROM vehicle v
             JOIN traffic_violation tv ON v.plate_number = tv.plate_number
-            WHERE
+            WHERE ${whereClause}
         `;
-        const values: any[] = [];
-        const conditions: string[] = [];
 
-        if (city) {
-            conditions.push('tv.violation_location_city = ?');
-            values.push(city);
-        }
-        if (region) {
-            conditions.push('tv.violation_location_region = ?');
-            values.push(region);
-        }
-
-        query += conditions.join(' OR ');
-
-        const rows = await conn.query(query, values);
+        const rows = await conn.query(query, [whereValue]);
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error running report 7:', error);

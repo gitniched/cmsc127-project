@@ -25,6 +25,7 @@ app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
+
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('Unhandled error:', err);

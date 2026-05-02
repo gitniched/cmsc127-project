@@ -8,7 +8,8 @@ import type { DriverWithAge } from '@shared/types/driver.types';
 import type { VehicleWithOwner } from '@shared/types/vehicle.types';
 import type { TrafficViolationFull } from '@shared/types/violation.types';
 import { ROUTES } from '../../constants/routes';
-
+import { FINE_SCHEDULE } from '../../constants/fineSchedule';
+import type { ViolationTypeEnum } from '../../constants/enums';
 export type Report1Row = DriverWithAge;
 export type Report2Row = VehicleWithOwner;
 export type Report3Row = VehicleWithOwner & { expired_registration_date: string };
@@ -211,7 +212,7 @@ const REPORT5_COLS: ColumnDef<Report5Row>[] = [
   },
   {
     key: 'violation_date', header: 'Date', sortable: true,
-    render: (r) => r.violation_date,
+    render: (r) => new Date(r.violation_date).toLocaleDateString('en-CA'),
   },
   {
     key: 'violation_location_city', header: 'Location', sortable: true,
@@ -223,11 +224,24 @@ const REPORT5_COLS: ColumnDef<Report5Row>[] = [
   },
   {
     key: 'violation_types', header: 'Violation Types', sortable: false,
-    render: (r) => r.violation_types.map((vt) => vt.violation_type).join(', '),
+    render: (r) => typeof r.violation_types === 'string'
+      ? r.violation_types
+      : Array.isArray(r.violation_types)
+        ? r.violation_types.map((vt: any) => vt.violation_type).join(', ')
+        : '',
   },
   {
-    key: 'total_fine', header: 'Total Fine', sortable: true,
-    render: (r) => `₱${r.total_fine.toLocaleString()}`,
+    key: 'total_fine', header: 'Total Fine', sortable: false,
+    render: (r) => {
+      const types = typeof r.violation_types === 'string'
+        ? (r.violation_types as string).split(', ')
+        : Array.isArray(r.violation_types)
+          ? r.violation_types.map((vt: any) => vt.violation_type ?? vt)
+          : [];
+      const total = types.reduce((sum: number, t: string) =>
+        sum + (FINE_SCHEDULE[t as ViolationTypeEnum] ?? 0), 0);
+      return `₱${total.toLocaleString()}`;
+    },
   },
   {
     key: 'violation_status', header: 'Status', sortable: true,
@@ -272,12 +286,8 @@ const REPORT7_COLS: ColumnDef<Report7Row>[] = [
     render: (r) => r.vehicle_type,
   },
   {
-    key: 'owner_name', header: 'Owner', sortable: true,
-    render: (r) => <DriverLink licenseNumber={r.owner_license_number} name={r.owner_name} />,
-  },
-  {
-    key: 'violation_count', header: 'Violations', sortable: true,
-    render: (r) => r.violation_count,
+    key: 'color', header: 'Color', sortable: false,
+    render: (r) => r.color,
   },
 ];
 
@@ -310,6 +320,17 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
   const resolvedEmptyMessage = emptyMessage ?? 'No results found.';
 
   return (
+    <>
+    <style>{`
+      .glass-card {
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(16px) saturate(1.6);
+        -webkit-backdrop-filter: blur(16px) saturate(1.6);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+        border-radius: 12px;
+      }
+    `}</style>
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink-muted">
@@ -331,7 +352,7 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
         </Button>
       </div>
 
-      <div className="bg-surface border border-border rounded-lg overflow-hidden">
+      <div className="glass-card overflow-hidden">
         <Table
           columns={columns}
           rows={rows}
@@ -341,5 +362,6 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
         />
       </div>
     </div>
+    </>
   );
 }

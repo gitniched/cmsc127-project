@@ -84,9 +84,19 @@ export default function DriverList() {
 
   return (
     <Layout>
-      <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
+      <style>{`
+        .glass-card {
+          background: rgba(255, 255, 255, 0.45);
+          backdrop-filter: blur(16px) saturate(1.6);
+          -webkit-backdrop-filter: blur(16px) saturate(1.6);
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+          border-radius: 12px;
+        }
+      `}</style>
+      <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-6">
 
-        <div className="flex items-start justify-between gap-4">
+        <div className="glass-card px-5 py-4 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-ink tracking-tight">Drivers</h1>
             <p className="text-sm text-ink-muted mt-1">

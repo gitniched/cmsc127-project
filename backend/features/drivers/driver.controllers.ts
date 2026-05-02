@@ -38,10 +38,13 @@ export const addDriver = async (req: Request, res: Response) => {
         await conn.query(query, values);
         res.status(201).json({ message: 'Driver added successfully' });
     } catch (error: any) {
-        if (error.code === 'ER_SIGNAL_EXCEPTION') {
+        if (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000') {
             return res.status(400).json({ message: error.message });
         }
-        console.error('Error adding driver:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'A driver with that license number already exists.' });
+        }
+        console.error('Error adding driver:', error.code, error.sqlState, error.message);
         res.status(500).json({ message: 'Internal server error' });
     } finally {
         if (conn) conn.release();
@@ -79,10 +82,10 @@ export const updateDriver = async (req: Request, res: Response) => {
 
         res.status(200).json({ message: 'Driver updated successfully' });
     } catch (error: any) {
-        if (error.code === 'ER_SIGNAL_EXCEPTION') {
+        if (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000') {
             return res.status(400).json({ message: error.message });
         }
-        console.error('Error updating driver:', error);
+        console.error('Error updating driver:', error.code, error.sqlState, error.message);
         res.status(500).json({ message: 'Internal server error' });
     } finally {
         if (conn) conn.release();
@@ -102,7 +105,12 @@ export const deleteDriver = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Driver not found' });
         }
         res.status(200).json({ message: 'Driver deleted successfully' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(409).json({
+                message: 'Cannot delete driver: they have vehicles or violations on record. Remove those first.',
+            });
+        }
         console.error('Error deleting driver:', error);
         return res.status(500).json({ message: 'Internal server error' });
     } finally {

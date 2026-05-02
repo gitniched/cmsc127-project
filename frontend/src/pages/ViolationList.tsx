@@ -90,7 +90,7 @@ export default function ViolationList() {
     <Layout>
       <div className="pl-20 pr-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
 
-        <div className="flex items-start justify-between gap-4">
+        <div className="glass-card px-5 py-4 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-ink tracking-tight">Violations</h1>
             <p className="text-sm text-ink-muted mt-1">
