@@ -6,7 +6,7 @@ import Modal from '../components/ui/Modal';
 import ViolationTable from '../components/violations/ViolationTable';
 import ViolationForm from '../components/violations/ViolationForm';
 import { useViolations } from '../hooks/useViolations';
-import type { TrafficViolationFull, CreateViolationDTO } from '../types/violation.types';
+import type { TrafficViolationFull, CreateViolationDTO } from '@shared/types/violation.types';
 import { buildRoute } from '../constants/routes';
 
 type ModalState =

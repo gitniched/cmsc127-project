@@ -1,5 +1,5 @@
 import { Request, Response} from 'express';
-import { VehicleRegistration } from '@shared/types/type';
+import { VehicleRegistration } from '@shared/types/registration.types';
 import pool from '../../config/mariadb';
 
 // NOTE: To be tested

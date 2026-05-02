@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { TrafficViolationFull } from '../../types/violation.types';
+import type { TrafficViolationFull } from '@shared/types/violation.types';
 import { VIOLATION_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS } from '../../constants/enums';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';

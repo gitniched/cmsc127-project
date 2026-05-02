@@ -7,7 +7,7 @@ import VehicleTable from '../components/vehicles/VehicleTable';
 import VehicleForm from '../components/vehicles/VehicleForm';
 import { useVehicles } from '../hooks/useVehicles';
 import { useDrivers } from '../hooks/useDrivers';
-import type { VehicleWithOwner, CreateVehicleDTO } from '../types/vehicle.types';
+import type { VehicleWithOwner, CreateVehicleDTO } from '@shared/types/vehicle.types';
 import { buildRoute } from '../constants/routes';
 
 type ModalState =

@@ -2,7 +2,7 @@ import Table from '../ui/Table';
 import type { ColumnDef } from '../ui/Table';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
-import type { VehicleRegistration } from '../../types/registration.types';
+import type { VehicleRegistration } from '@shared/types/registration.types';
 
 interface RegistrationTableProps {
   registrations: VehicleRegistration[];

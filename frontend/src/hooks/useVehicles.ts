@@ -7,7 +7,7 @@ import {
   deleteVehicle,
 } from '../api/vehicles.api';
 import type { VehicleFilters } from '../api/vehicles.api';
-import type { Vehicle, VehicleWithOwner, CreateVehicleDTO, UpdateVehicleDTO } from '../types/vehicle.types';
+import type { Vehicle, VehicleWithOwner, CreateVehicleDTO, UpdateVehicleDTO } from '@shared/types/vehicle.types';
 import { getDrivers } from '../api/driver.api';
 
 async function enrichWithOwner(vehicles: Vehicle[]): Promise<VehicleWithOwner[]> {

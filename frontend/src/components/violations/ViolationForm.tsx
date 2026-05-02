@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import type { TrafficViolationFull, CreateViolationDTO } from '../../types/violation.types';
+import type { TrafficViolationFull, CreateViolationDTO } from '@shared/types/violation.types';
 import {
   ViolationStatus,
   PaymentStatus,
@@ -10,7 +10,7 @@ import {
   INVALID_STATUS_COMBOS,
 } from '../../constants/enums';
 import { FINE_SCHEDULE } from '../../constants/fineSchedule';
-import { getFullName } from '../../types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import { useDrivers } from '../../hooks/useDrivers';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useRegistrations } from '../../hooks/useRegistrations';

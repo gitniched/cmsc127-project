@@ -12,9 +12,9 @@ import { useVehicle } from '../hooks/useVehicles';
 import { useDrivers } from '../hooks/useDrivers';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { useViolations } from '../hooks/useViolations';
-import type { CreateVehicleDTO } from '../types/vehicle.types';
-import type { CreateRegistrationDTO } from '../types/registration.types';
-import { getFullName } from '../types/driver.types';
+import type { CreateVehicleDTO } from '@shared/types/vehicle.types';
+import type { CreateRegistrationDTO } from '@shared/types/registration.types';
+import { getFullName } from '@shared/types/driver.types';
 import { buildRoute, ROUTES } from '../constants/routes';
 
 export default function VehicleDetail() {

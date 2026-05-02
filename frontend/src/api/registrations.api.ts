@@ -1,6 +1,5 @@
 import { apiFetch } from './base.api';
-import type { VehicleRegistration } from '../types/registration.types';
-import type { CreateRegistrationDTO } from '../types/registration.types';
+import type { VehicleRegistration, CreateRegistrationDTO } from '@shared/types/registration.types';
 
 export interface RegistrationFilters {
     plate_number?: string;

@@ -1,6 +1,6 @@
 import { Request, Response} from 'express';
 import pool from '../../config/mariadb';
-import { TrafficViolation, ViolationType } from '@shared/types/type';
+import { TrafficViolation, ViolationType } from '@shared/types/violation.types';
 
 const ALLOWED_VIOLATION_FIELDS = [
     'violation_status',

@@ -6,7 +6,7 @@ import Modal from '../components/ui/Modal';
 import DriverTable from '../components/drivers/DriverTable';
 import DriverForm from '../components/drivers/DriverForm';
 import { useDrivers } from '../hooks/useDrivers';
-import type { DriverWithAge, CreateDriverDTO } from '../types/driver.types';
+import type { DriverWithAge, CreateDriverDTO } from '@shared/types/driver.types';
 import { buildRoute } from '../constants/routes';
 
 type ModalState =

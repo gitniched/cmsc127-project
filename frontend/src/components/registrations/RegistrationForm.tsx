@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { CreateRegistrationDTO } from '../../types/registration.types';
-import { getRenewalMonthFromPlate, MONTH_NAMES } from '../../types/registration.types';
+import type { CreateRegistrationDTO } from '@shared/types/registration.types';
+import { getRenewalMonthFromPlate, MONTH_NAMES } from '@shared/types/registration.types';
 import { RegistrationStatus, REGISTRATION_STATUS_OPTIONS } from '../../constants/enums';
 
 interface RegistrationFormProps {

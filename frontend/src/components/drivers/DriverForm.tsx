@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Driver, DriverWithAge, CreateDriverDTO } from '../../types/driver.types';
+import type { Driver, DriverWithAge, CreateDriverDTO } from '@shared/types/driver.types';
 import { LicenseType, LicenseStatus } from '../../constants/enums';
 import {
   Sex,
@@ -76,7 +76,7 @@ function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: s
   if (isNaN(dob.getTime())) return '';
 
   const expiryYear = issue.getFullYear() + 5;
-  let month = dob.getMonth(); // 0-indexed
+  const month = dob.getMonth(); // 0-indexed
   let day   = dob.getDate();
 
   // Feb 29, if birth month/day doesn't exist in expiry year, fall back to Feb 28
