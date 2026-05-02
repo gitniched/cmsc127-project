@@ -25,6 +25,7 @@ SELECT
     first_name,
     middle_name,
     last_name,
+    birth_date,
     TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age,
     sex,
     address,
