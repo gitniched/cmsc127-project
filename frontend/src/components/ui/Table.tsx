@@ -58,10 +58,17 @@ export default function Table<T>({
   })();
 
   return (
-    <div className={['overflow-x-auto', className].join(' ')}>
+    <div className={['overflow-x-auto', className].join(' ')} style={{ background: 'transparent' }}>
       <table className="min-w-full">
-        <thead className={stickyHeader ? 'sticky top-0 z-10 bg-surface' : ''}>
-          <tr className="border-b border-border">
+        <thead
+          className={stickyHeader ? 'sticky top-0 z-10' : ''}
+          style={{
+            background: 'rgba(255, 255, 255, 0.45)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          <tr style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.7)' }}>
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -126,10 +133,10 @@ export default function Table<T>({
                 key={rowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={[
-                  'border-b border-border last:border-0',
                   'transition-colors duration-100',
-                  onRowClick ? 'cursor-pointer hover:bg-surface-inset' : 'hover:bg-surface-raised',
+                  onRowClick ? 'cursor-pointer hover:bg-white/20' : 'hover:bg-white/10',
                 ].join(' ')}
+                style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.5)' }}
               >
                 {columns.map((col) => (
                   <td
