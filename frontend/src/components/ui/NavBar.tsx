@@ -88,62 +88,42 @@ export default function NavBar() {
       <style>{`
         .nav-wrapper {
           position: fixed;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 50;
-          padding: 40px 16px 40px 12px;
+          width: 100%;
+          max-width: 900px;
+          padding: 12px 16px;
         }
 
-        .nav-sidebar {
+        .nav-topbar {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 2px;
-          padding: 8px;
-          width: 53px;
+          align-items: center;
+          gap: 4px;
+          padding: 6px 8px;
           border-radius: 16px;
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.45);
           backdrop-filter: blur(16px) saturate(1.6);
           -webkit-backdrop-filter: blur(16px) saturate(1.6);
           border: 1px solid rgba(226, 232, 240, 0.9);
           box-shadow:
             0 2px 8px 0 rgba(0,0,0,0.06),
-            0 0 0 0 rgba(0,0,0,0);
-          overflow: hidden;
-          transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1),
-                      box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1);
-          will-change: width;
-        }
-
-        .nav-wrapper:hover .nav-sidebar {
-          width: 168px;
-          box-shadow:
-            0 4px 24px 0 rgba(0,0,0,0.09),
-            0 1px 4px 0 rgba(0,0,0,0.04);
-        }
-
-        .nav-divider {
-          width: 100%;
-          height: 1px;
-          background: rgba(226, 232, 240, 0.8);
-          margin: 4px 0;
-          flex-shrink: 0;
+            0 1px 2px 0 rgba(0,0,0,0.03);
         }
 
         .nav-logo-btn {
           display: flex;
           align-items: center;
-          gap: 0;
-          width: 100%;
+          gap: 8px;
           height: 36px;
-          padding: 0 3px;
+          padding: 0 6px 0 3px;
           border-radius: 10px;
-          overflow: hidden;
           flex-shrink: 0;
           background: none;
           border: none;
           cursor: default;
+          margin-right: 4px;
         }
 
         .nav-logo-icon {
@@ -157,40 +137,42 @@ export default function NavBar() {
           flex-shrink: 0;
         }
 
-        .nav-label-text {
-          font-size: 13px;
-          font-weight: 600;
+        .nav-brand-text {
+          font-size: 14px;
+          font-weight: 700;
+          font-family: 'Syne', sans-serif;
           color: #0f172a;
-          letter-spacing: -0.01em;
+          letter-spacing: -0.02em;
           white-space: nowrap;
-          overflow: hidden;
-          opacity: 0;
-          transform: translateX(-4px);
-          transition: opacity 160ms ease,
-                      transform 160ms ease;
-          margin-left: 10px;
         }
 
-        .nav-wrapper:hover .nav-label-text {
-          opacity: 1;
-          transform: translateX(0);
-          transition: opacity 160ms ease 80ms,
-                      transform 160ms ease 80ms;
+        .nav-divider {
+          width: 1px;
+          height: 22px;
+          background: rgba(226, 232, 240, 0.8);
+          margin: 0 4px;
+          flex-shrink: 0;
+        }
+
+        .nav-links {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          margin-left: auto;
         }
 
         .nav-link {
           display: flex;
           align-items: center;
-          width: 100%;
+          gap: 6px;
           height: 36px;
-          padding: 0 3px;
+          padding: 0 10px;
           border-radius: 10px;
           text-decoration: none;
           color: #64748b;
-          overflow: hidden;
           flex-shrink: 0;
           transition: background 120ms ease, color 120ms ease;
-          gap: 0;
+          white-space: nowrap;
         }
 
         .nav-link:hover {
@@ -208,63 +190,52 @@ export default function NavBar() {
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          width: 28px;
-          height: 28px;
+          width: 18px;
+          height: 18px;
         }
 
         .nav-link-label {
           font-size: 13.5px;
           font-weight: 500;
-          white-space: nowrap;
-          overflow: hidden;
-          opacity: 0;
-          transform: translateX(-4px);
-          transition: opacity 160ms ease,
-                      transform 160ms ease;
-          margin-left: 6px;
-        }
-
-        .nav-wrapper:hover .nav-link-label {
-          opacity: 1;
-          transform: translateX(0);
-          transition: opacity 160ms ease 80ms,
-                      transform 160ms ease 80ms;
         }
       `}</style>
 
       <div className="nav-wrapper">
-        <nav className="nav-sidebar">
+        <nav className="nav-topbar">
           <div className="nav-logo-btn">
             <div className="nav-logo-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M2 10V5.5L5 2h4l3 3.5V10"
-                  stroke="white"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <rect x="1" y="10" width="12" height="2.5" rx="0.8" fill="white" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M3 14h18v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4z" fill="white"/>
+                <path d="M3 14l2.5-5h13l2.5 5" fill="white"/>
+                <path d="M7.5 9l1.5-3h6l1.5 3" fill="white" opacity="0.5"/>
+                <rect x="8" y="10" width="3" height="3" rx="0.5" fill="#2563eb" opacity="0.6"/>
+                <rect x="13" y="10" width="3" height="3" rx="0.5" fill="#2563eb" opacity="0.6"/>
+                <circle cx="7" cy="18" r="2" fill="#2563eb"/>
+                <circle cx="7" cy="18" r="0.8" fill="white"/>
+                <circle cx="17" cy="18" r="2" fill="#2563eb"/>
+                <circle cx="17" cy="18" r="0.8" fill="white"/>
               </svg>
             </div>
-            <span className="nav-label-text">BiyaheDB</span>
+            <span className="nav-brand-text">BiyaheDB</span>
           </div>
 
           <div className="nav-divider" />
 
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === ROUTES.dashboard}
-              className={({ isActive }) =>
-                ['nav-link', isActive ? 'active' : ''].join(' ').trim()
-              }
-            >
-              <span className="nav-link-icon">{item.icon}</span>
-              <span className="nav-link-label">{item.label}</span>
-            </NavLink>
-          ))}
+          <div className="nav-links">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === ROUTES.dashboard}
+                className={({ isActive }) =>
+                  ['nav-link', isActive ? 'active' : ''].join(' ').trim()
+                }
+              >
+                <span className="nav-link-icon">{item.icon}</span>
+                <span className="nav-link-label">{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
         </nav>
       </div>
     </>
