@@ -4,12 +4,12 @@ export { buildRoute } from './constants/routes';
 import NavBar from './components/ui/NavBar';
 
 import Dashboard      from './pages/Dashboard';
-// import DriverList     from './pages/DriverList';
-// import DriverProfile  from './pages/DriverProfile';
-// import VehicleList    from './pages/VehicleList';
-// import VehicleDetail  from './pages/VehicleDetail';
-// import ViolationList  from './pages/ViolationList';
-// import ViolationDetail from './pages/ViolationDetail';
+import DriverList     from './pages/DriverList';
+import DriverProfile  from './pages/DriverProfile';
+import VehicleList    from './pages/VehicleList';
+import VehicleDetail  from './pages/VehicleDetail';
+import ViolationList  from './pages/ViolationList';
+import ViolationDetail from './pages/ViolationDetail';
 import Reports        from './pages/Reports';
 
 function App() {
@@ -23,16 +23,16 @@ function App() {
             <Route path={ROUTES.dashboard}       element={<Dashboard />} />
 
             {/* Drivers */}
-            {/* <Route path={ROUTES.drivers}         element={<DriverList />} />
-            <Route path={ROUTES.driverProfile}   element={<DriverProfile />} /> */}
+            <Route path={ROUTES.drivers}         element={<DriverList />} />
+            <Route path={ROUTES.driverProfile}   element={<DriverProfile />} />
 
             {/* Vehicles */}
-            {/* <Route path={ROUTES.vehicles}        element={<VehicleList />} />
-            <Route path={ROUTES.vehicleDetail}   element={<VehicleDetail />} /> */}
+            <Route path={ROUTES.vehicles}        element={<VehicleList />} />
+            <Route path={ROUTES.vehicleDetail}   element={<VehicleDetail />} />
 
             {/* Violations */}
-            {/* <Route path={ROUTES.violations}      element={<ViolationList />} />
-            <Route path={ROUTES.violationDetail} element={<ViolationDetail />} /> */}
+            <Route path={ROUTES.violations}      element={<ViolationList />} />
+            <Route path={ROUTES.violationDetail} element={<ViolationDetail />} />
 
             {/* Reports */}
             <Route path={ROUTES.reports}         element={<Reports />} />
