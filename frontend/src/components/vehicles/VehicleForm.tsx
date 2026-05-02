@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Vehicle, VehicleWithOwner, CreateVehicleDTO } from '../../types/vehicle';
-import type { DriverWithAge } from '../../types/driver';
-import { getFullName } from '../../types/driver';
+import type { Vehicle, VehicleWithOwner, CreateVehicleDTO } from '../../types/vehicle.types';
+import type { DriverWithAge } from '../../types/driver.types';
+import { getFullName } from '../../types/driver.types';
 import { VehicleType, VEHICLE_TYPE_OPTIONS } from '../../constants/enums';
 
 interface VehicleFormProps {
-  open:     boolean;
-  onClose:  () => void;
-  onSubmit: (data: CreateVehicleDTO) => void;
-  initial?: VehicleWithOwner | Vehicle | null;
-  drivers:  DriverWithAge[];
+  open:       boolean;
+  onClose:    () => void;
+  onSubmit:   (data: CreateVehicleDTO) => void;
+  initial?:   VehicleWithOwner | Vehicle | null;
+  drivers:    DriverWithAge[];
+  saveError?: string | null;
+  saving?:    boolean;
 }
 
 type FormState = {
@@ -68,7 +70,7 @@ interface FieldError {
   [key: string]: string;
 }
 
-export default function VehicleForm({ open, onClose, onSubmit, initial, drivers }: VehicleFormProps) {
+export default function VehicleForm({ open, onClose, onSubmit, initial, drivers, saveError, saving }: VehicleFormProps) {
   const isEdit = !!initial;
   const [form, setForm]           = useState<FormState>(EMPTY);
   const [errors, setErrors]       = useState<FieldError>({});
@@ -153,14 +155,20 @@ export default function VehicleForm({ open, onClose, onSubmit, initial, drivers 
       size="lg"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            {isEdit ? 'Save Changes' : 'Add Vehicle'}
+          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Vehicle'}
           </Button>
         </>
       }
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
+      <div className="flex flex-col gap-4">
+        {saveError && (
+          <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+            {saveError}
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
         <div>
           <label className={labelBase}>Plate Number <span className="text-danger-500">*</span></label>
           <input
@@ -293,6 +301,7 @@ export default function VehicleForm({ open, onClose, onSubmit, initial, drivers 
             </div>
           )}
         </div>
+      </div>
       </div>
     </Modal>
   );
