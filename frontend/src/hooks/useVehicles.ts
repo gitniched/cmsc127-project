@@ -5,10 +5,10 @@ import {
   createVehicle,
   updateVehicle,
   deleteVehicle,
-} from '../api/vehicles';
-import type { VehicleFilters } from '../api/vehicles';
-import type { Vehicle, VehicleWithOwner, CreateVehicleDTO, UpdateVehicleDTO } from '../types/vehicle';
-import { getDrivers } from '../api/driver';
+} from '../api/vehicles.api';
+import type { VehicleFilters } from '../api/vehicles.api';
+import type { Vehicle, VehicleWithOwner, CreateVehicleDTO, UpdateVehicleDTO } from '../types/vehicle.types';
+import { getDrivers } from '../api/driver.api';
 
 async function enrichWithOwner(vehicles: Vehicle[]): Promise<VehicleWithOwner[]> {
   if (vehicles.length === 0) return [];
