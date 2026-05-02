@@ -1,6 +1,6 @@
-import { apiFetch } from './base';
-import type { DriverWithAge } from '../types/driver';
-import type { CreateDriverDTO, UpdateDriverDTO, RenewLicenseResult } from '../types/driver';
+import { apiFetch } from './base.api';
+import type { DriverWithAge } from '../types/driver.types';
+import type { CreateDriverDTO, UpdateDriverDTO, RenewLicenseResult } from '../types/driver.types';
 
 export interface DriverFilters {
     license_type?: string;
