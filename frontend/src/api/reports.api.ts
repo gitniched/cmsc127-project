@@ -1,6 +1,6 @@
 import { apiFetch } from './base.api';
 import type { DriverWithAge } from '@shared/types/driver.types';
-import type { Vehicle } from '@shared/types/vehicle.types';
+import type { Vehicle, VehicleWithOwner } from '@shared/types/vehicle.types';
 import type { ViolationListRow } from './violations.api';
 
 export interface Report3Row extends Vehicle {
