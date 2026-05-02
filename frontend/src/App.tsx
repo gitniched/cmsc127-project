@@ -15,7 +15,7 @@ import Reports        from './pages/Reports';
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-surface-raised">
+      <div className="min-h-screen flex flex-col">
         <NavBar />
         <main className="flex-1"></main>
           <Routes>
