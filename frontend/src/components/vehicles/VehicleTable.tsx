@@ -4,7 +4,7 @@ import type { ColumnDef } from '../ui/Table';
 import FilterBar from '../ui/FilterBar';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
-import type { VehicleWithOwner } from '../../types/vehicle';
+import type { VehicleWithOwner } from '../../types/vehicle.types';
 import { VehicleType, VEHICLE_TYPE_OPTIONS } from '../../constants/enums';
 
 interface VehicleTableProps {
