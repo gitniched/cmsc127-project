@@ -1,300 +1,169 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Driver, DriverWithAge, CreateDriverDTO } from '../../types/driver';
-import {
-  LicenseType,
-  LicenseStatus,
-  Sex,
-  LICENSE_TYPE_OPTIONS,
-  LICENSE_STATUS_OPTIONS,
-  MIN_AGE_FOR_LICENSE,
-} from '../../constants/enums';
+import Badge from '../ui/Badge';
+import type { DriverWithAge } from '../../types/driver';
+import { getFullName } from '../../types/driver';
+import { LicenseStatus, PaymentStatus, ViolationStatus } from '../../constants/enums';
+import { mockViolations } from '../../mock/violations';
 
-interface DriverFormProps {
-  open:     boolean;
-  onClose:  () => void;
-  onSubmit: (data: CreateDriverDTO) => void;
-  initial?: DriverWithAge | Driver | null;
+interface RenewLicenseModalProps {
+  open:      boolean;
+  onClose:   () => void;
+  driver:    DriverWithAge;
+  onRenewed: (newExpiry: string) => void;
 }
 
-type FormState = {
-  first_name:         string;
-  last_name:          string;
-  middle_name:        string;
-  birth_date:         string;
-  sex:                Sex;
-  address:            string;
-  license_number:     string;
-  license_type:       LicenseType;
-  license_status:     LicenseStatus;
-  license_issue_date: string;
-};
+type ModalStep =
+  | { step: 'confirm' }
+  | { step: 'result'; success: boolean; message: string; newExpiry?: string };
 
-const EMPTY: FormState = {
-  first_name:         '',
-  last_name:          '',
-  middle_name:        '',
-  birth_date:         '',
-  sex:                Sex.Male,
-  address:            '',
-  license_number:     '',
-  license_type:       LicenseType.NonProfessional,
-  license_status:     LicenseStatus.Active,
-  license_issue_date: '',
-};
-
-function toFormState(d: Driver | DriverWithAge): FormState {
-  return {
-    first_name:         d.first_name,
-    last_name:          d.last_name,
-    middle_name:        d.middle_name ?? '',
-    birth_date:         d.birth_date,
-    sex:                d.sex,
-    address:            d.address,
-    license_number:     d.license_number,
-    license_type:       d.license_type,
-    license_status:     d.license_status,
-    license_issue_date: d.license_issue_date,
-  };
+function formatDate(iso: string): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-PH', {
+    year:  'numeric',
+    month: 'long',
+    day:   'numeric',
+  });
 }
 
-function computeExpiry(birthDate: string, _licenseType: LicenseType): string {
-  if (!birthDate) return '';
-  const dob = new Date(birthDate);
-  if (isNaN(dob.getTime())) return '';
-  const expiry = new Date(dob);
-  expiry.setFullYear(expiry.getFullYear() + 5);
-  return expiry.toISOString().slice(0, 10);
+function getUnpaidCount(licenseNumber: string): number {
+  return mockViolations.filter(
+    (v) =>
+      v.license_number === licenseNumber &&
+      v.payment_status === PaymentStatus.Unpaid &&
+      v.violation_status !== ViolationStatus.Dismissed &&
+      v.violation_status !== ViolationStatus.Contested
+  ).length;
 }
 
-function getAgeFromBirthDate(birthDate: string): number {
-  if (!birthDate) return 0;
-  const dob = new Date(birthDate);
-  const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-  return age;
-}
-
-const inputBase = [
-  'h-9 px-3 text-sm rounded-md w-full',
-  'bg-surface border border-border text-ink placeholder:text-ink-faint',
-  'outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100',
-  'transition-colors duration-150',
-].join(' ');
-
-const labelBase = 'block text-xs font-medium text-ink-muted mb-1';
-
-interface FieldError {
-  [key: string]: string;
-}
-
-export default function DriverForm({ open, onClose, onSubmit, initial }: DriverFormProps) {
-  const isEdit = !!initial;
-  const [form, setForm]     = useState<FormState>(EMPTY);
-  const [errors, setErrors] = useState<FieldError>({});
+export default function RenewLicenseModal({
+  open,
+  onClose,
+  driver,
+  onRenewed,
+}: RenewLicenseModalProps) {
+  const [modalStep, setModalStep] = useState<ModalStep>({ step: 'confirm' });
 
   useEffect(() => {
-    if (open) {
-      setForm(initial ? toFormState(initial) : EMPTY);
-      setErrors({});
-    }
-  }, [open, initial]);
+    if (open) setModalStep({ step: 'confirm' });
+  }, [open]);
 
-  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => ({ ...prev, [key]: '' }));
-  }
+  const unpaidCount = getUnpaidCount(driver.license_number);
 
-  function validate(): boolean {
-    const e: FieldError = {};
-
-    if (!form.first_name.trim())     e.first_name         = 'Required';
-    if (!form.last_name.trim())      e.last_name          = 'Required';
-    if (!form.birth_date)            e.birth_date         = 'Required';
-    if (!form.address.trim())        e.address            = 'Required';
-    if (!form.license_number.trim()) e.license_number     = 'Required';
-    if (!form.license_issue_date)    e.license_issue_date = 'Required';
-
-    if (form.birth_date) {
-      const age    = getAgeFromBirthDate(form.birth_date);
-      const minAge = MIN_AGE_FOR_LICENSE[form.license_type];
-      if (age < minAge) {
-        e.birth_date = `Must be at least ${minAge} years old for ${form.license_type}`;
-      }
+  function handleConfirm() {
+    if (driver.license_status === LicenseStatus.Revoked) {
+      setModalStep({
+        step:    'result',
+        success: false,
+        message: 'License is revoked and cannot be renewed.',
+      });
+      return;
     }
 
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
+    if (driver.license_status === LicenseStatus.Suspended) {
+      setModalStep({
+        step:    'result',
+        success: false,
+        message: 'License is suspended. Resolve all pending violations before renewing.',
+      });
+      return;
+    }
 
-  function handleSubmit() {
-    if (!validate()) return;
-    onSubmit({
-      first_name:         form.first_name.trim(),
-      last_name:          form.last_name.trim(),
-      middle_name:        form.middle_name.trim() || null,
-      birth_date:         form.birth_date,
-      sex:                form.sex,
-      address:            form.address.trim(),
-      license_number:     form.license_number.trim(),
-      license_type:       form.license_type,
-      license_status:     form.license_status,
-      license_issue_date: form.license_issue_date,
+    if (unpaidCount > 0) {
+      setModalStep({
+        step:    'result',
+        success: false,
+        message: `Driver has ${unpaidCount} unpaid violation(s). All fines must be settled before renewal.`,
+      });
+      return;
+    }
+
+    const today         = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentExpiry = new Date(driver.license_expiry_date);
+    const base          = currentExpiry > today ? currentExpiry : today;
+    const newExpiry     = new Date(base);
+    newExpiry.setFullYear(newExpiry.getFullYear() + 5);
+    const newExpiryStr  = newExpiry.toISOString().slice(0, 10);
+
+    onRenewed(newExpiryStr);
+    setModalStep({
+      step:      'result',
+      success:   true,
+      message:   'License renewed successfully.',
+      newExpiry: newExpiryStr,
     });
   }
 
-  const computedExpiry = computeExpiry(form.birth_date, form.license_type);
+  function handleClose() {
+    onClose();
+  }
+
+  const isResult  = modalStep.step === 'result';
+  const isSuccess = isResult && modalStep.success;
 
   return (
     <Modal
       open={open}
-      onClose={onClose}
-      title={isEdit ? 'Edit Driver' : 'Add Driver'}
-      size="lg"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            {isEdit ? 'Save Changes' : 'Add Driver'}
-          </Button>
-        </>
-      }
+      onClose={handleClose}
+      title={isResult ? (isSuccess ? 'License Renewed' : 'Renewal Failed') : 'Renew License'}
+      size="sm"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
-        <div>
-          <label className={labelBase}>First Name <span className="text-danger-500">*</span></label>
-          <input
-            className={[inputBase, errors.first_name ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.first_name}
-            onChange={(e) => set('first_name', e.target.value)}
-            placeholder="Juan"
-          />
-          {errors.first_name && <p className="mt-1 text-xs text-danger-500">{errors.first_name}</p>}
-        </div>
+      {modalStep.step === 'confirm' && (
+        <div className="flex flex-col gap-5">
+          <p className="text-sm text-ink-muted">
+            Renewing license for{' '}
+            <span className="font-semibold text-ink">{getFullName(driver)}</span>.
+          </p>
 
-        <div>
-          <label className={labelBase}>Last Name <span className="text-danger-500">*</span></label>
-          <input
-            className={[inputBase, errors.last_name ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.last_name}
-            onChange={(e) => set('last_name', e.target.value)}
-            placeholder="dela Cruz"
-          />
-          {errors.last_name && <p className="mt-1 text-xs text-danger-500">{errors.last_name}</p>}
-        </div>
+          <div className="flex flex-col gap-3 bg-surface-inset border border-border rounded-md px-4 py-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">Current Status</span>
+              <Badge status={driver.license_status} />
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">Current Expiry</span>
+              <span className="text-ink">{formatDate(driver.license_expiry_date)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-ink-muted">Unpaid Violations</span>
+              <span className={unpaidCount > 0 ? 'text-danger-600 font-medium' : 'text-ink'}>
+                {unpaidCount}
+              </span>
+            </div>
+          </div>
 
-        <div>
-          <label className={labelBase}>Middle Name</label>
-          <input
-            className={inputBase}
-            value={form.middle_name}
-            onChange={(e) => set('middle_name', e.target.value)}
-            placeholder="Optional"
-          />
+          <div className="flex justify-end gap-2 border-t border-border pt-4">
+            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
+            <Button variant="primary" onClick={handleConfirm}>Confirm Renewal</Button>
+          </div>
         </div>
+      )}
 
-        <div>
-          <label className={labelBase}>Birth Date <span className="text-danger-500">*</span></label>
-          <input
-            type="date"
-            className={[inputBase, errors.birth_date ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.birth_date}
-            onChange={(e) => set('birth_date', e.target.value)}
-          />
-          {errors.birth_date && <p className="mt-1 text-xs text-danger-500">{errors.birth_date}</p>}
-        </div>
+      {modalStep.step === 'result' && (
+        <div className="flex flex-col gap-5">
+          <p className={[
+            'text-sm',
+            modalStep.success ? 'text-ink' : 'text-danger-600',
+          ].join(' ')}>
+            {modalStep.message}
+          </p>
 
-        <div>
-          <label className={labelBase}>Sex <span className="text-danger-500">*</span></label>
-          <select
-            className={inputBase}
-            value={form.sex}
-            onChange={(e) => set('sex', e.target.value as Sex)}
-          >
-            <option value={Sex.Male}>Male</option>
-            <option value={Sex.Female}>Female</option>
-          </select>
-        </div>
+          {modalStep.success && modalStep.newExpiry && (
+            <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-md px-4 py-3">
+              <span className="text-sm text-emerald-700 font-medium">New Expiry Date</span>
+              <span className="text-sm text-emerald-800 font-semibold">
+                {formatDate(modalStep.newExpiry)}
+              </span>
+            </div>
+          )}
 
-        <div className="sm:col-span-2">
-          <label className={labelBase}>Address <span className="text-danger-500">*</span></label>
-          <input
-            className={[inputBase, errors.address ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.address}
-            onChange={(e) => set('address', e.target.value)}
-            placeholder="House No., Street, City"
-          />
-          {errors.address && <p className="mt-1 text-xs text-danger-500">{errors.address}</p>}
+          <div className="flex justify-end border-t border-border pt-4">
+            <Button variant="ghost" onClick={handleClose}>Close</Button>
+          </div>
         </div>
-
-        <div className="sm:col-span-2 border-t border-border pt-4 mt-1">
-          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-3">License Information</p>
-        </div>
-
-        <div>
-          <label className={labelBase}>License Number <span className="text-danger-500">*</span></label>
-          <input
-            className={[inputBase, 'font-mono', errors.license_number ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.license_number}
-            onChange={(e) => set('license_number', e.target.value)}
-            placeholder="N01-23-100001"
-            disabled={isEdit}
-          />
-          {errors.license_number && <p className="mt-1 text-xs text-danger-500">{errors.license_number}</p>}
-        </div>
-
-        <div>
-          <label className={labelBase}>License Type <span className="text-danger-500">*</span></label>
-          <select
-            className={inputBase}
-            value={form.license_type}
-            onChange={(e) => set('license_type', e.target.value as LicenseType)}
-          >
-            {LICENSE_TYPE_OPTIONS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelBase}>License Status <span className="text-danger-500">*</span></label>
-          <select
-            className={inputBase}
-            value={form.license_status}
-            onChange={(e) => set('license_status', e.target.value as LicenseStatus)}
-          >
-            {LICENSE_STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelBase}>Issue Date <span className="text-danger-500">*</span></label>
-          <input
-            type="date"
-            className={[inputBase, errors.license_issue_date ? 'border-danger-400 focus:border-danger-400 focus:ring-danger-100' : ''].join(' ')}
-            value={form.license_issue_date}
-            onChange={(e) => set('license_issue_date', e.target.value)}
-          />
-          {errors.license_issue_date && <p className="mt-1 text-xs text-danger-500">{errors.license_issue_date}</p>}
-        </div>
-
-        <div>
-          <label className={labelBase}>Expiry Date</label>
-          <input
-            className={[inputBase, 'bg-surface-inset text-ink-muted cursor-not-allowed'].join(' ')}
-            value={computedExpiry}
-            readOnly
-            disabled
-            placeholder="Auto-computed from birth date"
-          />
-          <p className="mt-1 text-xs text-ink-faint">Auto-computed by trigger</p>
-        </div>
-      </div>
+      )}
     </Modal>
   );
 }
