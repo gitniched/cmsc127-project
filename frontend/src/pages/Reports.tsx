@@ -99,9 +99,9 @@ function runReport7(params: Report7Params): Report7Row[] {
   const violationsByPlate: Record<string, number> = {};
   mockViolations
     .filter((v) => {
-      const matchCity   = city   ? v.violation_location_city.toLowerCase().includes(city)     : true;
-      const matchRegion = region ? v.violation_location_region.toLowerCase().includes(region) : true;
-      return matchCity && matchRegion;
+      const matchCity   = city   ? v.violation_location_city.toLowerCase().includes(city)     : false;
+      const matchRegion = region ? v.violation_location_region.toLowerCase().includes(region) : false;
+      return matchCity || matchRegion;
     })
     .forEach((v) => {
       violationsByPlate[v.plate_number] = (violationsByPlate[v.plate_number] ?? 0) + 1;
