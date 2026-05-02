@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes } from 'react';
-import { useEffect, useRef, useState,  } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value?:       string;
@@ -56,10 +56,14 @@ export default function SearchInput({
         placeholder={placeholder}
         className={[
           'w-full h-9 pl-9 pr-8 text-sm rounded-md',
-          'bg-surface border border-border text-ink placeholder:text-ink-faint',
+          'border text-ink placeholder:text-ink-faint',
           'outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100',
           'transition-colors duration-150',
         ].join(' ')}
+        style={{
+          background: 'rgba(255, 255, 255, 0.45)',
+          borderColor: 'rgba(226, 232, 240, 0.9)',
+        }}
       />
 
       {inner && (
