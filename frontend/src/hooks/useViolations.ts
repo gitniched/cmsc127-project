@@ -5,17 +5,12 @@ import {
   createViolation,
   updateViolation,
   deleteViolation,
-} from '../api/violations';
-import type { ViolationFilters, ViolationListRow } from '../api/violations';
-import type {
-  TrafficViolationFull,
-  CreateViolationDTO,
-  UpdateViolationDTO,
-  ViolationTypeLineItem,
-} from '../types/violation';
+} from '../api/violations.api';
+import type { ViolationFilters, ViolationListRow } from '../api/violations.api';
+import type { TrafficViolationFull, CreateViolationDTO, UpdateViolationDTO, ViolationTypeLineItem } from '../types/violation.types';
 import { FINE_SCHEDULE } from '../constants/fineSchedule';
 import type { ViolationTypeEnum } from '../constants/enums';
-import { getDrivers } from '../api/driver';
+import { getDrivers } from '../api/driver.api';
 
 function mapTypeStringsToLineItems(types: string[]): ViolationTypeLineItem[] {
   return types.map((t) => ({
