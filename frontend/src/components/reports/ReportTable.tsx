@@ -4,9 +4,9 @@ import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import type { ColumnDef } from '../ui/Table';
 import type { ReportId } from './ReportRunner';
-import type { DriverWithAge } from '../../types/driver';
-import type { VehicleWithOwner } from '../../types/vehicle';
-import type { TrafficViolationFull } from '../../types/violation';
+import type { DriverWithAge } from '../../types/driver.types';
+import type { VehicleWithOwner } from '../../types/vehicle.types';
+import type { TrafficViolationFull } from '../../types/violation.types';
 import { ROUTES } from '../../constants/routes';
 
 export type Report1Row = DriverWithAge;
