@@ -1,39 +1,35 @@
-
 import { ViolationStatus, PaymentStatus, ViolationTypeEnum } from '../constants/enums';
-import { FINE_SCHEDULE, computeTotalFine } from '../constants/fineSchedule';
+import { FINE_SCHEDULE } from '../constants/fineSchedule';
 
 export interface TrafficViolation {
-  uovr_number:               string;               // VARCHAR(20) PK
-  officer:                   string | null;         // VARCHAR(100) nullable
+  uovr_number:               string;
+  officer:                   string | null;
   violation_status:          ViolationStatus;
-  violation_location_city:   string;               // VARCHAR(100)
-  violation_location_region: string;               // VARCHAR(100)
-  violation_date:            string;               // DATE as ISO string 'YYYY-MM-DD'
+  violation_location_city:   string;
+  violation_location_region: string;
+  violation_date:            string;
   payment_status:            PaymentStatus;
-  license_number:            string;               // FK → driver.license_number
-  plate_number:              string;               // FK → vehicle.plate_number
-  registration_number:       string | null;        // FK → vehicle_registration.registration_number (optional)
+  license_number:            string;
+  plate_number:              string;
+  registration_number:       string | null;
 }
 
-// Mirrors the violation_type table
-// Note: (uovr_number, violation_type) is a composite PK in the DB
 export interface ViolationType {
   uovr_number:    string;
   violation_type: ViolationTypeEnum;
 }
+
 export interface ViolationTypeLineItem {
   violation_type: ViolationTypeEnum;
-  base_fine:      number; // looked up from FINE_SCHEDULE
+  base_fine:      number;
 }
 
 export interface TrafficViolationFull extends TrafficViolation {
-  driver_name:     string;               // CONCAT(first_name, ' ', last_name)
+  driver_name:     string;
   violation_types: ViolationTypeLineItem[];
-  total_fine:      number;               // sum of all base_fines
+  total_fine:      number;
 }
 
-
-// Used when creating a violation (POST /api/violations)
 export interface CreateViolationDTO {
   uovr_number:               string;
   officer?:                  string;
@@ -45,11 +41,13 @@ export interface CreateViolationDTO {
   license_number:            string;
   plate_number:              string;
   registration_number?:      string;
-  violation_types:           ViolationTypeEnum[]; // sent as array; backend inserts rows into violation_type
+  violation_types:           ViolationTypeEnum[];
 }
 
-export type UpdateViolationDTO = Partial<CreateViolationDTO>;
-
+export interface UpdateViolationDTO {
+  violation_status?: ViolationStatus;
+  payment_status?:   PaymentStatus;
+}
 
 export function buildViolationLineItems(types: ViolationTypeEnum[]): ViolationTypeLineItem[] {
   return types.map((t) => ({
