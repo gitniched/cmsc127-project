@@ -1,4 +1,4 @@
-import { Request, Response} from "express";
+import { Request, Response} from 'express';
 import { VehicleRegistration } from '@shared/types/type';
 import pool from '../../config/mariadb';
 
@@ -18,9 +18,8 @@ export const addRegistration = async(req:Request, res: Response) => {
             data.registration_status
         ];
 
-        const result = await conn.query(query, values);
-
-        res.status(201).json({ message: 'Registration added successfully'});
+        await conn.query(query, values);
+        res.status(201).json({ message: 'Registration added successfully' });
     } catch (error) {
         console.error('Error adding registration:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -29,52 +28,37 @@ export const addRegistration = async(req:Request, res: Response) => {
     }
 };
 
-export const renewRegistration = async (req: Request, res: Response) => {
-    const plate_number = req.params.plate_number;
-    const { registration_date } = req.body;
-    let conn;
-
-    try{
-        conn = await pool.getConnection();
-
-        const query = "UPDATE vehicle_registration SET registration_date = ?, registration_status = 'Active' WHERE plate_number = ?";
-
-        const result = await conn.query(query, [registration_date, plate_number]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Registration record not found for this plate' });
-        }
-
-        res.status(200).json({ message: 'Registration renewed successfully', });
-    } catch (error) {
-        console.error('Error updating registration:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    } finally {
-        if (conn) conn.release();
-    }
-};
-
-export const getRegistration = async (req: Request, res: Response) => {    
+export const getRegistrations = async (req: Request, res: Response) => {
     let conn;
 
     try {
         conn = await pool.getConnection();
 
-        let query = 'SELECT * FROM vehicle_registration';
         const queryParams = req.query;
-        const filteredWith: string[] = []; // Use lowercase string
+        const active_only = queryParams.active_only === 'true';
+
+        let query = active_only
+            ? 'SELECT * FROM v_active_registrations'
+            : 'SELECT * FROM vehicle_registration';
+
+        const conditions: string[] = [];
         const values: any[] = [];
 
-        const filters = ['registration_status', 'registration_date'];
-        Object.keys(queryParams).forEach((key: string) => {
-            if (filters.includes(key) && queryParams[key]) {
-                filteredWith.push(`${key} = ?`);
+        const filters = ['registration_status', 'registration_date', 'plate_number'];
+        filters.forEach((key) => {
+            if (queryParams[key] && !active_only) {
+                conditions.push(`${key} = ?`);
                 values.push(queryParams[key]);
             }
         });
 
-        if (filteredWith.length > 0) {
-            query += ' WHERE ' + filteredWith.join(' AND ');
+        if (queryParams.plate_number && active_only) {
+            conditions.push('plate_number = ?');
+            values.push(queryParams.plate_number);
+        }
+
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
         }
 
         // to be tested
@@ -97,4 +81,28 @@ export const getRegistration = async (req: Request, res: Response) => {
     }
 };
 
-export default{ getRegistration, renewRegistration, addRegistration };
+export const getRegistrationByNumber = async (req: Request, res: Response) => {
+    const registration_number = req.params.registration_number;
+    let conn;
+
+    try {
+        conn = await pool.getConnection();
+        const rows: VehicleRegistration[] = await conn.query(
+            'SELECT * FROM vehicle_registration WHERE registration_number = ?',
+            [registration_number]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Registration not found' });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error('Error retrieving registration:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
+export default { addRegistration, getRegistrations, getRegistrationByNumber };
