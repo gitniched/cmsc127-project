@@ -1,6 +1,5 @@
-import { apiFetch } from './base';
-import type { TrafficViolation } from '../types/violation';
-import type { CreateViolationDTO, UpdateViolationDTO } from '../types/violation';
+import { apiFetch } from './base.api';
+import type { TrafficViolation, CreateViolationDTO, UpdateViolationDTO } from '../types/violation.types';
 
 export interface ViolationFilters {
     violation_status?: string;
