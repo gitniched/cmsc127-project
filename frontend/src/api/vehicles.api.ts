@@ -1,6 +1,6 @@
-import { apiFetch } from './base';
-import type { Vehicle } from '../types/vehicle';
-import type { CreateVehicleDTO, UpdateVehicleDTO } from '../types/vehicle';
+import { apiFetch } from './base.api';
+import type { Vehicle } from '../types/vehicle.types';
+import type { CreateVehicleDTO, UpdateVehicleDTO } from '../types/vehicle.types';
 
 export interface VehicleFilters {
     vehicle_type?: string;
