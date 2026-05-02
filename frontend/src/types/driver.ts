@@ -18,7 +18,6 @@ export interface DriverWithAge extends Driver {
   age: number; // TIMESTAMPDIFF(YEAR, birth_date, CURDATE())
 }
 
-
 export type CreateDriverDTO = Omit<Driver, 'license_expiry_date'>;
 
 export type UpdateDriverDTO = Partial<CreateDriverDTO>;
