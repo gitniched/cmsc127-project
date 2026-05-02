@@ -7,7 +7,7 @@ import {
   getReport5,
   getReport6,
   getReport7,
-} from '../api/reports';
+} from '../api/reports.api';
 
 export type ReportId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
