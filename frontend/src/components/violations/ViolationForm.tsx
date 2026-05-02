@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import type { TrafficViolationFull, CreateViolationDTO } from '../../types/violation';
+import type { TrafficViolationFull, CreateViolationDTO } from '../../types/violation.types';
 import {
   ViolationStatus,
   PaymentStatus,
@@ -10,16 +10,18 @@ import {
   INVALID_STATUS_COMBOS,
 } from '../../constants/enums';
 import { FINE_SCHEDULE } from '../../constants/fineSchedule';
-import { mockDrivers } from '../../mock/drivers';
-import { mockVehicles } from '../../mock/vehicles';
-import { mockRegistrations } from '../../mock/registrations';
-import { getFullName } from '../../types/driver';
+import { getFullName } from '../../types/driver.types';
+import { useDrivers } from '../../hooks/useDrivers';
+import { useVehicles } from '../../hooks/useVehicles';
+import { useRegistrations } from '../../hooks/useRegistrations';
 import Button from '../ui/Button';
 
 interface ViolationFormProps {
   violation?: TrafficViolationFull;
   onSubmit:   (dto: CreateViolationDTO) => void;
   onCancel:   () => void;
+  saving?:    boolean;
+  saveError?: string | null;
 }
 
 interface TypeRow {
@@ -46,24 +48,33 @@ function fieldError(errors: Record<string, string>, key: string) {
   return errors[key] ? <p className={errorText}>{errors[key]}</p> : null;
 }
 
-export default function ViolationForm({ violation, onSubmit, onCancel }: ViolationFormProps) {
+export default function ViolationForm({ violation, onSubmit, onCancel, saving, saveError }: ViolationFormProps) {
   const isEdit = !!violation;
 
-  const [uovrNumber,       setUovrNumber]       = useState(violation?.uovr_number ?? '');
-  const [officer,          setOfficer]          = useState(violation?.officer ?? '');
-  const [violationDate,    setViolationDate]    = useState(violation?.violation_date ?? '');
-  const [city,             setCity]             = useState(violation?.violation_location_city ?? '');
-  const [region,           setRegion]           = useState(violation?.violation_location_region ?? '');
-  const [violationStatus,  setViolationStatus]  = useState<ViolationStatus>(
+  const { drivers } = useDrivers();
+  const [licenseNumber, setLicenseNumber] = useState(violation?.license_number ?? '');
+  const [plateNumber,   setPlateNumber]   = useState(violation?.plate_number ?? '');
+
+  const { vehicles: vehiclesForDriver } = useVehicles(
+    licenseNumber ? { owner_license_number: licenseNumber } : undefined
+  );
+  const { registrations: registrationsForVehicle } = useRegistrations(
+    plateNumber ? { plate_number: plateNumber } : undefined
+  );
+
+  const [uovrNumber,          setUovrNumber]          = useState(violation?.uovr_number ?? '');
+  const [officer,             setOfficer]             = useState(violation?.officer ?? '');
+  const [violationDate,       setViolationDate]       = useState(violation?.violation_date ?? '');
+  const [city,                setCity]                = useState(violation?.violation_location_city ?? '');
+  const [region,              setRegion]              = useState(violation?.violation_location_region ?? '');
+  const [violationStatus,     setViolationStatus]     = useState<ViolationStatus>(
     violation?.violation_status ?? ViolationStatus.Pending
   );
-  const [paymentStatus,    setPaymentStatus]    = useState<PaymentStatus>(
+  const [paymentStatus,       setPaymentStatus]       = useState<PaymentStatus>(
     violation?.payment_status ?? PaymentStatus.Unpaid
   );
-  const [licenseNumber,    setLicenseNumber]    = useState(violation?.license_number ?? '');
-  const [plateNumber,      setPlateNumber]      = useState(violation?.plate_number ?? '');
-  const [registrationNumber, setRegistrationNumber] = useState(violation?.registration_number ?? '');
-  const [typeRows,         setTypeRows]         = useState<TypeRow[]>(() =>
+  const [registrationNumber,  setRegistrationNumber]  = useState(violation?.registration_number ?? '');
+  const [typeRows,            setTypeRows]            = useState<TypeRow[]>(() =>
     violation?.violation_types.length
       ? violation.violation_types.map((t) => ({
           id:             nextId(),
@@ -73,40 +84,25 @@ export default function ViolationForm({ violation, onSubmit, onCancel }: Violati
       : [blankRow()]
   );
 
-  const [driverQuery,       setDriverQuery]       = useState(() => {
+  const [driverQuery, setDriverQuery] = useState(() => {
     if (!violation) return '';
-    const d = mockDrivers.find((d) => d.license_number === violation.license_number);
-    return d ? getFullName(d) : '';
+    const d = drivers.find((dr) => dr.license_number === violation.license_number);
+    return d ? getFullName(d) : violation.license_number;
   });
   const [driverOpen, setDriverOpen] = useState(false);
   const driverRef = useRef<HTMLDivElement>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const vehiclesForDriver = useMemo(
-    () => mockVehicles.filter((v) => v.owner_license_number === licenseNumber),
-    [licenseNumber]
-  );
-
-  const registrationsForVehicle = useMemo(
-    () => mockRegistrations.filter((r) => r.plate_number === plateNumber),
-    [plateNumber]
-  );
-
   const filteredDrivers = useMemo(() => {
     const q = driverQuery.toLowerCase();
-    if (!q) return mockDrivers;
-    return mockDrivers.filter(
+    if (!q) return drivers;
+    return drivers.filter(
       (d) =>
         getFullName(d).toLowerCase().includes(q) ||
         d.license_number.toLowerCase().includes(q)
     );
-  }, [driverQuery]);
-
-  const selectedTypes = useMemo(
-    () => new Set(typeRows.map((r) => r.violation_type).filter(Boolean)),
-    [typeRows]
-  );
+  }, [driverQuery, drivers]);
 
   const totalFine = useMemo(
     () => typeRows.reduce((sum, r) => sum + r.base_fine, 0),
@@ -125,13 +121,13 @@ export default function ViolationForm({ violation, onSubmit, onCancel }: Violati
       setPlateNumber('');
       setRegistrationNumber('');
     }
-  }, [licenseNumber]);
+  }, [licenseNumber, vehiclesForDriver]);
 
   useEffect(() => {
     if (!plateNumber) return;
     const stillLinked = registrationsForVehicle.find((r) => r.registration_number === registrationNumber);
     if (!stillLinked) setRegistrationNumber('');
-  }, [plateNumber]);
+  }, [plateNumber, registrationsForVehicle]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -172,15 +168,15 @@ export default function ViolationForm({ violation, onSubmit, onCancel }: Violati
 
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (!uovrNumber.trim())   e.uovrNumber    = 'UOVR Number is required.';
-    if (!violationDate)       e.violationDate  = 'Date is required.';
-    if (!city.trim())         e.city           = 'City is required.';
-    if (!region.trim())       e.region         = 'Region is required.';
-    if (!licenseNumber)       e.licenseNumber  = 'Driver is required.';
-    if (!plateNumber)         e.plateNumber    = 'Vehicle is required.';
-    if (statusComboError)     e.statusCombo    = 'invalid';
+    if (!uovrNumber.trim()) e.uovrNumber   = 'UOVR Number is required.';
+    if (!violationDate)     e.violationDate = 'Date is required.';
+    if (!city.trim())       e.city          = 'City is required.';
+    if (!region.trim())     e.region        = 'Region is required.';
+    if (!licenseNumber)     e.licenseNumber = 'Driver is required.';
+    if (!plateNumber)       e.plateNumber   = 'Vehicle is required.';
+    if (statusComboError)   e.statusCombo   = 'invalid';
     const hasType = typeRows.some((r) => r.violation_type !== '');
-    if (!hasType)             e.typeRows       = 'At least one violation type is required.';
+    if (!hasType)           e.typeRows      = 'At least one violation type is required.';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -207,6 +203,12 @@ export default function ViolationForm({ violation, onSubmit, onCancel }: Violati
 
   return (
     <div className="flex flex-col gap-6">
+
+      {saveError && (
+        <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
+          {saveError}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -372,92 +374,86 @@ export default function ViolationForm({ violation, onSubmit, onCancel }: Violati
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-ink-muted">Violation Types *</label>
-          <Button variant="ghost" size="sm" onClick={addTypeRow}>
-            + Add Type
-          </Button>
+          <Button variant="ghost" size="sm" onClick={addTypeRow}>+ Add Type</Button>
         </div>
 
-        {typeRows.length > 0 && (
-          <div className="rounded-md border border-border overflow-hidden">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-border bg-surface-inset">
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-ink-muted uppercase tracking-wide">
-                    Violation Type
-                  </th>
-                  <th className="px-3 py-2 text-right text-xs font-semibold text-ink-muted uppercase tracking-wide w-32">
-                    Base Fine
-                  </th>
-                  <th className="px-3 py-2 w-10" />
-                </tr>
-              </thead>
-              <tbody>
-                {typeRows.map((row) => {
-                  const usedTypes = new Set(
-                    typeRows
-                      .filter((r) => r.id !== row.id)
-                      .map((r) => r.violation_type)
-                      .filter(Boolean)
-                  );
-                  return (
-                    <tr key={row.id} className="border-b border-border last:border-0">
-                      <td className="px-3 py-2">
-                        <select
-                          className={inputBase}
-                          value={row.violation_type}
-                          onChange={(e) => updateTypeRow(row.id, e.target.value as ViolationTypeEnum | '')}
-                        >
-                          <option value="">Select type…</option>
-                          {VIOLATION_TYPE_OPTIONS.map((t) => (
-                            <option key={t} value={t} disabled={usedTypes.has(t)}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-3 py-2 text-right text-sm font-medium text-ink">
-                        {row.base_fine > 0 ? `₱${row.base_fine.toLocaleString()}` : '—'}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <button
-                          type="button"
-                          onClick={() => removeTypeRow(row.id)}
-                          disabled={typeRows.length === 1}
-                          className="text-ink-faint hover:text-danger-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          aria-label="Remove row"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="bg-surface-inset border-t border-border">
-                  <td className="px-3 py-2 text-xs font-semibold text-ink-muted uppercase tracking-wide">
-                    Total Fine
-                  </td>
-                  <td className="px-3 py-2 text-right text-sm font-semibold text-ink">
-                    ₱{totalFine.toLocaleString()}
-                  </td>
-                  <td />
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
+        <div className="rounded-md border border-border overflow-hidden">
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b border-border bg-surface-inset">
+                <th className="px-3 py-2 text-left text-xs font-semibold text-ink-muted uppercase tracking-wide">
+                  Violation Type
+                </th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-ink-muted uppercase tracking-wide w-32">
+                  Base Fine
+                </th>
+                <th className="px-3 py-2 w-10" />
+              </tr>
+            </thead>
+            <tbody>
+              {typeRows.map((row) => {
+                const usedTypes = new Set(
+                  typeRows
+                    .filter((r) => r.id !== row.id)
+                    .map((r) => r.violation_type)
+                    .filter(Boolean)
+                );
+                return (
+                  <tr key={row.id} className="border-b border-border last:border-0">
+                    <td className="px-3 py-2">
+                      <select
+                        className={inputBase}
+                        value={row.violation_type}
+                        onChange={(e) => updateTypeRow(row.id, e.target.value as ViolationTypeEnum | '')}
+                      >
+                        <option value="">Select type…</option>
+                        {VIOLATION_TYPE_OPTIONS.map((t) => (
+                          <option key={t} value={t} disabled={usedTypes.has(t)}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-3 py-2 text-right text-sm font-medium text-ink">
+                      {row.base_fine > 0 ? `₱${row.base_fine.toLocaleString()}` : '—'}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => removeTypeRow(row.id)}
+                        disabled={typeRows.length === 1}
+                        className="text-ink-faint hover:text-danger-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        aria-label="Remove row"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-surface-inset border-t border-border">
+                <td className="px-3 py-2 text-xs font-semibold text-ink-muted uppercase tracking-wide">
+                  Total Fine
+                </td>
+                <td className="px-3 py-2 text-right text-sm font-semibold text-ink">
+                  ₱{totalFine.toLocaleString()}
+                </td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
         {fieldError(errors, 'typeRows')}
       </div>
 
       <div className="flex justify-end gap-3 pt-2 border-t border-border">
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          {isEdit ? 'Save Changes' : 'Add Violation'}
+        <Button variant="ghost" onClick={onCancel} disabled={saving}>Cancel</Button>
+        <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+          {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Violation'}
         </Button>
       </div>
     </div>
