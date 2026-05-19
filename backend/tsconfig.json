@@ -11,8 +11,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": false,
-    "moduleResolution": "node",
-    "ignoreDeprecations": "5.0",
+    "moduleResolution": "nodenext",
+    "ignoreDeprecations": "6.0",
     "typeRoots": [
       "./node_modules/@types",
       "./types"
