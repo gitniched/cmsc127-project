@@ -401,8 +401,7 @@ BEGIN
     DECLARE v_expiry_date DATE;
     DECLARE v_current_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
 
-    -- only re-evaluate if payment_status or violation_status changed
-    IF NEW.payment_status <> OLD.payment_status 
+    IF NEW.payment_status <> OLD.payment_status
     OR NEW.violation_status <> OLD.violation_status THEN
 
         SELECT license_issue_date, license_expiry_date, license_status
@@ -410,18 +409,24 @@ BEGIN
         FROM driver
         WHERE license_number = NEW.license_number;
 
-        -- only attempt to lift suspension, not touch Revoked
-        IF v_current_status = 'Suspended' THEN
+        IF v_current_status <> 'Revoked' THEN
 
             SELECT COUNT(*) INTO v_pending_count
             FROM traffic_violation
             WHERE license_number = NEW.license_number
               AND violation_status = 'Pending'
-              AND violation_date BETWEEN v_issue_date 
+              AND violation_date BETWEEN v_issue_date
               AND GREATEST(v_expiry_date, CURDATE());
 
-            -- if pending count dropped below 3, lift suspension
-            IF v_pending_count < 3 THEN
+            IF v_pending_count >= 3 THEN
+                -- re-apply suspension
+                UPDATE driver
+                SET license_status = 'Suspended'
+                WHERE license_number = NEW.license_number
+                  AND license_status IN ('Active', 'Expired');
+
+            ELSEIF v_current_status = 'Suspended' THEN
+                -- lift suspension
                 UPDATE driver
                 SET license_status = 'Expired'
                 WHERE license_number = NEW.license_number
