@@ -225,6 +225,9 @@ export default function ViolationTable({ violations, onEdit, onDelete }: Violati
   return (
     <div className="flex flex-col gap-4">
       <FilterBar controls={controls} onReset={handleReset} />
+      <div className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
+        Showing {filtered.length} of {violations.length} violations
+      </div>
       <div className="glass-card overflow-hidden">
         <Table
           columns={columns}
