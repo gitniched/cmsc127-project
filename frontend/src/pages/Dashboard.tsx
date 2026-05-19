@@ -6,7 +6,7 @@ import { useDrivers } from '../hooks/useDrivers';
 import { useVehicles } from '../hooks/useVehicles';
 import { useViolations } from '../hooks/useViolations';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { getFullName } from '../types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import { LicenseStatus, ViolationStatus, PaymentStatus } from '../constants/enums';
 import { ROUTES, buildRoute } from '../constants/routes';
 

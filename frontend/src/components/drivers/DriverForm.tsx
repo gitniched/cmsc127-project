@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Driver, DriverWithAge, CreateDriverDTO } from '../../types/driver.types';
+import type { Driver, DriverWithAge, CreateDriverDTO } from '@shared/types/driver.types';
 import { LicenseType, LicenseStatus } from '../../constants/enums';
 import {
   Sex,

@@ -1,5 +1,5 @@
 
-import { VehicleType } from '../constants/enums';
+import { VehicleType } from '../../frontend/src/constants/enums';
 
 export interface Vehicle {
   plate_number:         string;      // VARCHAR(10) PK

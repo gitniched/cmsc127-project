@@ -7,7 +7,7 @@ import {
   deleteViolation,
 } from '../api/violations.api';
 import type { ViolationFilters, ViolationListRow } from '../api/violations.api';
-import type { TrafficViolationFull, CreateViolationDTO, UpdateViolationDTO, ViolationTypeLineItem } from '../types/violation.types';
+import type { TrafficViolationFull, CreateViolationDTO, UpdateViolationDTO, ViolationTypeLineItem } from '@shared/types/violation.types';
 import { FINE_SCHEDULE } from '../constants/fineSchedule';
 import type { ViolationTypeEnum } from '../constants/enums';
 import { getDrivers } from '../api/driver.api';

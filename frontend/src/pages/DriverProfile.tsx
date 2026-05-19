@@ -10,11 +10,11 @@ import Table from '../components/ui/Table';
 import { useDriver } from '../hooks/useDrivers';
 import { useVehicles } from '../hooks/useVehicles';
 import { useViolations } from '../hooks/useViolations';
-import type { CreateDriverDTO } from '../types/driver.types';
-import { getFullName } from '../types/driver.types';
-import type { VehicleWithOwner } from '../types/vehicle.types';
-import type { TrafficViolationFull } from '../types/violation.types';
-import { isCountedAsUnpaid } from '../types/violation.types';
+import type { CreateDriverDTO } from '@shared/types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
+import type { VehicleWithOwner } from '@shared/types/vehicle.types';
+import type { TrafficViolationFull } from '@shared/types/violation.types';
+import { isCountedAsUnpaid } from '@shared/types/violation.types';
 import { buildRoute, ROUTES } from '../constants/routes';
 
 function daysUntilExpiry(expiryDate: string): number {

@@ -3,11 +3,11 @@
     "target": "ES2022",
     "esModuleInterop": true,
     "declaration": true,
-    "rootDir": "./",
+    "rootDir": "..",
     "outDir": "./dist",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
   },
   "include": [
     "types/**/*",

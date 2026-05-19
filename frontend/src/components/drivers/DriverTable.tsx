@@ -4,8 +4,8 @@ import type { ColumnDef } from '../ui/Table';
 import FilterBar from '../ui/FilterBar';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
-import type { DriverWithAge } from '../../types/driver.types';
-import { getFullName } from '../../types/driver.types';
+import type { DriverWithAge } from '@shared/types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import type { LicenseType, LicenseStatus, Sex } from '../../constants/enums';
 import { LICENSE_TYPE_OPTIONS, LICENSE_STATUS_OPTIONS } from '../../constants/enums';
 

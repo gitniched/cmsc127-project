@@ -8,7 +8,7 @@ import {
   renewLicense,
 } from '../api/driver.api';
 import type { DriverFilters } from '../api/driver.api';
-import type { DriverWithAge, CreateDriverDTO, UpdateDriverDTO, RenewLicenseResult } from '../types/driver.types';
+import type { DriverWithAge, CreateDriverDTO, UpdateDriverDTO, RenewLicenseResult } from '@shared/types/driver.types';
 
 export function useDrivers(filters?: DriverFilters) {
   const [drivers, setDrivers] = useState<DriverWithAge[]>([]);

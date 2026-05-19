@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../../config/mariadb';
-import { VDriver, Driver } from '@shared/types/type';
+import { DriverWithAge, Driver } from '@shared/types/driver.types';
 
 const ALLOWED_DRIVER_FIELDS = [
     'first_name',
@@ -166,7 +166,7 @@ export const getDrivers = async (req: Request, res: Response) => {
         }
 
         console.log('Executing query:', query);
-        const rows: VDriver[] = await conn.query(query, values);
+        const rows: DriverWithAge[] = await conn.query(query, values);
         console.log('Query successful, returning', rows.length, 'rows');
         res.status(200).json(rows);
     } catch (error: any) {
@@ -184,7 +184,7 @@ export const getDriverByLicense = async (req: Request, res: Response) => {
 
     try {
         conn = await pool.getConnection();
-        const rows: VDriver[] = await conn.query('SELECT * FROM v_driver WHERE license_number = ?', [license_number]);
+        const rows: DriverWithAge[] = await conn.query('SELECT * FROM v_driver WHERE license_number = ?', [license_number]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Driver not found' });
@@ -213,7 +213,7 @@ export const renewLicense = async (req: Request, res: Response) => {
             return res.status(400).json({ success: false, message });
         }
 
-        const driverRows: VDriver[] = await conn.query(
+        const driverRows: DriverWithAge[] = await conn.query(
             'SELECT license_expiry_date FROM driver WHERE license_number = ?',
             [license_number]
         );

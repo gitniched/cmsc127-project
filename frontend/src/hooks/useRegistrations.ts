@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRegistrations, createRegistration } from '../api/registrations.api';
 import type { RegistrationFilters } from '../api/registrations.api';
-import type { VehicleRegistration, CreateRegistrationDTO } from '../types/registration.types';
+import type { VehicleRegistration, CreateRegistrationDTO } from '@shared/types/registration.types';
 
 export function useRegistrations(filters?: RegistrationFilters) {
   const [registrations, setRegistrations] = useState<VehicleRegistration[]>([]);

@@ -2,9 +2,9 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import type { Vehicle, VehicleWithOwner, CreateVehicleDTO } from '../../types/vehicle.types';
-import type { DriverWithAge } from '../../types/driver.types';
-import { getFullName } from '../../types/driver.types';
+import type { Vehicle, VehicleWithOwner, CreateVehicleDTO } from '@shared/types/vehicle.types';
+import type { DriverWithAge } from '@shared/types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import { VehicleType, VEHICLE_TYPE_OPTIONS } from '../../constants/enums';
 
 interface VehicleFormProps {

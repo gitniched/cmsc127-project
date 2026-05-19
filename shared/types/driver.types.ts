@@ -1,4 +1,4 @@
-import { LicenseType, LicenseStatus, Sex } from '../constants/enums';
+import { LicenseType, LicenseStatus, Sex } from '../../frontend/src/constants/enums';
 
 export interface Driver {
   license_number:      string;        // VARCHAR(13) PK

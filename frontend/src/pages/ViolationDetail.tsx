@@ -8,7 +8,7 @@ import ViolationForm from '../components/violations/ViolationForm';
 import AutoSuspensionBanner from '../components/violations/AutoSuspensionBanner';
 import { useViolation } from '../hooks/useViolations';
 import { getDriverByLicense } from '../api/driver.api';
-import type { CreateViolationDTO, UpdateViolationDTO, ViolationTypeLineItem } from '../types/violation.types';
+import type { CreateViolationDTO, UpdateViolationDTO, ViolationTypeLineItem } from '@shared/types/violation.types';
 import { LicenseStatus } from '../constants/enums';
 import { buildRoute, ROUTES } from '../constants/routes';
 

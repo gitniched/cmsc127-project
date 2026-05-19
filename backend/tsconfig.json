@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
-    "baseUrl": ".",
     "rootDir": "..",
+    "baseUrl": ".",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "sourceMap": false,
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "typeRoots": [
       "./node_modules/@types",
       "./types"
@@ -26,9 +26,11 @@
   "include": [
     "**/*.ts",
     "types/**/*.d.ts",
-    "../shared/**/*.ts"
-  ],
-  "exclude": [
+    "../shared/**/*.ts",
+ "../frontend/src/constants/fineSchedule.ts"  ,
+ "../frontend/src/constants/enums.ts"],  
+ 
+ "exclude": [
     "node_modules",
     "dist"
   ]

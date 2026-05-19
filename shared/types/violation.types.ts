@@ -1,5 +1,5 @@
-import { ViolationStatus, PaymentStatus, ViolationTypeEnum } from '../constants/enums';
-import { FINE_SCHEDULE } from '../constants/fineSchedule';
+import { ViolationStatus, PaymentStatus, ViolationTypeEnum } from '../../frontend/src/constants/enums';
+import { FINE_SCHEDULE } from '../../frontend/src/constants/fineSchedule';
 
 export interface TrafficViolation {
   uovr_number:               string;

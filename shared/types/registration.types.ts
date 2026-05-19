@@ -1,5 +1,4 @@
-
-import { RegistrationStatus } from '../constants/enums';
+import { RegistrationStatus } from '../../frontend/src/constants/enums';
 
 export interface VehicleRegistration {
   registration_number: string;             // VARCHAR(20) PK

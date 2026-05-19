@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../../config/mariadb';
-import { Vehicle } from '@shared/types/type';
+import { Vehicle } from '@shared/types/vehicle.types';
 
 const ALLOWED_VEHICLE_FIELDS = [
     'make',

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
-import type { DriverWithAge } from '../../types/driver.types';
-import { getFullName } from '../../types/driver.types';
+import type { DriverWithAge } from '@shared/types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import { renewLicense } from '../../api/driver.api';
 
 interface RenewLicenseModalProps {
