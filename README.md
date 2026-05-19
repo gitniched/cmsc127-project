@@ -37,7 +37,6 @@ This system digitizes the workflow of an LTO traffic enforcement office. It allo
 
 The database schema strictly follows Philippine LTO regulations, including **R.A. 4136** (Land Transportation and Traffic Code), **R.A. 10930** (IRR for driver's license validity), and **MMDA revised fines and penalties**.
 
-> **Note:** Fine amounts are intentionally kept out of the database and managed at the application layer via `src/constants/fineSchedule.ts`. This prevents stale amounts if the fine schedule changes without requiring a database migration.
 
 ---
 
