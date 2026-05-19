@@ -82,9 +82,15 @@ export const getReport3 = async (req: Request, res: Response) => {
     try {
         conn = await pool.getConnection();
         const query = `
-            SELECT v.*, vr.registration_number, vr.expiration_date, vr.registration_status
+            SELECT
+                v.*,
+                CONCAT(d.first_name, ' ', d.last_name) AS owner_name,
+                vr.registration_number,
+                vr.expiration_date AS expired_registration_date,
+                vr.registration_status
             FROM vehicle v
             JOIN vehicle_registration vr ON v.plate_number = vr.plate_number
+            JOIN driver d ON v.owner_license_number = d.license_number
             WHERE vr.expiration_date < ?
             AND vr.registration_status = 'Expired'
         `;

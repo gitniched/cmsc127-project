@@ -4,8 +4,9 @@ import type { Vehicle, VehicleWithOwner } from '@shared/types/vehicle.types';
 import type { ViolationListRow } from './violations.api';
 
 export interface Report3Row extends Vehicle {
+    owner_name: string;
     registration_number: string;
-    expiration_date: string;
+    expired_registration_date: string;
     registration_status: string;
 }
 

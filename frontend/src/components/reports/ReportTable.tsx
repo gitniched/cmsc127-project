@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Table from '../ui/Table';
 import Badge from '../ui/Badge';
-import Button from '../ui/Button';
 import type { ColumnDef } from '../ui/Table';
 import type { ReportId } from './ReportRunner';
 import type { DriverWithAge } from '@shared/types/driver.types';
@@ -33,7 +32,7 @@ interface ReportTableProps {
   emptyMessage?: string;
 }
 
-function exportCSV(rows: ReportRow[], reportId: ReportId) {
+export function exportCSV(rows: ReportRow[], reportId: ReportId) {
   if (rows.length === 0) return;
   const keys = Object.keys(rows[0]) as (keyof ReportRow)[];
   const header = keys.join(',');
@@ -141,7 +140,11 @@ const REPORT1_COLS: ColumnDef<Report1Row>[] = [
     key:      'license_expiry_date',
     header:   'Expiry Date',
     sortable: true,
-    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-CA'),
+    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
 ];
 
@@ -191,7 +194,11 @@ const REPORT3_COLS: ColumnDef<Report3Row>[] = [
   },
   {
     key: 'expired_registration_date', header: 'Expired On', sortable: true,
-    render: (r) => r.expired_registration_date,
+    render: (r) => new Date(r.expired_registration_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
 ];
 
@@ -225,7 +232,11 @@ const REPORT4_COLS: ColumnDef<Report4Row>[] = [
     key:      'license_expiry_date',
     header:   'Expiry Date',
     sortable: true,
-    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-CA'),
+    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
   {
     key:      'address',
@@ -242,7 +253,11 @@ const REPORT5_COLS: ColumnDef<Report5Row>[] = [
   },
   {
     key: 'violation_date', header: 'Date', sortable: true,
-    render: (r) => new Date(r.violation_date).toLocaleDateString('en-CA'),
+    render: (r) => new Date(r.violation_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
   {
     key: 'violation_location_city', header: 'Location', sortable: true,
@@ -350,36 +365,12 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
   const resolvedEmptyMessage = emptyMessage ?? 'No results found.';
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-ink-muted">
-          {rows.length} {rows.length === 1 ? 'result' : 'results'}
-        </p>
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={rows.length === 0}
-          onClick={() => exportCSV(rows, reportId)}
-          icon={
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M2 11h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-          }
-        >
-          Export CSV
-        </Button>
-      </div>
-
-      <div className="border border-white/25 rounded-xl overflow-hidden bg-transparent">
-        <Table
-          columns={columns}
-          rows={rows}
-          rowKey={(row) => getRowKey(reportId, row)}
-          emptyMessage={resolvedEmptyMessage}
-          stickyHeader
-        />
-      </div>
-    </div>
+    <Table
+      columns={columns}
+      rows={rows}
+      rowKey={(row) => getRowKey(reportId, row)}
+      emptyMessage={resolvedEmptyMessage}
+      stickyHeader
+    />
   );
 }
