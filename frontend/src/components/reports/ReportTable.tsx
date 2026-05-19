@@ -320,17 +320,6 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
   const resolvedEmptyMessage = emptyMessage ?? 'No results found.';
 
   return (
-    <>
-    <style>{`
-      .glass-card {
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(16px) saturate(1.6);
-        -webkit-backdrop-filter: blur(16px) saturate(1.6);
-        border: 1px solid rgba(226, 232, 240, 0.9);
-        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
-        border-radius: 12px;
-      }
-    `}</style>
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink-muted">
@@ -362,6 +351,5 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
         />
       </div>
     </div>
-    </>
   );
 }

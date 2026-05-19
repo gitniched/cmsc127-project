@@ -175,15 +175,7 @@ export default function DriverTable({ drivers, onView, onEdit, onDelete }: Drive
         Showing {filtered.length} of {drivers.length} drivers
       </div>
 
-      <div
-        className="rounded-lg overflow-hidden"
-        style={{
-          background: 'rgba(255, 255, 255, 0.2)',
-          border: '1px solid rgba(226, 232, 240, 0.9)',
-          backdropFilter: 'blur(16px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
-        }}
-      >
+      <div className="glass-card overflow-hidden">
         <Table
           columns={columns}
           rows={filtered}
