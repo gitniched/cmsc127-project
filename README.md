@@ -37,6 +37,55 @@ This system digitizes the workflow of an LTO traffic enforcement office. It allo
 
 The database schema strictly follows Philippine LTO regulations, including **R.A. 4136** (Land Transportation and Traffic Code), **R.A. 10930** (IRR for driver's license validity), and **MMDA revised fines and penalties**.
 
+---
+ 
+## Screenshots
+ 
+### Dashboard
+ 
+| Dashboard |
+|---|
+|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/92fd9e10-34d7-4469-84e3-cf9f039e76d4" />|
+ 
+---
+ 
+### Drivers
+ 
+| Driver List | Driver Profile | Add / Edit Driver | Renew License |
+|---|---|---|---|
+|<img width="1918" height="915" alt="image" src="https://github.com/user-attachments/assets/23f4ead3-8834-4d57-b91f-a1c6d2977439" />|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/9746b324-d429-4f5a-b337-e19d3d419169" />|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/619794d1-e0f3-4773-aa28-7a74c03255fc" />|<img width="495" height="442" alt="image" src="https://github.com/user-attachments/assets/33fec872-0fe5-4279-92f4-ceca63659a1c" />|
+ 
+---
+ 
+### Vehicles
+ 
+| Vehicle List | Vehicle Detail | Add / Edit Vehicle | Add Registration |
+|---|---|---|---|
+|<img width="1918" height="916" alt="image" src="https://github.com/user-attachments/assets/0af15997-7d42-4cfc-8861-f2951d6e34ea" />|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/15b28165-7261-402c-af96-6f35c671c810" />|<img width="846" height="750" alt="image" src="https://github.com/user-attachments/assets/c314b91e-9dd3-46c7-8dc8-3453ebcf3aa8" />|<img width="490" height="728" alt="image" src="https://github.com/user-attachments/assets/ae9ae3b8-96a5-4eef-90dd-6094cb93fd14" />|
+ 
+---
+ 
+### Violations
+ 
+| Violation List | Violation Detail | Add / Edit Violation |
+|---|---|---|
+|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/be9531e5-9377-4341-ac30-3321466fd051" />|<img width="775" height="705" alt="image" src="https://github.com/user-attachments/assets/314b1288-361f-4697-81b1-ff202b5de311" />|<img width="842" height="832" alt="image" src="https://github.com/user-attachments/assets/3937a2cd-4cc4-4212-8375-e4a5e7599c19" />|
+ 
+---
+ 
+### Reports
+ 
+| Report 1 — Filter Drivers | Report 2 — Vehicles by Driver | Report 3 — Expired Registrations |
+|---|---|---|
+|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/0256390d-dcc7-4f9d-9e38-f1b6e49b0102" />|<img width="1918" height="912" alt="image" src="https://github.com/user-attachments/assets/3cb414fa-7ad3-4fce-b569-e6a20249808b" />|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/cd52d7b7-6357-45f9-8f7d-a93732c802d6" />|
+ 
+| Report 4 — Expired/Suspended Licenses | Report 5 — Violations by Driver | Report 6 — Violations per Type |
+|---|---|---|
+|<img width="1918" height="917" alt="image" src="https://github.com/user-attachments/assets/0cdb905a-00cc-46b5-a0dd-c70a828d9837" />|<img width="1918" height="912" alt="image" src="https://github.com/user-attachments/assets/44a9242c-2e90-46f3-99a8-1bff66c9db88" />|<img width="1918" height="913" alt="image" src="https://github.com/user-attachments/assets/828a3e74-0b5d-423e-b870-cd4f39590f2f" />|
+ 
+| Report 7 — Vehicles by Location |
+|---|
+|<img width="1918" height="916" alt="image" src="https://github.com/user-attachments/assets/46545568-b1a1-414a-b019-c2088658030b" />|
 
 ---
 
