@@ -126,7 +126,7 @@ export default function ViolationDetail() {
       <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-ink-muted">
+        <div className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
           <Link to={ROUTES.violations} className="hover:text-ink transition-colors">Violations</Link>
           <span>/</span>
           <span className="text-ink font-mono">{violation.uovr_number}</span>

@@ -171,7 +171,7 @@ export default function VehicleTable({ vehicles, onView, onEdit, onDelete }: Veh
         onReset={resetFilters}
       />
 
-      <div className="text-xs text-ink-muted px-1">
+      <div className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
         Showing {filtered.length} of {vehicles.length} vehicles
       </div>
 

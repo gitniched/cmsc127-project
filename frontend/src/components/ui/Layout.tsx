@@ -11,9 +11,10 @@ export default function Layout({ children }: LayoutProps) {
       <div style={{
         position: 'fixed',
         inset: 0,
+        background: 'linear-gradient(to bottom, rgba(0, 79, 119, 0.25) 0%, rgba(6, 36, 66, 0.5) 100%)',
         backdropFilter: 'blur(1.5px)', 
         WebkitBackdropFilter: 'blur(1.5px)',
-        zIndex: -1,
+        zIndex: 0,
         pointerEvents: 'none',
       }} />
       <NavBar />
