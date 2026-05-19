@@ -1,4 +1,4 @@
-# 🚙 BiyaheDB, LTO Traffic Violation Management System
+# 🚙 BiyaheDB, LTO Traffic Management System
 
 A full-stack web application for managing LTO (Land Transportation Office) driver records, vehicle registrations, and traffic violation tracking in the Philippines. Built as a course project for **CMSC 127: File Processing and Database Systems**.
 
