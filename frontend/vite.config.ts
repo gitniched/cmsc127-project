@@ -13,4 +13,14 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, '../shared'),
     },
   },
+  server: {
+    host: true,
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+    hmr: {
+      overlay: true,
+    },
+  },
 })

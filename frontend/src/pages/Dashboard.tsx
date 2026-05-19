@@ -13,26 +13,26 @@ import { ROUTES, buildRoute } from '../constants/routes';
 function formatDate(iso: string): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-PH', {
-    year:  'numeric',
+    year: 'numeric',
     month: 'short',
-    day:   'numeric',
+    day: 'numeric',
   });
 }
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const { drivers, loading: driversLoading }             = useDrivers();
-  const { vehicles, loading: vehiclesLoading }           = useVehicles();
-  const { violations, loading: violationsLoading }       = useViolations();
+  const { drivers, loading: driversLoading } = useDrivers();
+  const { vehicles, loading: vehiclesLoading } = useVehicles();
+  const { violations, loading: violationsLoading } = useViolations();
   const { registrations, loading: registrationsLoading } = useRegistrations();
 
   const loading = driversLoading || vehiclesLoading || violationsLoading || registrationsLoading;
 
-  const totalDrivers          = drivers.length;
-  const totalVehicles         = vehicles.length;
-  const activeRegistrations   = registrations.filter((r) => r.registration_status === 'Active').length;
-  const pendingViolations     = violations.filter((v) => v.violation_status === ViolationStatus.Pending).length;
+  const totalDrivers = drivers.length;
+  const totalVehicles = vehicles.length;
+  const activeRegistrations = registrations.filter((r) => r.registration_status === 'Active').length;
+  const pendingViolations = violations.filter((v) => v.violation_status === ViolationStatus.Pending).length;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -69,8 +69,8 @@ export default function Dashboard() {
     .filter((d) => (pendingCountByDriver[d.license_number] ?? 0) >= 2)
     .map((d) => ({
       license_number: d.license_number,
-      full_name:      getFullName(d),
-      pending_count:  pendingCountByDriver[d.license_number],
+      full_name: getFullName(d),
+      pending_count: pendingCountByDriver[d.license_number],
     }));
 
   return (
@@ -93,17 +93,88 @@ export default function Dashboard() {
         .glass-divider {
           border-top: 1px solid rgba(226, 232, 240, 0.7);
         }
-        .glass-quick-link {
-          background: rgba(255, 255, 255, 0.35);
+        .quick-link-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 24px 16px;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(16px) saturate(1.6);
           -webkit-backdrop-filter: blur(16px) saturate(1.6);
           border: 1px solid rgba(226, 232, 240, 0.9);
-          border-radius: 10px;
-          transition: background 120ms ease, border-color 120ms ease;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
         }
-        .glass-quick-link:hover {
-          background: rgba(255, 255, 255, 0.55);
-          border-color: rgba(147, 197, 253, 0.8);
+        .quick-link-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        
+        .quick-link-drivers:hover {
+          border-color: #3b82f6;
+          color: #2563eb;
+        }
+        .quick-link-vehicles:hover {
+          border-color: #10b981;
+          color: #059669;
+        }
+        .quick-link-violations:hover {
+          border-color: #ef4444;
+          color: #dc2626;
+        }
+        .quick-link-reports:hover {
+          border-color: #f59e0b;
+          color: #d97706;
+        }
+        
+        .quick-icon-bg {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          transition: all 0.2s ease;
+        }
+        
+        .quick-link-drivers .quick-icon-bg {
+          background: rgba(59, 130, 246, 0.08);
+          color: #2563eb;
+        }
+        .quick-link-drivers:hover .quick-icon-bg {
+          background: #2563eb;
+          color: #ffffff;
+        }
+        
+        .quick-link-vehicles .quick-icon-bg {
+          background: rgba(16, 185, 129, 0.08);
+          color: #059669;
+        }
+        .quick-link-vehicles:hover .quick-icon-bg {
+          background: #059669;
+          color: #ffffff;
+        }
+        
+        .quick-link-violations .quick-icon-bg {
+          background: rgba(239, 68, 68, 0.08);
+          color: #dc2626;
+        }
+        .quick-link-violations:hover .quick-icon-bg {
+          background: #dc2626;
+          color: #ffffff;
+        }
+        
+        .quick-link-reports .quick-icon-bg {
+          background: rgba(245, 158, 11, 0.08);
+          color: #d97706;
+        }
+        .quick-link-reports:hover .quick-icon-bg {
+          background: #d97706;
+          color: #ffffff;
         }
       `}</style>
       <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-8">
@@ -146,20 +217,67 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: 'Drivers',    route: ROUTES.drivers    },
-                  { label: 'Vehicles',   route: ROUTES.vehicles   },
-                  { label: 'Violations', route: ROUTES.violations },
-                  { label: 'Reports',    route: ROUTES.reports    },
-                ].map(({ label, route }) => (
+                  {
+                    label: 'Drivers',
+                    route: ROUTES.drivers,
+                    className: 'quick-link-drivers',
+                    icon: (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                    )
+                  },
+                  {
+                    label: 'Vehicles',
+                    route: ROUTES.vehicles,
+                    className: 'quick-link-vehicles',
+                    icon: (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="8" width="20" height="10" rx="2" />
+                        <path d="M6 8l2-4h8l2 4" />
+                        <circle cx="7" cy="18" r="2" />
+                        <circle cx="17" cy="18" r="2" />
+                      </svg>
+                    )
+                  },
+                  {
+                    label: 'Violations',
+                    route: ROUTES.violations,
+                    className: 'quick-link-violations',
+                    icon: (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                    )
+                  },
+                  {
+                    label: 'Reports',
+                    route: ROUTES.reports,
+                    className: 'quick-link-reports',
+                    icon: (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="9" y1="13" x2="15" y2="13" />
+                        <line x1="9" y1="17" x2="13" y2="17" />
+                      </svg>
+                    )
+                  },
+                ].map(({ label, route, className, icon }) => (
                   <button
                     key={route}
                     onClick={() => navigate(route)}
-                    className={[
-                      'glass-quick-link px-4 py-4',
-                      'text-sm font-medium text-ink text-center',
-                    ].join(' ')}
+                    className={`quick-link-card ${className} text-ink`}
                   >
-                    {label}
+                    <div className="quick-icon-bg">
+                      {icon}
+                    </div>
+                    <span className="text-sm font-semibold tracking-tight">
+                      {label}
+                    </span>
                   </button>
                 ))}
               </div>
