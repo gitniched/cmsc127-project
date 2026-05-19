@@ -442,6 +442,45 @@ BEGIN
     END IF;
 END$$
 
+CREATE TRIGGER trg_violation_after_delete
+AFTER DELETE ON traffic_violation
+FOR EACH ROW
+BEGIN
+    DECLARE v_pending_count INT;
+    DECLARE v_issue_date DATE;
+    DECLARE v_expiry_date DATE;
+    DECLARE v_current_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
+
+    SELECT license_issue_date, license_expiry_date, license_status
+    INTO v_issue_date, v_expiry_date, v_current_status
+    FROM driver
+    WHERE license_number = OLD.license_number;
+
+    -- only attempt to lift suspension, never touch Revoked
+    IF v_current_status = 'Suspended' THEN
+
+        SELECT COUNT(*) INTO v_pending_count
+        FROM traffic_violation
+        WHERE license_number = OLD.license_number
+          AND violation_status = 'Pending'
+          AND violation_date BETWEEN v_issue_date
+          AND GREATEST(v_expiry_date, CURDATE());
+
+        IF v_pending_count < 3 THEN
+            UPDATE driver
+            SET license_status = 'Expired'
+            WHERE license_number = OLD.license_number
+              AND CURDATE() > license_expiry_date;
+
+            UPDATE driver
+            SET license_status = 'Active'
+            WHERE license_number = OLD.license_number
+              AND CURDATE() <= license_expiry_date;
+        END IF;
+
+    END IF;
+END$$
+
 -- renew license:
 -- student permit: always 1 year, blocked if unpaid violations exist
 -- non-professional/professional: 10 years if no violations in current period, else 5 years
