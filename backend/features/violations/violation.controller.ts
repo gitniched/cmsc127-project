@@ -221,10 +221,58 @@ export const getViolationByUOVR = async(req: Request, res: Response) => {
     }
 };
 
+export const updateViolationTypes = async (req: Request, res: Response) => {
+    const uovr_number = req.params.uovr_number;
+    const { violation_types }: { violation_types: string[] } = req.body;
+
+    if (!violation_types || violation_types.length === 0) {
+        return res.status(400).json({ message: 'At least one violation type is required' });
+    }
+
+    let conn;
+
+    try {
+        conn = await pool.getConnection();
+        await conn.beginTransaction();
+
+        // check violation exists
+        const rows = await conn.query(
+            'SELECT uovr_number FROM traffic_violation WHERE uovr_number = ?',
+            [uovr_number]
+        );
+        if (rows.length === 0) {
+            await conn.rollback();
+            return res.status(404).json({ message: 'Violation not found' });
+        }
+
+        // delete existing types
+        await conn.query('DELETE FROM violation_type WHERE uovr_number = ?', [uovr_number]);
+
+        // insert new types
+        const typeQuery = 'INSERT INTO violation_type (uovr_number, violation_type) VALUES (?, ?)';
+        for (const type of violation_types) {
+            await conn.query(typeQuery, [uovr_number, type]);
+        }
+
+        await conn.commit();
+        res.status(200).json({ message: 'Violation types updated successfully' });
+    } catch (error: any) {
+        if (conn) await conn.rollback();
+        if (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000') {
+            return res.status(400).json({ message: error.message });
+        }
+        console.error('Error updating violation types:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    } finally {
+        if (conn) conn.release();
+    }
+};
+
 export default {
     addViolation,
     updateViolation,
     deleteViolation,
     getViolations,
-    getViolationByUOVR
+    getViolationByUOVR,
+    updateViolationTypes
 };

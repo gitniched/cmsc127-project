@@ -167,6 +167,12 @@ BEGIN
     DECLARE v_age INT;
     SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, NEW.license_issue_date);
 
+    -- block future birth dates
+    IF NEW.birth_date > CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: birth_date cannot be in the future';
+    END IF;
+
     -- validate minimum age per license type
     IF NEW.license_type = 'Student Permit' AND v_age < 16 THEN
         SIGNAL SQLSTATE '45000'
@@ -210,6 +216,11 @@ BEGIN
     SET v_age = TIMESTAMPDIFF(YEAR, NEW.birth_date, CURDATE());
 
     -- re-validate minimum age only when license_type is being changed
+    IF NEW.birth_date > CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'error: birth_date cannot be in the future';
+    END IF;
+
     IF NEW.license_type <> OLD.license_type THEN
         IF NEW.license_type = 'Non-Professional' AND v_age < 17 THEN
             SIGNAL SQLSTATE '45000'
@@ -289,6 +300,26 @@ BEGIN
     END IF;
 END$$
 
+-- check if there is already an active regitration for the same plate number before allowing a new active registration to be inserted.
+CREATE TRIGGER trg_registration_before_insert_active_check
+BEFORE INSERT ON vehicle_registration
+FOR EACH ROW
+BEGIN
+    DECLARE v_active_count INT;
+
+    IF NEW.registration_status = 'Active' THEN
+        SELECT COUNT(*) INTO v_active_count
+        FROM vehicle_registration
+        WHERE plate_number = NEW.plate_number
+          AND registration_status = 'Active';
+
+        IF v_active_count > 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'error: vehicle already has an active registration';
+        END IF;
+    END IF;
+END$$
+
 -- block logically impossible combinations of violation_status and payment_status on insert
 CREATE TRIGGER trg_violation_before_insert
 BEFORE INSERT ON traffic_violation
@@ -358,6 +389,95 @@ BEGIN
         SET license_status = 'Suspended'
         WHERE license_number = NEW.license_number
           AND license_status IN ('Active', 'Expired');
+    END IF;
+END$$
+
+CREATE TRIGGER trg_violation_after_update
+AFTER UPDATE ON traffic_violation
+FOR EACH ROW
+BEGIN
+    DECLARE v_pending_count INT;
+    DECLARE v_issue_date DATE;
+    DECLARE v_expiry_date DATE;
+    DECLARE v_current_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
+
+    IF NEW.payment_status <> OLD.payment_status
+    OR NEW.violation_status <> OLD.violation_status THEN
+
+        SELECT license_issue_date, license_expiry_date, license_status
+        INTO v_issue_date, v_expiry_date, v_current_status
+        FROM driver
+        WHERE license_number = NEW.license_number;
+
+        IF v_current_status <> 'Revoked' THEN
+
+            SELECT COUNT(*) INTO v_pending_count
+            FROM traffic_violation
+            WHERE license_number = NEW.license_number
+              AND violation_status = 'Pending'
+              AND violation_date BETWEEN v_issue_date
+              AND GREATEST(v_expiry_date, CURDATE());
+
+            IF v_pending_count >= 3 THEN
+                -- re-apply suspension
+                UPDATE driver
+                SET license_status = 'Suspended'
+                WHERE license_number = NEW.license_number
+                  AND license_status IN ('Active', 'Expired');
+
+            ELSEIF v_current_status = 'Suspended' THEN
+                -- lift suspension
+                UPDATE driver
+                SET license_status = 'Expired'
+                WHERE license_number = NEW.license_number
+                  AND CURDATE() > license_expiry_date;
+
+                UPDATE driver
+                SET license_status = 'Active'
+                WHERE license_number = NEW.license_number
+                  AND CURDATE() <= license_expiry_date;
+            END IF;
+
+        END IF;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_violation_after_delete
+AFTER DELETE ON traffic_violation
+FOR EACH ROW
+BEGIN
+    DECLARE v_pending_count INT;
+    DECLARE v_issue_date DATE;
+    DECLARE v_expiry_date DATE;
+    DECLARE v_current_status ENUM('Active', 'Expired', 'Suspended', 'Revoked');
+
+    SELECT license_issue_date, license_expiry_date, license_status
+    INTO v_issue_date, v_expiry_date, v_current_status
+    FROM driver
+    WHERE license_number = OLD.license_number;
+
+    -- only attempt to lift suspension, never touch Revoked
+    IF v_current_status = 'Suspended' THEN
+
+        SELECT COUNT(*) INTO v_pending_count
+        FROM traffic_violation
+        WHERE license_number = OLD.license_number
+          AND violation_status = 'Pending'
+          AND violation_date BETWEEN v_issue_date
+          AND GREATEST(v_expiry_date, CURDATE());
+
+        IF v_pending_count < 3 THEN
+            UPDATE driver
+            SET license_status = 'Expired'
+            WHERE license_number = OLD.license_number
+              AND CURDATE() > license_expiry_date;
+
+            UPDATE driver
+            SET license_status = 'Active'
+            WHERE license_number = OLD.license_number
+              AND CURDATE() <= license_expiry_date;
+        END IF;
+
     END IF;
 END$$
 
