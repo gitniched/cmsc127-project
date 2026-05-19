@@ -563,7 +563,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
               error={!!errors.address}
             />
             <p className="mt-1 text-xs text-ink-faint">
-              Type street first, then ", City" — or type the city name to pick from the list
+              Type street first, then ", City", or type the city name to pick from the list
             </p>
             <FieldErr msg={errors.address} />
           </div>
@@ -601,12 +601,12 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </div>
             {isEdit && (
               <p className="mt-1 text-xs text-ink-faint">
-                Primary key — cannot be changed after creation
+                Primary key, cannot be changed after creation
               </p>
             )}
             {!isEdit && form.license_issue_date && (
               <p className="mt-1 text-xs text-ink-faint">
-                Auto-suggested — edit freely or click ↺ to regenerate
+                Auto-suggested, edit freely or click ↺ to regenerate
               </p>
             )}
             {!isEdit && !form.license_issue_date && (
@@ -631,7 +631,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </select>
             {isDowngrade && (
               <p className="mt-1 text-xs text-warning-600">
-                ⚠ Downgrading from {originalLicenseType} — confirm this is intentional
+                ⚠ Downgrading from {originalLicenseType}, confirm this is intentional
               </p>
             )}
           </div>

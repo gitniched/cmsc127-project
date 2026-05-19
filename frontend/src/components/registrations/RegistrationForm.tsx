@@ -41,7 +41,7 @@ function computeExpiryLabel(plateNumber: string, registrationDate: string): stri
   if (!renewalMonth) {
     const flat = new Date(registrationDate);
     flat.setFullYear(flat.getFullYear() + 1);
-    return `${flat.toISOString().slice(0, 7)} — 12 months flat (non-numeric plate ending)`;
+    return `${flat.toISOString().slice(0, 7)}, 12 months flat (non-numeric plate ending)`;
   }
 
   const regDate    = new Date(registrationDate);
@@ -235,7 +235,7 @@ export default function RegistrationForm({
           </select>
           {form.registration_status === RegistrationStatus.Suspended && (
             <p className="mt-1 text-xs text-warning-600">
-              ⚠ Suspended is uncommon for a new registration — confirm this is intentional
+              ⚠ Suspended is uncommon for a new registration, confirm this is intentional
             </p>
           )}
         </div>

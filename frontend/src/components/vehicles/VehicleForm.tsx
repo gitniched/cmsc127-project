@@ -58,9 +58,6 @@ function toFormState(v: Vehicle | VehicleWithOwner): FormState {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Make → model suggestions (PH market)
-// ---------------------------------------------------------------------------
 const MAKE_MODELS: Record<string, string[]> = {
   Toyota:         ['Vios', 'Innova', 'Fortuner', 'Hilux', 'Avanza', 'Rush', 'Wigo', 'Land Cruiser', 'Camry', 'Corolla Altis'],
   Honda:          ['City', 'Civic', 'BR-V', 'CR-V', 'HR-V', 'Jazz', 'Brio', 'Accord'],
@@ -128,9 +125,6 @@ function generateChassisNumber(): string {
   return vin;
 }
 
-// ---------------------------------------------------------------------------
-// Style tokens
-// ---------------------------------------------------------------------------
 const inputBase = [
   'h-9 px-3 text-sm rounded-md w-full',
   'bg-surface border border-border text-ink placeholder:text-ink-faint',
@@ -148,9 +142,6 @@ function FieldErr({ msg }: { msg?: string }) {
   return <p className="mt-1 text-xs text-danger-500">{msg}</p>;
 }
 
-// ---------------------------------------------------------------------------
-// Portal dropdown — anchors to a ref element via fixed positioning
-// ---------------------------------------------------------------------------
 function PortalDropdown({
   anchorRef,
   children,
@@ -173,9 +164,6 @@ function PortalDropdown({
 const dropdownList = 'bg-surface border border-border rounded-md shadow-lg max-h-48 overflow-y-auto';
 const dropdownItem = 'w-full px-3 py-2 text-left text-sm hover:bg-surface-inset cursor-pointer block';
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export default function VehicleForm({
   open, onClose, onSubmit, initial, drivers, saveError, saving,
 }: VehicleFormProps) {
@@ -309,8 +297,6 @@ export default function VehicleForm({
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
-
-          {/* ── Vehicle Type ── */}
           <div>
             <label className={labelBase}>Vehicle Type <span className="text-danger-500">*</span></label>
             <select
@@ -327,7 +313,6 @@ export default function VehicleForm({
             </select>
           </div>
 
-          {/* ── Plate Number ── */}
           <div>
             <label className={labelBase}>Plate Number <span className="text-danger-500">*</span></label>
             <input
@@ -346,8 +331,6 @@ export default function VehicleForm({
               <p className="mt-1 text-xs text-warning-600">⚠ Format doesn't match LTO pattern yet</p>
             )}
           </div>
-
-          {/* ── Make ── */}
           <div ref={makeRef} className="relative">
             <label className={labelBase}>Make <span className="text-danger-500">*</span></label>
             <input
@@ -387,8 +370,6 @@ export default function VehicleForm({
               </PortalDropdown>
             )}
           </div>
-
-          {/* ── Model ── */}
           <div ref={modelRef} className="relative">
             <label className={labelBase}>Model <span className="text-danger-500">*</span></label>
             <input
@@ -421,8 +402,6 @@ export default function VehicleForm({
               </PortalDropdown>
             )}
           </div>
-
-          {/* ── Year ── */}
           <div>
             <label className={labelBase}>Year <span className="text-danger-500">*</span></label>
             <select
@@ -437,8 +416,6 @@ export default function VehicleForm({
             </select>
             <FieldErr msg={errors.year} />
           </div>
-
-          {/* ── Color ── */}
           <div ref={colorRef} className="relative">
             <label className={labelBase}>Color <span className="text-danger-500">*</span></label>
             <input
@@ -469,7 +446,6 @@ export default function VehicleForm({
             )}
           </div>
 
-          {/* ── Engine Number ── */}
           <div>
             <label className={labelBase}>Engine Number <span className="text-danger-500">*</span></label>
             <div className="flex gap-2">
@@ -496,8 +472,6 @@ export default function VehicleForm({
             )}
             <FieldErr msg={errors.engine_number} />
           </div>
-
-          {/* ── Chassis Number ── */}
           <div>
             <label className={labelBase}>Chassis Number <span className="text-danger-500">*</span></label>
             <div className="flex gap-2">
@@ -524,8 +498,6 @@ export default function VehicleForm({
             )}
             <FieldErr msg={errors.chassis_number} />
           </div>
-
-          {/* ── Owner ── */}
           <div ref={ownerRef} className="sm:col-span-2 relative">
             <label className={labelBase}>Owner <span className="text-danger-500">*</span></label>
             <input

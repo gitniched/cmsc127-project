@@ -211,7 +211,7 @@ function blankRow(): TypeRow {
 }
 
 // ---------------------------------------------------------------------------
-// ViolationTypeCombobox  — searchable combobox for a single type row
+// ViolationTypeCombobox , searchable combobox for a single type row
 // ---------------------------------------------------------------------------
 interface ViolationTypeComboboxProps {
   row:       TypeRow;
@@ -340,7 +340,7 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery }: Vi
 }
 
 // ---------------------------------------------------------------------------
-// CityCombobox — searchable city input that auto-fills region
+// CityCombobox, searchable city input that auto-fills region
 // ---------------------------------------------------------------------------
 interface CityComboboxProps {
   value:     string;
@@ -717,7 +717,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
           <FieldError errors={errors} field="violationDate" />
         </div>
 
-        {/* City — searchable combobox that auto-fills region */}
+        {/* City, searchable combobox that auto-fills region */}
         <div>
           <label className={labelBase}>City *</label>
           <CityCombobox
@@ -729,7 +729,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
           <FieldError errors={errors} field="city" />
         </div>
 
-        {/* Region — auto-filled, still editable */}
+        {/* Region, auto-filled, still editable */}
         <div>
           <label className={labelBase}>Region *</label>
           <input
@@ -755,7 +755,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         </div>
       </div>
 
-      {/* ── Section 2: Status — filtered to only valid combos ───────────── */}
+      {/* ── Section 2: Status, filtered to only valid combos ───────────── */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelBase}>Violation Status *</label>
@@ -832,7 +832,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
           )}
         </div>
 
-        {/* Vehicle — filtered to driver */}
+        {/* Vehicle, filtered to driver */}
         <div>
           <label className={labelBase}>Vehicle * (auto-filtered to selected driver)</label>
           <select
@@ -855,7 +855,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
           <FieldError errors={errors} field="plateNumber" />
         </div>
 
-        {/* Registration — filtered to vehicle, optional */}
+        {/* Registration, filtered to vehicle, optional */}
         <div>
           <label className={labelBase}>Registration (optional, auto-filtered to selected vehicle)</label>
           <select
@@ -874,7 +874,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         </div>
       </div>
 
-      {/* ── Section 4: Violation types — searchable combobox per row ─────── */}
+      {/* ── Section 4: Violation types, searchable combobox per row ─────── */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-ink-muted">Violation Types *</label>
