@@ -7,15 +7,15 @@ interface AboutModalProps {
 
 const REFERENCES = [
   {
-    label: 'R.A. 4136 — Land Transportation and Traffic Code (1964)',
+    label: 'R.A. 4136: Land Transportation and Traffic Code (1964)',
     url:   'https://lawphil.net/statutes/repacts/ra1964/ra_4136_1964.html',
   },
   {
-    label: 'R.A. 10930 IRR — Driver\'s License Validity Periods',
+    label: 'R.A. 10930 IRR: Driver\'s License Validity Periods',
     url:   'https://lto.gov.ph/wp-content/uploads/2023/09/IRR-RA10930.pdf',
   },
   {
-    label: 'LTO APL Form v3 — Application for Driver\'s License',
+    label: 'LTO APL Form v3: Application for Driver\'s License',
     url:   'https://lto.gov.ph/wp-content/uploads/2023/09/APL-Form_v3.pdf',
   },
   {
