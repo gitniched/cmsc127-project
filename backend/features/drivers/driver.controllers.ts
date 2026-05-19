@@ -207,7 +207,7 @@ export const renewLicense = async (req: Request, res: Response) => {
         conn = await pool.getConnection();
         await conn.query('CALL sp_renew_license(?, @message)', [license_number]);
         const rows: any[] = await conn.query('SELECT @message AS message');
-        const message: string = rows[0]['@message'];
+        const message: string = rows[0].message;
 
         if (message.startsWith('error:')) {
             return res.status(400).json({ success: false, message });
