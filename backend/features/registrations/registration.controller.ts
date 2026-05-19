@@ -20,7 +20,16 @@ export const addRegistration = async(req:Request, res: Response) => {
 
         await conn.query(query, values);
         res.status(201).json({ message: 'Registration added successfully' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'A registration with that number already exists.' });
+        }
+        if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+            return res.status(400).json({ message: 'Plate number does not exist.' });
+        }
+        if (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000') {
+            return res.status(400).json({ message: error.message });
+        }
         console.error('Error adding registration:', error);
         res.status(500).json({ message: 'Internal server error' });
     } finally {
