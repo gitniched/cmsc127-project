@@ -175,12 +175,17 @@ export default function NavBar() {
           white-space: nowrap;
         }
 
-        .nav-link:hover {
-          background: rgba(241, 245, 249, 0.95);
-          color: #0f172a;
+        .nav-link.active {
+          background: rgba(239, 246, 255, 0.95);
+          color: #2563eb;
         }
 
-        .nav-link.active {
+        .nav-links:hover .nav-link.active {
+          background: transparent;
+          color: #64748b;
+        }
+
+        .nav-links:hover .nav-link:hover {
           background: rgba(239, 246, 255, 0.95);
           color: #2563eb;
         }
