@@ -1,0 +1,60 @@
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: trafficviolation
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./trafficviolation.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MARIADB_HOST: db
+      MARIADB_USER: root
+      MARIADB_PASSWORD: root
+      MARIADB_DATABASE: trafficviolation
+      PORT: 3000
+    volumes:
+      - ./backend:/app/backend
+      - ./shared:/app/shared
+      - ./frontend/src/constants:/app/frontend/src/constants
+      - backend_modules:/app/backend/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
+      - frontend_modules:/app/frontend/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  backend_modules:
+  frontend_modules:
