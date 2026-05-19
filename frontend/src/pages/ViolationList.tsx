@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '../components/ui/Layout';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -7,7 +6,6 @@ import ViolationTable from '../components/violations/ViolationTable';
 import ViolationForm from '../components/violations/ViolationForm';
 import { useViolations } from '../hooks/useViolations';
 import type { TrafficViolationFull, CreateViolationDTO } from '@shared/types/violation.types';
-import { buildRoute } from '../constants/routes';
 
 type ModalState =
   | { mode: 'closed' }
@@ -16,15 +14,10 @@ type ModalState =
   | { mode: 'delete'; uovrNumber: string; label: string };
 
 export default function ViolationList() {
-  const navigate = useNavigate();
   const { violations, loading, error, add, edit, remove } = useViolations();
   const [modal, setModal]         = useState<ModalState>({ mode: 'closed' });
   const [saving, setSaving]       = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  function handleView(violation: TrafficViolationFull) {
-    navigate(buildRoute.violationDetail(violation.uovr_number));
-  }
 
   function handleEdit(violation: TrafficViolationFull) {
     setSaveError(null);

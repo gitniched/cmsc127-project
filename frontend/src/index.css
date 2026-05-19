@@ -102,7 +102,15 @@
   }
 
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(24px) saturate(1.9) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 
+      0 8px 32px 0 rgba(15, 23, 42, 0.08), 
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .card-header {
@@ -126,16 +134,36 @@
   }
 
   .form-input {
-    @apply block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-           focus:border-blue-500 focus:ring-1 focus:ring-blue-500
-           disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed;
+    @apply block w-full rounded-lg px-3 py-2 text-sm
+           disabled:text-gray-500 disabled:cursor-not-allowed;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    color: #0f172a !important;
+    outline: none;
+  }
+
+  .form-input:focus {
+    border-color: var(--color-brand-400) !important;
+    box-shadow: 0 0 0 2px var(--color-brand-100) !important;
   }
 
   .form-select {
-    @apply block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-           focus:border-blue-500 focus:ring-1 focus:ring-blue-500
-           disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed
-           appearance-none bg-white;
+    @apply block w-full rounded-lg px-3 py-2 text-sm
+           disabled:text-gray-500 disabled:cursor-not-allowed
+           appearance-none;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    color: #0f172a !important;
+    outline: none;
+  }
+
+  .form-select:focus {
+    border-color: var(--color-brand-400) !important;
+    box-shadow: 0 0 0 2px var(--color-brand-100) !important;
   }
 
   .form-error {

@@ -99,32 +99,49 @@ function ViolationLink({ uovrNumber }: { uovrNumber: string }) {
 
 const REPORT1_COLS: ColumnDef<Report1Row>[] = [
   {
-    key: 'license_number', header: 'License No.', sortable: true,
-    render: (r) => <DriverLink licenseNumber={r.license_number} name={r.license_number} />,
+    key:      'license_number',
+    header:   'License Number',
+    sortable: true,
+    render:   (r) => <DriverLink licenseNumber={r.license_number} name={r.license_number} />,
   },
   {
-    key: 'last_name', header: 'Name', sortable: true,
-    render: (r) => <DriverLink licenseNumber={r.license_number} name={`${r.last_name}, ${r.first_name}`} />,
+    key:      'last_name',
+    header:   'Full Name',
+    sortable: true,
+    render:   (r) => <DriverLink licenseNumber={r.license_number} name={`${r.last_name}, ${r.first_name}`} />,
   },
   {
-    key: 'age', header: 'Age', sortable: true,
-    render: (r) => r.age,
+    key:      'age',
+    header:   'Age',
+    sortable: true,
+    width:    '72px',
+    render:   (r) => r.age,
   },
   {
-    key: 'sex', header: 'Sex', sortable: true,
-    render: (r) => r.sex === 'M' ? 'Male' : 'Female',
+    key:      'sex',
+    header:   'Sex',
+    sortable: true,
+    width:    '60px',
+    render:   (r) => (r.sex === 'M' ? 'Male' : 'Female'),
   },
   {
-    key: 'license_type', header: 'Type', sortable: true,
-    render: (r) => <Badge status={r.license_type} />,
+    key:      'license_type',
+    header:   'License Type',
+    sortable: true,
+    render:   (r) => <Badge status={r.license_type} />,
   },
   {
-    key: 'license_status', header: 'Status', sortable: true,
-    render: (r) => <Badge status={r.license_status} />,
+    key:      'license_status',
+    header:   'Status',
+    sortable: true,
+    width:    '110px',
+    render:   (r) => <Badge status={r.license_status} />,
   },
   {
-    key: 'license_expiry_date', header: 'Expiry', sortable: true,
-    render: (r) => r.license_expiry_date,
+    key:      'license_expiry_date',
+    header:   'Expiry Date',
+    sortable: true,
+    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-CA'),
   },
 ];
 
@@ -180,28 +197,41 @@ const REPORT3_COLS: ColumnDef<Report3Row>[] = [
 
 const REPORT4_COLS: ColumnDef<Report4Row>[] = [
   {
-    key: 'license_number', header: 'License No.', sortable: true,
-    render: (r) => <DriverLink licenseNumber={r.license_number} name={r.license_number} />,
+    key:      'license_number',
+    header:   'License Number',
+    sortable: true,
+    render:   (r) => <DriverLink licenseNumber={r.license_number} name={r.license_number} />,
   },
   {
-    key: 'last_name', header: 'Name', sortable: true,
-    render: (r) => <DriverLink licenseNumber={r.license_number} name={`${r.last_name}, ${r.first_name}`} />,
+    key:      'last_name',
+    header:   'Full Name',
+    sortable: true,
+    render:   (r) => <DriverLink licenseNumber={r.license_number} name={`${r.last_name}, ${r.first_name}`} />,
   },
   {
-    key: 'license_type', header: 'Type', sortable: true,
-    render: (r) => <Badge status={r.license_type} />,
+    key:      'license_type',
+    header:   'License Type',
+    sortable: true,
+    render:   (r) => <Badge status={r.license_type} />,
   },
   {
-    key: 'license_status', header: 'Status', sortable: true,
-    render: (r) => <Badge status={r.license_status} />,
+    key:      'license_status',
+    header:   'Status',
+    sortable: true,
+    width:    '110px',
+    render:   (r) => <Badge status={r.license_status} />,
   },
   {
-    key: 'license_expiry_date', header: 'Expiry', sortable: true,
-    render: (r) => r.license_expiry_date,
+    key:      'license_expiry_date',
+    header:   'Expiry Date',
+    sortable: true,
+    render:   (r) => new Date(r.license_expiry_date).toLocaleDateString('en-CA'),
   },
   {
-    key: 'address', header: 'Address', sortable: false,
-    render: (r) => r.address,
+    key:      'address',
+    header:   'Address',
+    sortable: false,
+    render:   (r) => r.address,
   },
 ];
 
@@ -341,7 +371,7 @@ export default function ReportTable({ reportId, rows, emptyMessage }: ReportTabl
         </Button>
       </div>
 
-      <div className="glass-card overflow-hidden">
+      <div className="border border-white/25 rounded-xl overflow-hidden bg-transparent">
         <Table
           columns={columns}
           rows={rows}

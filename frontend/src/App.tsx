@@ -47,8 +47,16 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backdropFilter: 'blur(1.5px)', 
+          WebkitBackdropFilter: 'blur(1.5px)',
+          zIndex: -1,
+          pointerEvents: 'none',
+        }} />
         <NavBar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col pt-[72px]">
           <AnimatedRoutes />
         </main>
       </div>
