@@ -35,3 +35,4 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+// Nodemon trigger reload to refresh env variables

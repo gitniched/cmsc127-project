@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
 import FilterBar from '../ui/FilterBar';
 import type { FilterControl } from '../ui/FilterBar';
-import type { DriverWithAge } from '../../types/driver.types';
-import { getFullName } from '../../types/driver.types';
+import type { DriverWithAge } from '@shared/types/driver.types';
+import { getFullName } from '@shared/types/driver.types';
 import {
   LICENSE_TYPE_OPTIONS,
   LICENSE_STATUS_OPTIONS,
