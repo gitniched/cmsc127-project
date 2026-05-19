@@ -300,6 +300,26 @@ BEGIN
     END IF;
 END$$
 
+-- check if there is already an active regitration for the same plate number before allowing a new active registration to be inserted.
+CREATE TRIGGER trg_registration_before_insert_active_check
+BEFORE INSERT ON vehicle_registration
+FOR EACH ROW
+BEGIN
+    DECLARE v_active_count INT;
+
+    IF NEW.registration_status = 'Active' THEN
+        SELECT COUNT(*) INTO v_active_count
+        FROM vehicle_registration
+        WHERE plate_number = NEW.plate_number
+          AND registration_status = 'Active';
+
+        IF v_active_count > 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'error: vehicle already has an active registration';
+        END IF;
+    END IF;
+END$$
+
 -- block logically impossible combinations of violation_status and payment_status on insert
 CREATE TRIGGER trg_violation_before_insert
 BEFORE INSERT ON traffic_violation
