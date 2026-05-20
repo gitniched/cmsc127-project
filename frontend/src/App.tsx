@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ROUTES } from './constants/routes';
 export { buildRoute } from './constants/routes';
@@ -14,6 +15,10 @@ import Reports        from './pages/Reports';
 
 function AnimatedRoutes() {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div key={location.pathname} className="animate-page-enter flex-1 flex flex-col">
