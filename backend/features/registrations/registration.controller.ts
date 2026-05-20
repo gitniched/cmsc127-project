@@ -28,7 +28,11 @@ export const addRegistration = async(req:Request, res: Response) => {
             return res.status(400).json({ message: 'Plate number does not exist.' });
         }
         if (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000') {
-            return res.status(400).json({ message: error.message });
+            const rawMessage = error.message || '';
+            const match = rawMessage.match(/error:\s*([^]+?)(?:\s+sql:|$)/i);
+            const cleanMessage = match && match[1] ? match[1].trim() : rawMessage;
+            const friendlyMessage = cleanMessage.charAt(0).toUpperCase() + cleanMessage.slice(1) + (cleanMessage.endsWith('.') ? '' : '.');
+            return res.status(400).json({ message: friendlyMessage });
         }
         console.error('Error adding registration:', error);
         res.status(500).json({ message: 'Internal server error' });

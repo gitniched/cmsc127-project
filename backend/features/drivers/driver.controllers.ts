@@ -210,7 +210,13 @@ export const renewLicense = async (req: Request, res: Response) => {
         const message: string = rows[0].message;
 
         if (message.startsWith('error:')) {
-            return res.status(400).json({ success: false, message });
+            let cleanMsg = message.replace(/^error:\s*/i, '').trim();
+            if (cleanMsg.toLowerCase().includes('license still valid')) {
+                cleanMsg = 'License still valid.';
+            } else {
+                cleanMsg = cleanMsg.charAt(0).toUpperCase() + cleanMsg.slice(1) + (cleanMsg.endsWith('.') ? '' : '.');
+            }
+            return res.status(400).json({ success: false, message: cleanMsg });
         }
 
         const driverRows: DriverWithAge[] = await conn.query(

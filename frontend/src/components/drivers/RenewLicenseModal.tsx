@@ -36,10 +36,28 @@ export default function RenewLicenseModal({
   const [modalStep, setModalStep] = useState<ModalStep>({ step: 'confirm' });
 
   useEffect(() => {
-    if (open) setModalStep({ step: 'confirm' });
-  }, [open]);
+    if (open) {
+      if (driver.license_status?.toLowerCase() === 'active') {
+        setModalStep({
+          step:    'result',
+          success: false,
+          message: 'License still valid.',
+        });
+      } else {
+        setModalStep({ step: 'confirm' });
+      }
+    }
+  }, [open, driver]);
 
   async function handleConfirm() {
+    if (driver.license_status?.toLowerCase() === 'active') {
+      setModalStep({
+        step:    'result',
+        success: false,
+        message: 'License still valid.',
+      });
+      return;
+    }
     setModalStep({ step: 'loading' });
     try {
       const result = await renewLicense(driver.license_number);
