@@ -125,7 +125,17 @@ export default function VehicleDetail() {
             <span>/</span>
             <span className="text-ink font-mono">{vehicle.plate_number}</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.vehicles)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(ROUTES.vehicles)}
+            className="!text-black hover:!text-brand-700 !border-brand-300/80 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: 'rgba(255, 255, 255, 0.75)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
             ← Back to Vehicles
           </Button>
         </div>
