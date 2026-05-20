@@ -7,6 +7,7 @@ export interface ColumnDef<T> {
   sortable?:  boolean;
   width?:     string;
   render:     (row: T, index: number) => ReactNode;
+  sortValue?: (row: T) => any;
 }
 
 interface TableProps<T> {
@@ -43,15 +44,24 @@ export default function Table<T>({
   }
 
   const sortedRows = (() => {
-    if (!sortKey) return rows;
+    const getRecentlyAddedRows = () => {
+      return [...rows].sort((a, b) => {
+        const ad = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0;
+        const bd = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0;
+        if (ad === bd) return 0;
+        return bd - ad;
+      });
+    };
+
+    if (!sortKey) return getRecentlyAddedRows();
     const col = columns.find((c) => c.key === sortKey);
-    if (!col?.sortable) return rows;
+    if (!col?.sortable) return getRecentlyAddedRows();
     return [...rows].sort((a, b) => {
-      const av = (a as Record<string, unknown>)[sortKey];
-      const bv = (b as Record<string, unknown>)[sortKey];
+      const av = col.sortValue ? col.sortValue(a) : (a as Record<string, unknown>)[sortKey];
+      const bv = col.sortValue ? col.sortValue(b) : (b as Record<string, unknown>)[sortKey];
       const as = av == null ? '' : String(av).toLowerCase();
       const bs = bv == null ? '' : String(bv).toLowerCase();
-      const n  = !isNaN(Number(av)) && !isNaN(Number(bv));
+      const n  = av !== '' && bv !== '' && !isNaN(Number(av)) && !isNaN(Number(bv));
       const cmp = n ? Number(av) - Number(bv) : as.localeCompare(bs);
       return sortDir === 'asc' ? cmp : -cmp;
     });

@@ -12,6 +12,7 @@ export interface Driver {
   license_status:      LicenseStatus;
   license_issue_date:  string;        // DATE as ISO string 'YYYY-MM-DD'
   license_expiry_date: string;        // DATE as ISO string 'YYYY-MM-DD'
+  created_at?:         string;
 }
 
 export interface DriverWithAge extends Driver {

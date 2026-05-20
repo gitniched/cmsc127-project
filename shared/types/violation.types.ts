@@ -12,6 +12,7 @@ export interface TrafficViolation {
   license_number:            string;
   plate_number:              string;
   registration_number:       string | null;
+  created_at?:               string;
 }
 
 export interface ViolationType {

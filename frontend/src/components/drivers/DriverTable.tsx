@@ -36,6 +36,7 @@ const DEFAULT_FILTERS: Filters = {
 
 export default function DriverTable({ drivers, onView, onEdit, onDelete }: DriverTableProps) {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [resetKey, setResetKey] = useState(0);
 
   function setFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -43,6 +44,7 @@ export default function DriverTable({ drivers, onView, onEdit, onDelete }: Drive
 
   function resetFilters() {
     setFilters(DEFAULT_FILTERS);
+    setResetKey((prev) => prev + 1);
   }
 
   const filtered = drivers.filter((d) => {
@@ -69,6 +71,7 @@ export default function DriverTable({ drivers, onView, onEdit, onDelete }: Drive
       key:      'full_name',
       header:   'Full Name',
       sortable: true,
+      sortValue: (d) => getFullName(d),
       render:   (d) => <span className="font-medium text-ink">{getFullName(d)}</span>,
     },
     {
@@ -181,6 +184,7 @@ export default function DriverTable({ drivers, onView, onEdit, onDelete }: Drive
 
       <div className="glass-card overflow-hidden">
         <Table
+          key={resetKey}
           columns={columns}
           rows={filtered}
           rowKey={(d) => d.license_number}

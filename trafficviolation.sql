@@ -16,6 +16,7 @@ CREATE TABLE driver (
     license_status ENUM('Active', 'Expired', 'Suspended', 'Revoked') NOT NULL,
     license_issue_date DATE NOT NULL,
     license_expiry_date DATE NOT NULL DEFAULT '9999-12-31',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_driver PRIMARY KEY (license_number)
 );
 
@@ -32,7 +33,8 @@ SELECT
     license_type,
     license_status,
     license_issue_date,
-    license_expiry_date
+    license_expiry_date,
+    created_at
 FROM driver;
 
 CREATE TABLE vehicle (
@@ -45,6 +47,7 @@ CREATE TABLE vehicle (
     year YEAR NOT NULL,
     color VARCHAR(20) NOT NULL,
     owner_license_number VARCHAR(13) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_vehicle PRIMARY KEY (plate_number),
     CONSTRAINT fk_vehicle_driver FOREIGN KEY (owner_license_number) REFERENCES driver(license_number),
     CONSTRAINT chk_plate_format CHECK (
@@ -88,6 +91,7 @@ CREATE TABLE traffic_violation (
     license_number VARCHAR(13) NOT NULL,
     plate_number VARCHAR(10) NOT NULL,
     registration_number VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_traffic_violation PRIMARY KEY (uovr_number),
     CONSTRAINT fk_violation_driver FOREIGN KEY (license_number) REFERENCES driver(license_number),
     CONSTRAINT fk_violation_vehicle FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number),

@@ -40,6 +40,8 @@ export default function ViolationTable({ violations, onEdit, onDelete }: Violati
     return Array.from(set).sort();
   }, [violations]);
 
+  const [resetKey, setResetKey] = useState(0);
+
   function handleReset() {
     setSearch('');
     setFilterViolationStatus('');
@@ -47,6 +49,7 @@ export default function ViolationTable({ violations, onEdit, onDelete }: Violati
     setFilterYear('');
     setFilterCity('');
     setFilterRegion('');
+    setResetKey((prev) => prev + 1);
   }
 
   const filtered = useMemo(() => {
@@ -234,6 +237,7 @@ export default function ViolationTable({ violations, onEdit, onDelete }: Violati
       </div>
       <div className="glass-card overflow-hidden">
         <Table
+          key={resetKey}
           columns={columns}
           rows={filtered}
           rowKey={(v) => v.uovr_number}

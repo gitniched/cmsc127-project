@@ -11,6 +11,7 @@ export interface Vehicle {
   year:                 number;      // YEAR — stored as number on frontend
   color:                string;      // VARCHAR(20)
   owner_license_number: string;      // FK → driver.license_number
+  created_at?:         string;
 }
 
 export interface VehicleWithOwner extends Vehicle {

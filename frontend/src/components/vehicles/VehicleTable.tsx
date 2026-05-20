@@ -32,6 +32,7 @@ const DEFAULT_FILTERS: Filters = {
 
 export default function VehicleTable({ vehicles, onView, onEdit, onDelete }: VehicleTableProps) {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [resetKey, setResetKey] = useState(0);
 
   function setFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -39,6 +40,7 @@ export default function VehicleTable({ vehicles, onView, onEdit, onDelete }: Veh
 
   function resetFilters() {
     setFilters(DEFAULT_FILTERS);
+    setResetKey((prev) => prev + 1);
   }
 
   const uniqueMakes = [...new Set(vehicles.map((v) => v.make))].sort();
@@ -166,6 +168,7 @@ export default function VehicleTable({ vehicles, onView, onEdit, onDelete }: Veh
 
       <div className="glass-card overflow-hidden">
         <Table
+          key={resetKey}
           columns={columns}
           rows={filtered}
           rowKey={(v) => v.plate_number}

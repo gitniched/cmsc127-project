@@ -172,12 +172,17 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
         <button
           type="button"
           onClick={onReset}
-          className="h-9 px-3 text-sm text-ink-muted hover:text-ink rounded-md transition-colors duration-150 shrink-0"
+          className="h-9 px-4 text-sm font-semibold text-brand-600 hover:text-brand-700 hover:bg-white/85 rounded-md transition-all duration-150 shrink-0 shadow-sm flex items-center gap-1.5"
           style={{
-            background: 'rgba(255,255,255,0.3)',
-            border: '1px solid rgba(226,232,240,0.9)',
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid rgba(37, 99, 235, 0.25)',
           }}
         >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="shrink-0">
+            <path d="M13.65 2.35A7.95 7.95 0 0 0 8 0a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35Z" />
+          </svg>
           Reset
         </button>
       )}
