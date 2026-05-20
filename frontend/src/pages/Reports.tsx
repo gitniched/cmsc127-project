@@ -169,19 +169,22 @@ export default function Reports() {
           font-size: 0.875rem;
           font-weight: 500;
           white-space: nowrap;
-          color: var(--color-ink-muted, #64748b);
-          transition: color 150ms ease, background 150ms ease;
+          color: #64748b;
+          transition: background 120ms ease, color 120ms ease;
           border-radius: 8px;
           flex-shrink: 0;
         }
-        .glass-tab:hover {
-          color: var(--color-ink, #0f172a);
-          background: rgba(255, 255, 255, 0.4);
-        }
         .glass-tab.active {
-          color: var(--color-brand-600, #2563eb);
-          background: rgba(255, 255, 255, 0.6);
-          box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
+          background: rgba(239, 246, 255, 0.95);
+          color: #2563eb;
+        }
+        .glass-tabs-container:hover .glass-tab.active {
+          background: transparent;
+          color: #64748b;
+        }
+        .glass-tabs-container:hover .glass-tab:hover {
+          background: rgba(239, 246, 255, 0.95);
+          color: #2563eb;
         }
       `}</style>
       <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
@@ -191,7 +194,7 @@ export default function Reports() {
           <p className="text-sm text-ink-muted mt-1">Run and export any of the 7 system reports.</p>
         </div>
 
-        <div className="glass-card px-3 py-2 flex gap-1 overflow-x-auto">
+        <div className="glass-card px-3 py-2 flex gap-1 overflow-x-auto glass-tabs-container">
           {REPORT_TABS.map((tab) => {
             const state    = reports[tab.id];
             const isActive = activeTab === tab.id;
