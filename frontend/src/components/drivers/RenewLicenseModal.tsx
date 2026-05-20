@@ -43,9 +43,6 @@ export default function RenewLicenseModal({
     setModalStep({ step: 'loading' });
     try {
       const result = await renewLicense(driver.license_number);
-      if (result.success) {
-        onRenewed();
-      }
       setModalStep({
         step:      'result',
         success:   result.success,
@@ -61,6 +58,13 @@ export default function RenewLicenseModal({
     }
   }
 
+  function handleClose() {
+    if (modalStep.step === 'result' && modalStep.success) {
+      onRenewed();
+    }
+    onClose();
+  }
+
   const isResult  = modalStep.step === 'result';
   const isSuccess = isResult && modalStep.success;
   const isLoading = modalStep.step === 'loading';
@@ -68,7 +72,7 @@ export default function RenewLicenseModal({
   return (
     <Modal
       open={open}
-      onClose={isLoading ? undefined : onClose}
+      onClose={isLoading ? undefined : handleClose}
       title={isResult ? (isSuccess ? 'License Renewed' : 'Renewal Failed') : 'Renew License'}
       size="sm"
     >
@@ -96,7 +100,7 @@ export default function RenewLicenseModal({
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border pt-4">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
             <Button variant="primary" onClick={handleConfirm}>Confirm Renewal</Button>
           </div>
         </div>
@@ -128,7 +132,7 @@ export default function RenewLicenseModal({
           )}
 
           <div className="flex justify-end border-t border-border pt-4">
-            <Button variant="ghost" onClick={onClose}>Close</Button>
+            <Button variant="ghost" onClick={handleClose}>Close</Button>
           </div>
         </div>
       )}

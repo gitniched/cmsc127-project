@@ -107,9 +107,6 @@ const YEAR_OPTIONS: number[] = Array.from(
   (_, i) => CURRENT_YEAR - i,
 );
 
-// ---------------------------------------------------------------------------
-// Portal dropdown — same pattern as VehicleForm / ViolationForm
-// ---------------------------------------------------------------------------
 function PortalDropdown({
   anchorRef,
   children,
@@ -132,9 +129,6 @@ function PortalDropdown({
 const dropdownList = 'bg-surface border border-border rounded-md shadow-lg max-h-52 overflow-y-auto';
 const dropdownItem = 'w-full px-3 py-2 text-left text-sm cursor-pointer flex items-center justify-between gap-4 hover:bg-surface-inset';
 
-// ---------------------------------------------------------------------------
-// Driver combobox — shared by Report2Runner and Report5Runner
-// ---------------------------------------------------------------------------
 interface DriverComboboxProps {
   label:         string;
   drivers:       DriverWithAge[];
@@ -230,9 +224,6 @@ function DriverCombobox({ label, drivers, licenseNumber, onChange }: DriverCombo
   );
 }
 
-// ---------------------------------------------------------------------------
-// Report runners
-// ---------------------------------------------------------------------------
 function Report1Runner({
   params, onParamsChange, onRun, loading,
 }: {
@@ -715,9 +706,6 @@ function Report7Runner({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Root
-// ---------------------------------------------------------------------------
 export default function ReportRunner({
   reportId,
   params,

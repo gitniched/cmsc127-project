@@ -59,7 +59,7 @@ interface FilterBarProps {
 }
 
 const inputStyle: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.45)',
+  background: 'rgba(255, 255, 255, 0.75)',
   borderColor: 'rgba(226, 232, 240, 0.9)',
 };
 
@@ -74,15 +74,9 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
   return (
     <div
       className={[
-        'flex items-end gap-3 p-4 rounded-lg overflow-x-auto',
+        'glass-card flex items-end gap-3 p-4 overflow-x-auto',
         className,
       ].join(' ')}
-      style={{
-        background: 'rgba(255, 255, 255, 0.45)',
-        border: '1px solid rgba(226, 232, 240, 0.9)',
-        backdropFilter: 'blur(16px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
-      }}
     >
       {controls.map((ctrl) => {
         if (ctrl.type === 'search') {
@@ -101,7 +95,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
         if (ctrl.type === 'select') {
           return (
             <div key={ctrl.key} className="flex flex-col gap-1 min-w-36">
-              <label className="text-xs font-medium text-ink-muted">{ctrl.label}</label>
+              <label className="text-xs font-medium text-ink">{ctrl.label}</label>
               <select
                 value={ctrl.value}
                 onChange={(e) => ctrl.onChange(e.target.value)}
@@ -122,7 +116,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
         if (ctrl.type === 'number-range') {
           return (
             <div key={ctrl.key} className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-ink-muted">{ctrl.label}</label>
+              <label className="text-xs font-medium text-ink">{ctrl.label}</label>
               <div className="flex items-center gap-1.5">
                 <input
                   type="number"
@@ -149,7 +143,7 @@ export default function FilterBar({ controls, onReset, className = '' }: FilterB
         if (ctrl.type === 'date-range') {
           return (
             <div key={ctrl.key} className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-ink-muted">{ctrl.label}</label>
+              <label className="text-xs font-medium text-ink">{ctrl.label}</label>
               <div className="flex items-center gap-1.5">
                 <input
                   type="date"

@@ -24,10 +24,6 @@ const makeEmpty = (): FormState => ({
   registration_status: RegistrationStatus.Active,
 });
 
-// ---------------------------------------------------------------------------
-// Registration number helpers
-// Format from README / seed data: REG-YYYY-NNN
-// ---------------------------------------------------------------------------
 const REG_NUMBER_RE = /^REG-\d{4}-\d{3,}$/;
 
 function generateRegistrationNumber(registrationDate: string): string {
@@ -36,13 +32,7 @@ function generateRegistrationNumber(registrationDate: string): string {
   return `REG-${year}-${seq}`;
 }
 
-// ---------------------------------------------------------------------------
-// Expiry computation — mirrors trg_registration_before_insert exactly:
-//   MONTH(reg_date) <= renewal_month  → year + 1
-//   MONTH(reg_date) >  renewal_month  → year + 2
-//   non-numeric plate ending          → reg_date + 1 year (flat)
-// Returns a human-readable label; the DB trigger is the authoritative source.
-// ---------------------------------------------------------------------------
+
 function computeExpiryLabel(plateNumber: string, registrationDate: string): string {
   if (!registrationDate) return 'Set a registration date to preview';
 
@@ -51,7 +41,7 @@ function computeExpiryLabel(plateNumber: string, registrationDate: string): stri
   if (!renewalMonth) {
     const flat = new Date(registrationDate);
     flat.setFullYear(flat.getFullYear() + 1);
-    return `${flat.toISOString().slice(0, 7)} — 12 months flat (non-numeric plate ending)`;
+    return `${flat.toISOString().slice(0, 7)}, 12 months flat (non-numeric plate ending)`;
   }
 
   const regDate    = new Date(registrationDate);
@@ -63,9 +53,6 @@ function computeExpiryLabel(plateNumber: string, registrationDate: string): stri
   return `${MONTH_NAMES[renewalMonth]} ${lastDay}, ${expiryYear} (last day of renewal month)`;
 }
 
-// ---------------------------------------------------------------------------
-// Style tokens
-// ---------------------------------------------------------------------------
 const inputBase = [
   'h-9 px-3 text-sm rounded-md w-full',
   'bg-surface border border-border text-ink placeholder:text-ink-faint',
@@ -89,9 +76,6 @@ function FieldErr({ msg }: { msg?: string }) {
   return <p className="mt-1 text-xs text-danger-500">{msg}</p>;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export default function RegistrationForm({
   open, onClose, onSubmit, plateNumber,
 }: RegistrationFormProps) {
@@ -170,7 +154,6 @@ export default function RegistrationForm({
     >
       <div className="flex flex-col gap-4">
 
-        {/* ── Vehicle Plate (read-only context) ── */}
         <div>
           <label className={labelBase}>Vehicle Plate</label>
           <div className={inputReadOnly}>
@@ -183,7 +166,6 @@ export default function RegistrationForm({
           </div>
         </div>
 
-        {/* ── Registration Number ── */}
         <div>
           <label className={labelBase}>
             Registration Number <span className="text-danger-500">*</span>
@@ -216,7 +198,6 @@ export default function RegistrationForm({
           }
         </div>
 
-        {/* ── Registration Date ── */}
         <div>
           <label className={labelBase}>
             Registration Date <span className="text-danger-500">*</span>
@@ -230,7 +211,6 @@ export default function RegistrationForm({
           <FieldErr msg={errors.registration_date} />
         </div>
 
-        {/* ── Expiry Date (computed preview) ── */}
         <div>
           <label className={labelBase}>Expiry Date</label>
           <div className={inputReadOnly}>{expiryLabel}</div>
@@ -242,7 +222,6 @@ export default function RegistrationForm({
           </p>
         </div>
 
-        {/* ── Status ── */}
         <div>
           <label className={labelBase}>Status</label>
           <select
@@ -256,7 +235,7 @@ export default function RegistrationForm({
           </select>
           {form.registration_status === RegistrationStatus.Suspended && (
             <p className="mt-1 text-xs text-warning-600">
-              ⚠ Suspended is uncommon for a new registration — confirm this is intentional
+              ⚠ Suspended is uncommon for a new registration, confirm this is intentional
             </p>
           )}
         </div>

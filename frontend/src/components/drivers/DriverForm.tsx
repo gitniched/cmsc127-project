@@ -11,9 +11,6 @@ import {
   MIN_AGE_FOR_LICENSE,
 } from '../../constants/enums';
 
-// ---------------------------------------------------------------------------
-// Philippine address data — city/municipality → province/region
-// ---------------------------------------------------------------------------
 interface CityEntry {
   city:     string;
   province: string;
@@ -90,9 +87,6 @@ const PH_CITIES: CityEntry[] = [
   { city: 'Butuan',         province: 'Agusan del Norte', region: 'Region XIII' },
 ].sort((a, b) => a.city.localeCompare(b.city));
 
-// ---------------------------------------------------------------------------
-// Pure helper functions
-// ---------------------------------------------------------------------------
 function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: string): string {
   if (!issueDate) return '';
   const issue = new Date(issueDate);
@@ -112,7 +106,6 @@ function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: s
   let month = dob.getMonth();
   let day   = dob.getDate();
 
-  // Feb-29 birthday guard for non-leap expiry year
   if (month === 1 && day === 29) {
     const isLeap = new Date(expiryYear, 1, 29).getMonth() === 1;
     if (!isLeap) day = 28;
@@ -141,7 +134,6 @@ function getAge(birthDate: string): number {
   return age;
 }
 
-/** "expires in X years Y months" relative label, or "expired X ago" */
 function expiryRelativeLabel(expiryDateStr: string): string {
   if (!expiryDateStr) return '';
   const expiry  = new Date(expiryDateStr);
@@ -161,16 +153,12 @@ function expiryRelativeLabel(expiryDateStr: string): string {
     : `expires in ${parts.join(' ')}`;
 }
 
-/** License type rank for upgrade/downgrade detection */
 const LICENSE_RANK: Record<LicenseType, number> = {
   [LicenseType.StudentPermit]:    0,
   [LicenseType.NonProfessional]:  1,
   [LicenseType.Professional]:     2,
 };
 
-// ---------------------------------------------------------------------------
-// Style constants — kept in sync with existing DriverForm style tokens
-// ---------------------------------------------------------------------------
 const glassInput: React.CSSProperties = {
   background:  'rgba(255, 255, 255, 0.45)',
   borderColor: 'rgba(226, 232, 240, 0.9)',
@@ -195,11 +183,6 @@ function FieldErr({ msg }: { msg?: string }) {
   return msg ? <p className="mt-1 text-xs text-danger-500">{msg}</p> : null;
 }
 
-// ---------------------------------------------------------------------------
-// AddressCombobox
-// Two-stage: pick a known city (portal dropdown) → type street address freely.
-// The full address field stays a single string (matches the DB column).
-// ---------------------------------------------------------------------------
 interface AddressComboboxProps {
   value:    string;
   onChange: (val: string) => void;
@@ -212,7 +195,6 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
   const [open, setOpen]   = useState(false);
   const [rect, setRect]   = useState<{ top: number; left: number; width: number } | null>(null);
 
-  // Extract city portion (everything after the last comma, trimmed)
   const cityQuery = useMemo(() => {
     const parts = value.split(',');
     return parts[parts.length - 1].trim();
@@ -254,13 +236,11 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
   }, []);
 
   function handleSelect(entry: CityEntry) {
-    // Preserve any street prefix the user already typed before the last comma
     const parts  = value.split(',');
     const street = parts.slice(0, -1).join(',').trim();
     const newVal = street ? `${street}, ${entry.city}` : entry.city;
     onChange(newVal);
     setOpen(false);
-    // Move caret to end
     setTimeout(() => {
       inputRef.current?.focus();
       const len = newVal.length;
@@ -318,9 +298,6 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Form state & props
-// ---------------------------------------------------------------------------
 interface DriverFormProps {
   open:       boolean;
   onClose:    () => void;
@@ -371,16 +348,12 @@ function toFormState(d: Driver | DriverWithAge): FormState {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
 export default function DriverForm({ open, onClose, onSubmit, initial, saveError, saving }: DriverFormProps) {
   const isEdit = !!initial;
 
   const [form,   setForm]   = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Track original license type so we can warn on downgrade in edit mode
   const [originalLicenseType, setOriginalLicenseType] = useState<LicenseType | null>(null);
 
   useEffect(() => {
@@ -392,7 +365,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     }
   }, [open, initial]);
 
-  // Auto-suggest license number in add mode when type or issue date changes
   useEffect(() => {
     if (isEdit || !open) return;
     if (form.license_issue_date) {
@@ -413,9 +385,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     if (s) set('license_number', s);
   }
 
-  // ---------------------------------------------------------------------------
-  // Derived / computed values
-  // ---------------------------------------------------------------------------
   const age          = getAge(form.birth_date);
   const minAge       = MIN_AGE_FOR_LICENSE[form.license_type];
   const ageOk        = !form.birth_date || age >= minAge;
@@ -424,19 +393,14 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
   const computedExpiry   = computeExpiry(form.birth_date, form.license_type, form.license_issue_date);
   const expiryRelative   = expiryRelativeLabel(computedExpiry);
 
-  // Warn if editing and license type is being downgraded (e.g. Pro → Non-Pro)
   const isDowngrade = isEdit &&
     originalLicenseType !== null &&
     LICENSE_RANK[form.license_type] < LICENSE_RANK[originalLicenseType];
 
-  // Issue date in the future?
   const issueFuture = form.license_issue_date
     ? new Date(form.license_issue_date) > new Date()
     : false;
 
-  // ---------------------------------------------------------------------------
-  // Validation
-  // ---------------------------------------------------------------------------
   function validate(): boolean {
     const e: Record<string, string> = {};
 
@@ -474,11 +438,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Render helpers
-  // ---------------------------------------------------------------------------
-
-  /** Inline age chip shown next to birth date */
   function AgeBadge() {
     if (!form.birth_date) return null;
     if (!ageOk) return null; // error state handled by FieldErr
@@ -496,7 +455,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     );
   }
 
-  /** Expiry relative label chip */
   function ExpiryBadge() {
     if (!computedExpiry) return null;
     const past  = new Date(computedExpiry) < new Date();
@@ -510,7 +468,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     );
   }
 
-  // ---------------------------------------------------------------------------
   return (
     <Modal
       open={open}
@@ -536,8 +493,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
-
-          {/* ── Personal details ────────────────────────────────────────── */}
           <div>
             <label className={labelBase}>First Name <span className="text-danger-500">*</span></label>
             <input
@@ -586,7 +541,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </select>
           </div>
 
-          {/* Birth date with live age badge */}
           <div className="sm:col-span-2">
             <label className={labelBase}>Birth Date <span className="text-danger-500">*</span></label>
             <input
@@ -602,7 +556,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </div>
           </div>
 
-          {/* Address — city combobox (portal) + free-text street */}
           <div className="sm:col-span-2">
             <label className={labelBase}>Address <span className="text-danger-500">*</span></label>
             <AddressCombobox
@@ -611,12 +564,11 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
               error={!!errors.address}
             />
             <p className="mt-1 text-xs text-ink-faint">
-              Type street first, then ", City" — or type the city name to pick from the list
+              Type street first, then ", City", or type the city name to pick from the list
             </p>
             <FieldErr msg={errors.address} />
           </div>
 
-          {/* ── License section divider ──────────────────────────────────── */}
           <div
             className="sm:col-span-2 pt-4 mt-1"
             style={{ borderTop: '1px solid rgba(226, 232, 240, 0.6)' }}
@@ -625,8 +577,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
               License Information
             </p>
           </div>
-
-          {/* License number — locked in edit with explanation badge */}
           <div>
             <label className={labelBase}>License Number <span className="text-danger-500">*</span></label>
             <div className="flex gap-2">
@@ -652,12 +602,12 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </div>
             {isEdit && (
               <p className="mt-1 text-xs text-ink-faint">
-                Primary key — cannot be changed after creation
+                Primary key, cannot be changed after creation
               </p>
             )}
             {!isEdit && form.license_issue_date && (
               <p className="mt-1 text-xs text-ink-faint">
-                Auto-suggested — edit freely or click ↺ to regenerate
+                Auto-suggested, edit freely or click ↺ to regenerate
               </p>
             )}
             {!isEdit && !form.license_issue_date && (
@@ -668,7 +618,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             <FieldErr msg={errors.license_number} />
           </div>
 
-          {/* License type — downgrade warning in edit mode */}
           <div>
             <label className={labelBase}>License Type <span className="text-danger-500">*</span></label>
             <select
@@ -683,12 +632,11 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             </select>
             {isDowngrade && (
               <p className="mt-1 text-xs text-warning-600">
-                ⚠ Downgrading from {originalLicenseType} — confirm this is intentional
+                ⚠ Downgrading from {originalLicenseType}, confirm this is intentional
               </p>
             )}
           </div>
 
-          {/* License status */}
           <div>
             <label className={labelBase}>License Status <span className="text-danger-500">*</span></label>
             <select
@@ -713,7 +661,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             )}
           </div>
 
-          {/* Issue date */}
           <div>
             <label className={labelBase}>Issue Date <span className="text-danger-500">*</span></label>
             <input
@@ -726,7 +673,6 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             <FieldErr msg={errors.license_issue_date} />
           </div>
 
-          {/* Expiry — computed, read-only, with relative label */}
           <div>
             <label className={labelBase}>Expiry Date</label>
             <input

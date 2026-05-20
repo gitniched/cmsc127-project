@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import Layout from '../components/ui/Layout';
 import ReportRunner, { defaultParams } from '../components/reports/ReportRunner';
-import ReportTable from '../components/reports/ReportTable';
+import ReportTable, { exportCSV } from '../components/reports/ReportTable';
 import type { ReportId, ReportParams, Report1Params, Report2Params, Report3Params, Report5Params, Report6Params, Report7Params } from '../components/reports/ReportRunner';
 import type { ReportRow } from '../components/reports/ReportTable';
+import Button from '../components/ui/Button';
 import {
   useReport1,
   useReport2,
@@ -260,13 +261,35 @@ export default function Reports() {
           )}
 
           {!current.loading && !current.error && currentHasRun && (
-            <div className="glass-card overflow-hidden">
-              <ReportTable
-                reportId={activeTab}
-                rows={currentRows}
-                emptyMessage={buildEmptyMessage(activeTab, params[activeTab])}
-              />
-            </div>
+            <>
+              <div className="flex items-center justify-between px-1">
+                <p className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
+                  {currentRows.length} {currentRows.length === 1 ? 'result' : 'results'}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="glass-card"
+                  disabled={currentRows.length === 0}
+                  onClick={() => exportCSV(currentRows, activeTab)}
+                  icon={
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M2 11h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                    </svg>
+                  }
+                >
+                  Export CSV
+                </Button>
+              </div>
+              <div className="glass-card overflow-hidden">
+                <ReportTable
+                  reportId={activeTab}
+                  rows={currentRows}
+                  emptyMessage={buildEmptyMessage(activeTab, params[activeTab])}
+                />
+              </div>
+            </>
           )}
 
           {!current.loading && !currentHasRun && !AUTO_RUN_REPORTS.includes(activeTab) && (

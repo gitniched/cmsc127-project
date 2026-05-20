@@ -102,7 +102,11 @@ export default function DriverTable({ drivers, onView, onEdit, onDelete }: Drive
       key:      'license_expiry_date',
       header:   'Expiry Date',
       sortable: true,
-      render:   (d) => new Date(d.license_expiry_date).toLocaleDateString('en-CA'),
+      render:   (d) => new Date(d.license_expiry_date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }),
     },
     {
       key:    'actions',

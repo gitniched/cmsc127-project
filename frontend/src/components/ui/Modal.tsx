@@ -5,12 +5,12 @@ import { createPortal } from 'react-dom';
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface ModalProps {
-  open:       boolean;
-  onClose?:   () => void;
-  title?:     string;
-  size?:      ModalSize;
-  children:   ReactNode;
-  footer?:    ReactNode;
+  open: boolean;
+  onClose?: () => void;
+  title?: string;
+  size?: ModalSize;
+  children: ReactNode;
+  footer?: ReactNode;
   className?: string;
 }
 
@@ -25,7 +25,7 @@ export default function Modal({
   open,
   onClose,
   title,
-  size      = 'md',
+  size = 'md',
   children,
   footer,
   className = '',
@@ -110,7 +110,7 @@ export default function Modal({
           animateShow ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95',
           sizeClasses[size],
           className,
-         ].join(' ')}
+        ].join(' ')}
         style={{
           background: 'rgba(255, 255, 255, 0.92)',
           border: '1px solid rgba(226, 232, 240, 0.95)',

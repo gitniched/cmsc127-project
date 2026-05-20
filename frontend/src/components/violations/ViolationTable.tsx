@@ -139,7 +139,11 @@ export default function ViolationTable({ violations, onEdit, onDelete }: Violati
       key:      'violation_date',
       header:   'Date',
       sortable: true,
-      render: (r) => new Date(r.violation_date).toLocaleDateString('en-CA'),
+      render: (r) => new Date(r.violation_date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }),
     },
     {
       key:      'violation_location_city',

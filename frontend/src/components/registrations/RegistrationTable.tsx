@@ -20,13 +20,21 @@ const columns: ColumnDef<VehicleRegistration>[] = [
     key:      'registration_date',
     header:   'Registration Date',
     sortable: true,
-    render:   (r) => r.registration_date,
+    render:   (r) => new Date(r.registration_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
   {
     key:      'expiration_date',
     header:   'Expiry Date',
     sortable: true,
-    render:   (r) => r.expiration_date,
+    render:   (r) => new Date(r.expiration_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
   },
   {
     key:      'registration_status',

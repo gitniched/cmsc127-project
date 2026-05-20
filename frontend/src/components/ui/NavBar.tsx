@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { ROUTES } from '../../constants/routes';
+import AboutModal from '../ui/AboutModal';
 
 interface NavItem {
   label: string;
@@ -83,6 +85,8 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function NavBar() {
+  const [aboutOpen, setAboutOpen] = useState(false);
+
   return (
     <>
       <style>{`
@@ -203,6 +207,27 @@ export default function NavBar() {
           font-size: 13.5px;
           font-weight: 500;
         }
+
+        .nav-about-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          border: none;
+          background: none;
+          color: #94a3b8;
+          cursor: pointer;
+          flex-shrink: 0;
+          margin-left: 2px;
+          transition: background 120ms ease, color 120ms ease;
+        }
+
+        .nav-about-btn:hover {
+          background: rgba(239, 246, 255, 0.95);
+          color: #2563eb;
+        }
       `}</style>
 
       <div className="nav-wrapper">
@@ -241,8 +266,26 @@ export default function NavBar() {
               </NavLink>
             ))}
           </div>
+
+          <div className="nav-divider" />
+
+          <button
+            type="button"
+            className="nav-about-btn"
+            onClick={() => setAboutOpen(true)}
+            aria-label="About"
+            title="About"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M8 7v4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              <circle cx="8" cy="4.75" r="0.75" fill="currentColor" />
+            </svg>
+          </button>
         </nav>
       </div>
+
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </>
   );
 }
