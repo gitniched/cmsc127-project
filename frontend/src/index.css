@@ -55,6 +55,7 @@
     background-color: var(--color-surface-raised);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scrollbar-gutter: stable;
   }
  
   body {

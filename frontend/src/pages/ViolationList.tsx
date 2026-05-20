@@ -138,6 +138,15 @@ export default function ViolationList() {
           onClose={closeModal}
           title="Edit Violation"
           size="xl"
+          className="h-[610px]"
+          footer={
+            <>
+              <Button variant="ghost" onClick={closeModal} disabled={saving}>Cancel</Button>
+              <Button variant="primary" type="submit" form="violation-form" disabled={saving}>
+                {saving ? 'Saving…' : 'Save Changes'}
+              </Button>
+            </>
+          }
         >
           {modal.mode === 'edit' && (
             <ViolationForm
@@ -146,6 +155,7 @@ export default function ViolationList() {
               onCancel={closeModal}
               saving={saving}
               saveError={saveError}
+              hideFooter={true}
             />
           )}
         </Modal>

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -30,6 +31,28 @@ export default function Modal({
   className = '',
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [shouldRender, setShouldRender] = useState(open);
+  const [animateShow, setAnimateShow] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: any;
+
+    if (open) {
+      setShouldRender(true);
+      // Small timeout to allow DOM node to mount before starting entry animation
+      timeoutId = setTimeout(() => {
+        setAnimateShow(true);
+      }, 20);
+    } else {
+      setAnimateShow(false);
+      // Wait for exit transition to finish before unmounting
+      timeoutId = setTimeout(() => {
+        setShouldRender(false);
+      }, 200);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -39,30 +62,40 @@ export default function Modal({
     }
 
     document.addEventListener('keydown', onKeyDown);
+
+    // Prevent background scrolling cleanly (relying on scrollbar-gutter: stable in CSS to prevent shifts)
+    const originalOverflowBody = document.body.style.overflow;
+    const originalOverflowHtml = document.documentElement.style.overflow;
+
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = '';
+      document.body.style.overflow = originalOverflowBody;
+      document.documentElement.style.overflow = originalOverflowHtml;
     };
   }, [open, onClose]);
 
   useEffect(() => {
-    if (open) {
-      setTimeout(() => panelRef.current?.focus(), 0);
+    if (open && shouldRender) {
+      setTimeout(() => panelRef.current?.focus({ preventScroll: true }), 50);
     }
-  }, [open]);
+  }, [open, shouldRender]);
 
-  if (!open) return null;
+  if (!shouldRender) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className={[
+        'fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ease-out',
+        animateShow ? 'opacity-100' : 'opacity-0 pointer-events-none',
+      ].join(' ')}
       aria-modal="true"
       role="dialog"
     >
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/25"
         onClick={() => onClose?.()}
         aria-hidden="true"
       />
@@ -72,15 +105,15 @@ export default function Modal({
         tabIndex={-1}
         className={[
           'relative z-10 w-full rounded-xl outline-none',
-          'flex flex-col max-h-[90vh]',
+          'flex flex-col max-h-[calc(100vh-52px)]',
+          'transition-all duration-200 ease-out',
+          animateShow ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95',
           sizeClasses[size],
           className,
-        ].join(' ')}
+         ].join(' ')}
         style={{
-          background: 'rgba(255, 255, 255, 0.45)',
-          backdropFilter: 'blur(20px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-          border: '1px solid rgba(226, 232, 240, 0.9)',
+          background: 'rgba(255, 255, 255, 0.92)',
+          border: '1px solid rgba(226, 232, 240, 0.95)',
           boxShadow: 'var(--shadow-modal)',
         }}
       >
@@ -122,6 +155,7 @@ export default function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

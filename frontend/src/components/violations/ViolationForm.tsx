@@ -425,9 +425,10 @@ interface ViolationFormProps {
   onCancel:   () => void;
   saving?:    boolean;
   saveError?: string | null;
+  hideFooter?: boolean;
 }
 
-export default function ViolationForm({ violation, onSubmit, onCancel, saving, saveError }: ViolationFormProps) {
+export default function ViolationForm({ violation, onSubmit, onCancel, saving, saveError, hideFooter = false }: ViolationFormProps) {
   const isEdit = !!violation;
 
   const { drivers } = useDrivers();
@@ -653,7 +654,14 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-6">
+    <form
+      id="violation-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+      className="flex flex-col gap-6"
+    >
 
       {saveError && (
         <div className="rounded-md bg-danger-50 border border-danger-200 px-4 py-3 text-sm text-danger-700">
@@ -950,13 +958,15 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <FieldError errors={errors} field="typeRows" />
       </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <div className="flex justify-end gap-3 pt-2 border-t border-border">
-        <Button variant="ghost" onClick={onCancel} disabled={saving}>Cancel</Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={saving}>
-          {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Violation'}
-        </Button>
-      </div>
-    </div>
+      {!hideFooter && (
+        <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+          <Button variant="ghost" onClick={onCancel} disabled={saving}>Cancel</Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Violation'}
+          </Button>
+        </div>
+      )}
+
+    </form>
   );
 }

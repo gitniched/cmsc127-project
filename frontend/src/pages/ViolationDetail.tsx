@@ -265,6 +265,15 @@ export default function ViolationDetail() {
         onClose={() => { setSaveError(null); setEditOpen(false); }}
         title="Edit Violation"
         size="xl"
+        className="h-[610px]"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => { setSaveError(null); setEditOpen(false); }} disabled={saving}>Cancel</Button>
+            <Button variant="primary" type="submit" form="violation-form" disabled={saving}>
+              {saving ? 'Saving…' : 'Save Changes'}
+            </Button>
+          </>
+        }
       >
         <ViolationForm
           violation={violation}

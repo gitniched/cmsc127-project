@@ -517,6 +517,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
       onClose={onClose}
       title={isEdit ? 'Edit Driver' : 'Add Driver'}
       size="lg"
+      className={isEdit ? 'h-[610px]' : ''}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
