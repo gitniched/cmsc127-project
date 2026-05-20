@@ -219,9 +219,10 @@ interface ViolationTypeComboboxProps {
   onChange:  (id: number, type: ViolationTypeEnum | '', label: string) => void;
   onOpen:    (id: number, open: boolean) => void;
   onQuery:   (id: number, q: string) => void;
+  disabled?: boolean;
 }
 
-function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery }: ViolationTypeComboboxProps) {
+function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery, disabled }: ViolationTypeComboboxProps) {
   const [localSearch, setLocalSearch] = useState('');
 
   // Reset localSearch when the selection modal opens
@@ -352,17 +353,21 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery }: Vi
         className={[
           'h-9 px-3 text-sm rounded-md w-full text-left bg-surface border border-border text-ink hover:border-brand-400 transition-colors flex items-center justify-between gap-2',
           !row.violation_type ? 'border-danger-400 text-ink-faint' : '',
+          disabled ? inputDisabled : '',
         ].join(' ')}
-        onClick={() => onOpen(row.id, true)}
+        onClick={() => !disabled && onOpen(row.id, true)}
+        disabled={disabled}
       >
         <span className="truncate">
           {row.violation_type || 'Click to select violation type…'}
         </span>
-        <span className="text-ink-faint text-xs shrink-0 select-none">
-          ▾
-        </span>
+        {!disabled && (
+          <span className="text-ink-faint text-xs shrink-0 select-none">
+            ▾
+          </span>
+        )}
       </button>
-      {createPortal(centeredModal, document.body)}
+      {!disabled && createPortal(centeredModal, document.body)}
     </>
   );
 }
@@ -375,9 +380,10 @@ interface CityComboboxProps {
   onChange:  (city: string) => void;
   onRegion:  (region: string) => void;
   error?:    boolean;
+  disabled?: boolean;
 }
 
-function CityCombobox({ value, onChange, onRegion, error }: CityComboboxProps) {
+function CityCombobox({ value, onChange, onRegion, error, disabled }: CityComboboxProps) {
   const [query, setQuery]   = useState(value);
   const [open,  setOpen]    = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -417,10 +423,11 @@ function CityCombobox({ value, onChange, onRegion, error }: CityComboboxProps) {
   return (
     <div ref={ref} className="relative">
       <input
-        className={[inputBase, error ? inputError : ''].join(' ')}
+        className={[inputBase, disabled ? inputDisabled : '', error ? inputError : ''].join(' ')}
         value={query}
+        disabled={disabled}
         onChange={(e) => handleChange(e.target.value)}
-        onFocus={() => setOpen(true)}
+        onFocus={() => !disabled && setOpen(true)}
         placeholder="e.g. Manila"
         autoComplete="off"
       />
@@ -454,6 +461,7 @@ interface ViolationFormProps {
   saving?:    boolean;
   saveError?: string | null;
   hideFooter?: boolean;
+  isDetailView?: boolean;
 }
 
 function formatToISODate(dateStr: string | null | undefined): string {
@@ -467,8 +475,17 @@ function formatToISODate(dateStr: string | null | undefined): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function ViolationForm({ violation, onSubmit, onCancel, saving, saveError, hideFooter = false }: ViolationFormProps) {
+export default function ViolationForm({
+  violation,
+  onSubmit,
+  onCancel,
+  saving,
+  saveError,
+  hideFooter = false,
+  isDetailView = false,
+}: ViolationFormProps) {
   const isEdit = !!violation;
+  const shouldDisableNonStatus = isEdit && isDetailView;
 
   const { drivers } = useDrivers();
 
@@ -566,19 +583,21 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
 
   // ── Cascade resets when driver/vehicle changes ───────────────────────────
   useEffect(() => {
+    if (isEdit) return;
     if (!licenseNumber) return;
     const stillOwned = vehiclesForDriver.find((v) => v.plate_number === plateNumber);
     if (!stillOwned) {
       setPlateNumber('');
       setRegistrationNumber('');
     }
-  }, [licenseNumber, vehiclesForDriver]);
+  }, [licenseNumber, vehiclesForDriver, isEdit]);
 
   useEffect(() => {
+    if (isEdit) return;
     if (!plateNumber) return;
     const stillLinked = registrationsForVehicle.find((r) => r.registration_number === registrationNumber);
     if (!stillLinked) setRegistrationNumber('');
-  }, [plateNumber, registrationsForVehicle]);
+  }, [plateNumber, registrationsForVehicle, isEdit]);
 
   // ── Payment status: auto-correct when violation status changes ───────────
   useEffect(() => {
@@ -598,6 +617,16 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  // Sync driver query when drivers list loads in edit mode
+  useEffect(() => {
+    if (isEdit && violation && drivers.length > 0) {
+      const d = drivers.find((dr) => dr.license_number === violation.license_number);
+      if (d) {
+        setDriverQuery(getFullName(d));
+      }
+    }
+  }, [isEdit, violation, drivers]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   function selectDriver(licNum: string, name: string) {
@@ -750,8 +779,9 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
           <label className={labelBase}>Date *</label>
           <input
             type="date"
-            className={[inputBase, errors.violationDate ? inputError : ''].join(' ')}
+            className={[inputBase, shouldDisableNonStatus ? inputDisabled : '', errors.violationDate ? inputError : ''].join(' ')}
             value={violationDate}
+            disabled={shouldDisableNonStatus}
             onChange={(e) => {
               setViolationDate(e.target.value);
               setErrors((prev) => ({ ...prev, violationDate: '' }));
@@ -773,6 +803,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
             onChange={handleCityChange}
             onRegion={handleRegionFill}
             error={!!errors.city}
+            disabled={shouldDisableNonStatus}
           />
           <FieldError errors={errors} field="city" />
         </div>
@@ -781,8 +812,9 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <div>
           <label className={labelBase}>Region *</label>
           <input
-            className={[inputBase, errors.region ? inputError : ''].join(' ')}
+            className={[inputBase, shouldDisableNonStatus ? inputDisabled : '', errors.region ? inputError : ''].join(' ')}
             value={region}
+            disabled={shouldDisableNonStatus}
             onChange={(e) => {
               setRegion(e.target.value);
               setErrors((prev) => ({ ...prev, region: '' }));
@@ -795,8 +827,9 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <div className="col-span-2">
           <label className={labelBase}>Officer</label>
           <input
-            className={inputBase}
+            className={[inputBase, shouldDisableNonStatus ? inputDisabled : ''].join(' ')}
             value={officer}
+            disabled={shouldDisableNonStatus}
             onChange={(e) => setOfficer(e.target.value)}
             placeholder="e.g. PO1 Santos (optional)"
           />
@@ -848,8 +881,9 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <div ref={driverRef} className="relative">
           <label className={labelBase}>Driver * (search by name or license number)</label>
           <input
-            className={[inputBase, errors.licenseNumber ? inputError : ''].join(' ')}
+            className={[inputBase, shouldDisableNonStatus ? inputDisabled : '', errors.licenseNumber ? inputError : ''].join(' ')}
             value={driverQuery}
+            disabled={shouldDisableNonStatus}
             onChange={(e) => {
               setDriverQuery(e.target.value);
               setDriverOpen(true);
@@ -857,12 +891,12 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
               setPlateNumber('');
               setRegistrationNumber('');
             }}
-            onFocus={() => setDriverOpen(true)}
+            onFocus={() => !shouldDisableNonStatus && setDriverOpen(true)}
             placeholder="Search driver…"
             autoComplete="off"
           />
           <FieldError errors={errors} field="licenseNumber" />
-          {driverOpen && filteredDrivers.length > 0 && (
+          {!shouldDisableNonStatus && driverOpen && filteredDrivers.length > 0 && (
             <ul className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
               {filteredDrivers.map((d) => (
                 <li key={d.license_number}>
@@ -884,14 +918,14 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <div>
           <label className={labelBase}>Vehicle * (auto-filtered to selected driver)</label>
           <select
-            className={[inputBase, !licenseNumber ? inputDisabled : '', errors.plateNumber ? inputError : ''].join(' ')}
+            className={[inputBase, (shouldDisableNonStatus || !licenseNumber) ? inputDisabled : '', errors.plateNumber ? inputError : ''].join(' ')}
             value={plateNumber}
             onChange={(e) => {
               setPlateNumber(e.target.value);
               setRegistrationNumber('');
               setErrors((prev) => ({ ...prev, plateNumber: '' }));
             }}
-            disabled={!licenseNumber}
+            disabled={shouldDisableNonStatus || !licenseNumber}
           >
             <option value="">{licenseNumber ? 'Select vehicle…' : 'Select a driver first'}</option>
             {vehiclesForDriver.map((v) => (
@@ -907,10 +941,10 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
         <div>
           <label className={labelBase}>Registration (optional, auto-filtered to selected vehicle)</label>
           <select
-            className={[inputBase, !plateNumber ? inputDisabled : ''].join(' ')}
+            className={[inputBase, (shouldDisableNonStatus || !plateNumber) ? inputDisabled : ''].join(' ')}
             value={registrationNumber}
             onChange={(e) => setRegistrationNumber(e.target.value)}
-            disabled={!plateNumber}
+            disabled={shouldDisableNonStatus || !plateNumber}
           >
             <option value="">{plateNumber ? 'None' : 'Select a vehicle first'}</option>
             {registrationsForVehicle.map((r) => (
@@ -926,7 +960,9 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-ink-muted">Violation Types *</label>
-          <Button type="button" variant="ghost" size="sm" onClick={addTypeRow}>+ Add Type</Button>
+          {!shouldDisableNonStatus && (
+            <Button type="button" variant="ghost" size="sm" onClick={addTypeRow}>+ Add Type</Button>
+          )}
         </div>
 
         <div className="rounded-md border border-border overflow-hidden">
@@ -960,6 +996,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
                         onChange={updateTypeRowType}
                         onOpen={updateTypeRowOpen}
                         onQuery={updateTypeRowQuery}
+                        disabled={shouldDisableNonStatus}
                       />
                     </td>
                     <td className="px-3 py-2 text-right text-sm font-medium text-ink whitespace-nowrap">
@@ -969,7 +1006,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
                       <button
                         type="button"
                         onClick={() => removeTypeRow(row.id)}
-                        disabled={typeRows.length === 1}
+                        disabled={shouldDisableNonStatus || typeRows.length === 1}
                         className="text-ink-faint hover:text-danger-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         aria-label="Remove row"
                       >

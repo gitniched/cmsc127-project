@@ -139,10 +139,15 @@ export default function DriverProfile() {
       `}</style>
       <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-6">
 
-        <div className="glass-card px-4 py-2 self-start flex items-center gap-2 text-sm text-ink-muted">
-          <Link to={ROUTES.drivers} className="hover:text-ink transition-colors">Drivers</Link>
-          <span>/</span>
-          <span className="text-ink">{getFullName(driver)}</span>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="glass-card px-4 py-2 flex items-center gap-2 text-sm text-ink-muted">
+            <Link to={ROUTES.drivers} className="hover:text-ink transition-colors">Drivers</Link>
+            <span>/</span>
+            <span className="text-ink">{getFullName(driver)}</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.drivers)}>
+            ← Back to Drivers
+          </Button>
         </div>
 
         <div className="glass-card p-6 flex flex-col gap-6">

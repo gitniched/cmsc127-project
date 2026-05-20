@@ -125,11 +125,15 @@ export default function ViolationDetail() {
       `}</style>
       <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-6">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-ink-muted">
-          <Link to={ROUTES.violations} className="hover:text-ink transition-colors">Violations</Link>
-          <span>/</span>
-          <span className="text-ink font-mono">{violation.uovr_number}</span>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="glass-card px-4 py-2 flex items-center gap-2 text-sm text-ink-muted">
+            <Link to={ROUTES.violations} className="hover:text-ink transition-colors">Violations</Link>
+            <span>/</span>
+            <span className="text-ink font-mono">{violation.uovr_number}</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.violations)}>
+            ← Back to Violations
+          </Button>
         </div>
 
         {suspended && (
@@ -281,6 +285,7 @@ export default function ViolationDetail() {
           onCancel={() => { setSaveError(null); setEditOpen(false); }}
           saving={saving}
           saveError={saveError}
+          hideFooter={true}
         />
       </Modal>
 
