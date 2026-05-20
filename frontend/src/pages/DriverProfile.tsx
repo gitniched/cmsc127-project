@@ -66,7 +66,7 @@ export default function DriverProfile() {
       <Layout>
         <div className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-4">
           <p className="text-sm text-danger-600">{error ?? 'Driver not found.'}</p>
-          <Button variant="ghost" onClick={() => navigate(ROUTES.drivers)}>← Back to Drivers</Button>
+          <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
         </div>
       </Layout>
     );
@@ -148,7 +148,7 @@ export default function DriverProfile() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(ROUTES.drivers)}
+            onClick={() => navigate(-1)}
             className="!text-black hover:!text-brand-700 !border-brand-300/80 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: 'rgba(255, 255, 255, 0.75)',
@@ -156,7 +156,7 @@ export default function DriverProfile() {
               WebkitBackdropFilter: 'blur(12px)',
             }}
           >
-            ← Back to Drivers
+            ← Back
           </Button>
         </div>
 

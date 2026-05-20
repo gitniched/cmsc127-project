@@ -53,7 +53,7 @@ export default function ViolationDetail() {
       <Layout>
         <div className="px-6 py-8 max-w-screen-xl mx-auto flex flex-col gap-4">
           <p className="text-sm text-danger-600">{error ?? 'Violation not found.'}</p>
-          <Button variant="ghost" onClick={() => navigate(ROUTES.violations)}>← Back to Violations</Button>
+          <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
         </div>
       </Layout>
     );
@@ -134,7 +134,7 @@ export default function ViolationDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(ROUTES.violations)}
+            onClick={() => navigate(-1)}
             className="!text-black hover:!text-brand-700 !border-brand-300/80 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: 'rgba(255, 255, 255, 0.75)',
@@ -142,7 +142,7 @@ export default function ViolationDetail() {
               WebkitBackdropFilter: 'blur(12px)',
             }}
           >
-            ← Back to Violations
+            ← Back
           </Button>
         </div>
 
@@ -153,7 +153,6 @@ export default function ViolationDetail() {
           />
         )}
 
-        {/* Header card */}
         <div className="glass-card p-6 flex flex-col gap-6">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex flex-col gap-2">
@@ -177,7 +176,6 @@ export default function ViolationDetail() {
             </div>
           )}
 
-          {/* Location / officer details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 glass-divider pt-5">
             <div>
               <p className="text-xs font-medium text-ink-muted mb-0.5">Date</p>
@@ -197,7 +195,6 @@ export default function ViolationDetail() {
             </div>
           </div>
 
-          {/* Driver / vehicle details */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 glass-divider pt-5">
             <div>
               <p className="text-xs font-medium text-ink-muted mb-0.5">Driver</p>
@@ -229,7 +226,6 @@ export default function ViolationDetail() {
           </div>
         </div>
 
-        {/* Violation types table card */}
         <div className="glass-card overflow-hidden">
           <div className="px-5 py-4 glass-card-header">
             <h2 className="text-sm font-semibold text-ink">Violation Types</h2>
