@@ -12,79 +12,79 @@ import {
 } from '../../constants/enums';
 
 interface CityEntry {
-  city:     string;
+  city: string;
   province: string;
-  region:   string;
+  region: string;
 }
 
 const PH_CITIES: CityEntry[] = [
   // NCR
-  { city: 'Manila',         province: 'Metro Manila', region: 'NCR' },
-  { city: 'Quezon City',    province: 'Metro Manila', region: 'NCR' },
-  { city: 'Caloocan',       province: 'Metro Manila', region: 'NCR' },
-  { city: 'Pasig',          province: 'Metro Manila', region: 'NCR' },
-  { city: 'Taguig',         province: 'Metro Manila', region: 'NCR' },
-  { city: 'Makati',         province: 'Metro Manila', region: 'NCR' },
-  { city: 'Mandaluyong',    province: 'Metro Manila', region: 'NCR' },
-  { city: 'Marikina',       province: 'Metro Manila', region: 'NCR' },
-  { city: 'Parañaque',      province: 'Metro Manila', region: 'NCR' },
-  { city: 'Las Piñas',      province: 'Metro Manila', region: 'NCR' },
-  { city: 'Muntinlupa',     province: 'Metro Manila', region: 'NCR' },
-  { city: 'Valenzuela',     province: 'Metro Manila', region: 'NCR' },
-  { city: 'Malabon',        province: 'Metro Manila', region: 'NCR' },
-  { city: 'Navotas',        province: 'Metro Manila', region: 'NCR' },
-  { city: 'Pasay',          province: 'Metro Manila', region: 'NCR' },
-  { city: 'Pateros',        province: 'Metro Manila', region: 'NCR' },
+  { city: 'Manila', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Quezon City', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Caloocan', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Pasig', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Taguig', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Makati', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Mandaluyong', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Marikina', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Parañaque', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Las Piñas', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Muntinlupa', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Valenzuela', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Malabon', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Navotas', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Pasay', province: 'Metro Manila', region: 'NCR' },
+  { city: 'Pateros', province: 'Metro Manila', region: 'NCR' },
   // CAR
-  { city: 'Baguio City',    province: 'Benguet',      region: 'CAR' },
+  { city: 'Baguio City', province: 'Benguet', region: 'CAR' },
   // Region I
-  { city: 'San Fernando',   province: 'La Union',     region: 'Region I' },
-  { city: 'Dagupan',        province: 'Pangasinan',   region: 'Region I' },
-  { city: 'Laoag',          province: 'Ilocos Norte', region: 'Region I' },
-  { city: 'Vigan',          province: 'Ilocos Sur',   region: 'Region I' },
+  { city: 'San Fernando', province: 'La Union', region: 'Region I' },
+  { city: 'Dagupan', province: 'Pangasinan', region: 'Region I' },
+  { city: 'Laoag', province: 'Ilocos Norte', region: 'Region I' },
+  { city: 'Vigan', province: 'Ilocos Sur', region: 'Region I' },
   // Region II
-  { city: 'Tuguegarao',     province: 'Cagayan',      region: 'Region II' },
-  { city: 'Santiago',       province: 'Isabela',      region: 'Region II' },
+  { city: 'Tuguegarao', province: 'Cagayan', region: 'Region II' },
+  { city: 'Santiago', province: 'Isabela', region: 'Region II' },
   // Region III
-  { city: 'Angeles City',   province: 'Pampanga',     region: 'Region III' },
-  { city: 'Olongapo',       province: 'Zambales',     region: 'Region III' },
-  { city: 'Malolos',        province: 'Bulacan',      region: 'Region III' },
-  { city: 'Meycauayan',     province: 'Bulacan',      region: 'Region III' },
-  { city: 'Cabanatuan',     province: 'Nueva Ecija',  region: 'Region III' },
-  { city: 'San Jose del Monte', province: 'Bulacan',  region: 'Region III' },
+  { city: 'Angeles City', province: 'Pampanga', region: 'Region III' },
+  { city: 'Olongapo', province: 'Zambales', region: 'Region III' },
+  { city: 'Malolos', province: 'Bulacan', region: 'Region III' },
+  { city: 'Meycauayan', province: 'Bulacan', region: 'Region III' },
+  { city: 'Cabanatuan', province: 'Nueva Ecija', region: 'Region III' },
+  { city: 'San Jose del Monte', province: 'Bulacan', region: 'Region III' },
   // Region IV-A
-  { city: 'Antipolo',       province: 'Rizal',        region: 'Region IV-A' },
-  { city: 'Calamba',        province: 'Laguna',       region: 'Region IV-A' },
-  { city: 'Santa Rosa',     province: 'Laguna',       region: 'Region IV-A' },
-  { city: 'Bacoor',         province: 'Cavite',       region: 'Region IV-A' },
-  { city: 'Imus',           province: 'Cavite',       region: 'Region IV-A' },
-  { city: 'Dasmariñas',     province: 'Cavite',       region: 'Region IV-A' },
+  { city: 'Antipolo', province: 'Rizal', region: 'Region IV-A' },
+  { city: 'Calamba', province: 'Laguna', region: 'Region IV-A' },
+  { city: 'Santa Rosa', province: 'Laguna', region: 'Region IV-A' },
+  { city: 'Bacoor', province: 'Cavite', region: 'Region IV-A' },
+  { city: 'Imus', province: 'Cavite', region: 'Region IV-A' },
+  { city: 'Dasmariñas', province: 'Cavite', region: 'Region IV-A' },
   // Region V
-  { city: 'Legazpi',        province: 'Albay',        region: 'Region V' },
-  { city: 'Naga',           province: 'Camarines Sur',region: 'Region V' },
+  { city: 'Legazpi', province: 'Albay', region: 'Region V' },
+  { city: 'Naga', province: 'Camarines Sur', region: 'Region V' },
   // Region VI
-  { city: 'Iloilo City',    province: 'Iloilo',       region: 'Region VI' },
-  { city: 'Bacolod',        province: 'Negros Occidental', region: 'Region VI' },
+  { city: 'Iloilo City', province: 'Iloilo', region: 'Region VI' },
+  { city: 'Bacolod', province: 'Negros Occidental', region: 'Region VI' },
   // Region VII
-  { city: 'Cebu City',      province: 'Cebu',         region: 'Region VII' },
-  { city: 'Lapu-Lapu',      province: 'Cebu',         region: 'Region VII' },
-  { city: 'Mandaue',        province: 'Cebu',         region: 'Region VII' },
-  { city: 'Tagbilaran',     province: 'Bohol',        region: 'Region VII' },
+  { city: 'Cebu City', province: 'Cebu', region: 'Region VII' },
+  { city: 'Lapu-Lapu', province: 'Cebu', region: 'Region VII' },
+  { city: 'Mandaue', province: 'Cebu', region: 'Region VII' },
+  { city: 'Tagbilaran', province: 'Bohol', region: 'Region VII' },
   // Region VIII
-  { city: 'Tacloban',       province: 'Leyte',        region: 'Region VIII' },
+  { city: 'Tacloban', province: 'Leyte', region: 'Region VIII' },
   // Region IX
   { city: 'Zamboanga City', province: 'Zamboanga del Sur', region: 'Region IX' },
   // Region X
   { city: 'Cagayan de Oro', province: 'Misamis Oriental', region: 'Region X' },
-  { city: 'Iligan',         province: 'Lanao del Norte',   region: 'Region X' },
+  { city: 'Iligan', province: 'Lanao del Norte', region: 'Region X' },
   // Region XI
-  { city: 'Davao City',     province: 'Davao del Sur', region: 'Region XI' },
-  { city: 'Tagum',          province: 'Davao del Norte', region: 'Region XI' },
+  { city: 'Davao City', province: 'Davao del Sur', region: 'Region XI' },
+  { city: 'Tagum', province: 'Davao del Norte', region: 'Region XI' },
   // Region XII
   { city: 'General Santos', province: 'South Cotabato', region: 'Region XII' },
-  { city: 'Cotabato City',  province: 'Maguindanao',    region: 'Region XII' },
+  { city: 'Cotabato City', province: 'Maguindanao', region: 'Region XII' },
   // Region XIII
-  { city: 'Butuan',         province: 'Agusan del Norte', region: 'Region XIII' },
+  { city: 'Butuan', province: 'Agusan del Norte', region: 'Region XIII' },
 ].sort((a, b) => a.city.localeCompare(b.city));
 
 function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: string): string {
@@ -93,40 +93,43 @@ function computeExpiry(birthDate: string, licenseType: LicenseType, issueDate: s
   if (isNaN(issue.getTime())) return '';
 
   if (licenseType === LicenseType.StudentPermit) {
-    const expiry = new Date(issueDate);
-    expiry.setFullYear(expiry.getFullYear() + 1);
-    return expiry.toISOString().slice(0, 10);
+    const expiryYear = issue.getUTCFullYear() + 1;
+    const mm = String(issue.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(issue.getUTCDate()).padStart(2, '0');
+    return `${expiryYear}-${mm}-${dd}`;
   }
 
   if (!birthDate) return '';
   const dob = new Date(birthDate);
   if (isNaN(dob.getTime())) return '';
 
-  const expiryYear = issue.getFullYear() + 5;
-  let month = dob.getMonth();
-  let day   = dob.getDate();
+  const expiryYear = issue.getUTCFullYear() + 5;
+  let month = dob.getUTCMonth();
+  let day   = dob.getUTCDate();
 
   if (month === 1 && day === 29) {
-    const isLeap = new Date(expiryYear, 1, 29).getMonth() === 1;
+    const isLeap = new Date(Date.UTC(expiryYear, 1, 29)).getUTCMonth() === 1;
     if (!isLeap) day = 28;
   }
 
-  return new Date(expiryYear, month, day).toISOString().slice(0, 10);
+  const mm = String(month + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${expiryYear}-${mm}-${dd}`;
 }
 
 function generateLicenseNumber(licenseType: LicenseType, issueDate: string): string {
   if (!issueDate) return '';
   const prefix =
     licenseType === LicenseType.StudentPermit ? 'S' :
-    licenseType === LicenseType.Professional  ? 'P' : 'N';
-  const yy  = issueDate.slice(2, 4);
+      licenseType === LicenseType.Professional ? 'P' : 'N';
+  const yy = issueDate.slice(2, 4);
   const seq = String(Math.floor(Math.random() * 900000) + 100000);
   return `${prefix}01-${yy}-${seq}`;
 }
 
 function getAge(birthDate: string): number {
   if (!birthDate) return 0;
-  const dob   = new Date(birthDate);
+  const dob = new Date(birthDate);
   const today = new Date();
   let age = today.getFullYear() - dob.getFullYear();
   const m = today.getMonth() - dob.getMonth();
@@ -136,16 +139,16 @@ function getAge(birthDate: string): number {
 
 function expiryRelativeLabel(expiryDateStr: string): string {
   if (!expiryDateStr) return '';
-  const expiry  = new Date(expiryDateStr);
-  const today   = new Date();
-  const isPast  = expiry < today;
-  const ref     = isPast ? today : expiry;
-  const base    = isPast ? expiry : today;
-  let years  = ref.getFullYear()  - base.getFullYear();
-  let months = ref.getMonth()     - base.getMonth();
+  const expiry = new Date(expiryDateStr);
+  const today = new Date();
+  const isPast = expiry < today;
+  const ref = isPast ? today : expiry;
+  const base = isPast ? expiry : today;
+  let years = ref.getFullYear() - base.getFullYear();
+  let months = ref.getMonth() - base.getMonth();
   if (months < 0) { years--; months += 12; }
   const parts: string[] = [];
-  if (years  > 0) parts.push(`${years} yr${years  !== 1 ? 's' : ''}`);
+  if (years > 0) parts.push(`${years} yr${years !== 1 ? 's' : ''}`);
   if (months > 0) parts.push(`${months} mo${months !== 1 ? 's' : ''}`);
   if (parts.length === 0) parts.push('less than a month');
   return isPast
@@ -154,19 +157,19 @@ function expiryRelativeLabel(expiryDateStr: string): string {
 }
 
 const LICENSE_RANK: Record<LicenseType, number> = {
-  [LicenseType.StudentPermit]:    0,
-  [LicenseType.NonProfessional]:  1,
-  [LicenseType.Professional]:     2,
+  [LicenseType.StudentPermit]: 0,
+  [LicenseType.NonProfessional]: 1,
+  [LicenseType.Professional]: 2,
 };
 
 const glassInput: React.CSSProperties = {
-  background:  'rgba(255, 255, 255, 0.45)',
+  background: 'rgba(255, 255, 255, 0.45)',
   borderColor: 'rgba(226, 232, 240, 0.9)',
 };
 const glassInputDisabled: React.CSSProperties = {
-  background:  'rgba(255, 255, 255, 0.2)',
+  background: 'rgba(255, 255, 255, 0.2)',
   borderColor: 'rgba(226, 232, 240, 0.7)',
-  cursor:      'not-allowed',
+  cursor: 'not-allowed',
 };
 
 const inputBase = [
@@ -176,7 +179,7 @@ const inputBase = [
   'transition-colors duration-150',
 ].join(' ');
 
-const inputErr  = 'border-danger-400 focus:border-danger-400 focus:ring-danger-100';
+const inputErr = 'border-danger-400 focus:border-danger-400 focus:ring-danger-100';
 const labelBase = 'block text-xs font-medium text-ink-muted mb-1';
 
 function FieldErr({ msg }: { msg?: string }) {
@@ -184,16 +187,16 @@ function FieldErr({ msg }: { msg?: string }) {
 }
 
 interface AddressComboboxProps {
-  value:    string;
+  value: string;
   onChange: (val: string) => void;
-  error?:   boolean;
+  error?: boolean;
 }
 
 function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen]   = useState(false);
-  const [rect, setRect]   = useState<{ top: number; left: number; width: number } | null>(null);
+  const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const cityQuery = useMemo(() => {
     const parts = value.split(',');
@@ -236,7 +239,7 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
   }, []);
 
   function handleSelect(entry: CityEntry) {
-    const parts  = value.split(',');
+    const parts = value.split(',');
     const street = parts.slice(0, -1).join(',').trim();
     const newVal = street ? `${street}, ${entry.city}` : entry.city;
     onChange(newVal);
@@ -253,11 +256,11 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
       <div
         ref={portalRef}
         style={{
-          position:  'fixed',
-          top:       rect.top,
-          left:      rect.left,
-          width:     rect.width,
-          zIndex:    9999,
+          position: 'fixed',
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          zIndex: 9999,
           maxHeight: '12rem',
           overflowY: 'auto',
         }}
@@ -299,51 +302,51 @@ function AddressCombobox({ value, onChange, error }: AddressComboboxProps) {
 }
 
 interface DriverFormProps {
-  open:       boolean;
-  onClose:    () => void;
-  onSubmit:   (data: CreateDriverDTO) => void;
-  initial?:   DriverWithAge | Driver | null;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: CreateDriverDTO) => void;
+  initial?: DriverWithAge | Driver | null;
   saveError?: string | null;
-  saving?:    boolean;
+  saving?: boolean;
 }
 
 type FormState = {
-  first_name:         string;
-  last_name:          string;
-  middle_name:        string;
-  birth_date:         string;
-  sex:                Sex;
-  address:            string;
-  license_number:     string;
-  license_type:       LicenseType;
-  license_status:     LicenseStatus;
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  birth_date: string;
+  sex: Sex;
+  address: string;
+  license_number: string;
+  license_type: LicenseType;
+  license_status: LicenseStatus;
   license_issue_date: string;
 };
 
 const EMPTY: FormState = {
-  first_name:         '',
-  last_name:          '',
-  middle_name:        '',
-  birth_date:         '',
-  sex:                Sex.Male,
-  address:            '',
-  license_number:     '',
-  license_type:       LicenseType.NonProfessional,
-  license_status:     LicenseStatus.Active,
+  first_name: '',
+  last_name: '',
+  middle_name: '',
+  birth_date: '',
+  sex: Sex.Male,
+  address: '',
+  license_number: '',
+  license_type: LicenseType.NonProfessional,
+  license_status: LicenseStatus.Active,
   license_issue_date: '',
 };
 
 function toFormState(d: Driver | DriverWithAge): FormState {
   return {
-    first_name:         d.first_name,
-    last_name:          d.last_name,
-    middle_name:        d.middle_name ?? '',
-    birth_date:         d.birth_date,
-    sex:                d.sex,
-    address:            d.address,
-    license_number:     d.license_number,
-    license_type:       d.license_type,
-    license_status:     d.license_status,
+    first_name: d.first_name,
+    last_name: d.last_name,
+    middle_name: d.middle_name ?? '',
+    birth_date: d.birth_date,
+    sex: d.sex,
+    address: d.address,
+    license_number: d.license_number,
+    license_type: d.license_type,
+    license_status: d.license_status,
     license_issue_date: d.license_issue_date,
   };
 }
@@ -351,7 +354,7 @@ function toFormState(d: Driver | DriverWithAge): FormState {
 export default function DriverForm({ open, onClose, onSubmit, initial, saveError, saving }: DriverFormProps) {
   const isEdit = !!initial;
 
-  const [form,   setForm]   = useState<FormState>(EMPTY);
+  const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [originalLicenseType, setOriginalLicenseType] = useState<LicenseType | null>(null);
@@ -385,13 +388,13 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     if (s) set('license_number', s);
   }
 
-  const age          = getAge(form.birth_date);
-  const minAge       = MIN_AGE_FOR_LICENSE[form.license_type];
-  const ageOk        = !form.birth_date || age >= minAge;
-  const ageMargin    = form.birth_date ? age - minAge : null; // years above minimum
+  const age = getAge(form.birth_date);
+  const minAge = MIN_AGE_FOR_LICENSE[form.license_type];
+  const ageOk = !form.birth_date || age >= minAge;
+  const ageMargin = form.birth_date ? age - minAge : null; // years above minimum
 
-  const computedExpiry   = computeExpiry(form.birth_date, form.license_type, form.license_issue_date);
-  const expiryRelative   = expiryRelativeLabel(computedExpiry);
+  const computedExpiry = computeExpiry(form.birth_date, form.license_type, form.license_issue_date);
+  const expiryRelative = expiryRelativeLabel(computedExpiry);
 
   const isDowngrade = isEdit &&
     originalLicenseType !== null &&
@@ -404,12 +407,12 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
   function validate(): boolean {
     const e: Record<string, string> = {};
 
-    if (!form.first_name.trim())     e.first_name         = 'Required';
-    if (!form.last_name.trim())      e.last_name          = 'Required';
-    if (!form.birth_date)            e.birth_date         = 'Required';
-    if (!form.address.trim())        e.address            = 'Required';
-    if (!form.license_number.trim()) e.license_number     = 'Required';
-    if (!form.license_issue_date)    e.license_issue_date = 'Required';
+    if (!form.first_name.trim()) e.first_name = 'Required';
+    if (!form.last_name.trim()) e.last_name = 'Required';
+    if (!form.birth_date) e.birth_date = 'Required';
+    if (!form.address.trim()) e.address = 'Required';
+    if (!form.license_number.trim()) e.license_number = 'Required';
+    if (!form.license_issue_date) e.license_issue_date = 'Required';
 
     if (form.birth_date && !ageOk) {
       e.birth_date = `Must be at least ${minAge} years old for ${form.license_type}`;
@@ -425,15 +428,15 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
   function handleSubmit() {
     if (!validate()) return;
     onSubmit({
-      first_name:         form.first_name.trim(),
-      last_name:          form.last_name.trim(),
-      middle_name:        form.middle_name.trim() || null,
-      birth_date:         form.birth_date,
-      sex:                form.sex,
-      address:            form.address.trim(),
-      license_number:     form.license_number.trim(),
-      license_type:       form.license_type,
-      license_status:     form.license_status,
+      first_name: form.first_name.trim(),
+      last_name: form.last_name.trim(),
+      middle_name: form.middle_name.trim() || null,
+      birth_date: form.birth_date,
+      sex: form.sex,
+      address: form.address.trim(),
+      license_number: form.license_number.trim(),
+      license_type: form.license_type,
+      license_status: form.license_status,
       license_issue_date: form.license_issue_date,
     });
   }
@@ -457,7 +460,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
 
   function ExpiryBadge() {
     if (!computedExpiry) return null;
-    const past  = new Date(computedExpiry) < new Date();
+    const past = new Date(computedExpiry) < new Date();
     const color = past
       ? 'bg-danger-50 border-danger-200 text-danger-700'
       : 'bg-surface-inset border-border text-ink-muted';
