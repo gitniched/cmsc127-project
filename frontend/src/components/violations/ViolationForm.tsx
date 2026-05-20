@@ -16,29 +16,34 @@ import { useVehicles } from '../../hooks/useVehicles';
 import { useRegistrations } from '../../hooks/useRegistrations';
 import Button from '../ui/Button';
 
+// ---------------------------------------------------------------------------
+// UOVR number generation
+// Format: [CityPrefix][YY]-[7-digit seq]-[1-digit checksum]
+// Prefix: M = NCR/MMDA, C = Cebu, D = Davao, B = Baguio, I = Iloilo
+// ---------------------------------------------------------------------------
 const CITY_PREFIX_MAP: Record<string, string> = {
-  
+  // NCR
   'Manila':       'M', 'Quezon City': 'M', 'Caloocan': 'M', 'Pasig': 'M',
   'Taguig':       'M', 'Makati': 'M', 'Mandaluyong': 'M', 'Marikina': 'M',
   'Parañaque':    'M', 'Las Piñas': 'M', 'Muntinlupa': 'M', 'Valenzuela': 'M',
   'Malabon':      'M', 'Navotas': 'M', 'Pasay': 'M', 'Pateros': 'M',
-  
+  // Cebu
   'Cebu City':    'C', 'Lapu-Lapu': 'C', 'Mandaue': 'C',
-  
+  // Davao
   'Davao City':   'D',
-  
+  // Baguio
   'Baguio City':  'B', 'Baguio': 'B',
-  
+  // Iloilo
   'Iloilo City':  'I', 'Iloilo': 'I',
 };
 
 const CITY_REGION_MAP: Record<string, string> = {
-  
+  // NCR
   'Manila':         'NCR', 'Quezon City': 'NCR', 'Caloocan': 'NCR', 'Pasig': 'NCR',
   'Taguig':         'NCR', 'Makati': 'NCR', 'Mandaluyong': 'NCR', 'Marikina': 'NCR',
   'Parañaque':      'NCR', 'Las Piñas': 'NCR', 'Muntinlupa': 'NCR', 'Valenzuela': 'NCR',
   'Malabon':        'NCR', 'Navotas': 'NCR', 'Pasay': 'NCR', 'Pateros': 'NCR',
-  
+  // Luzon
   'Baguio City':    'CAR', 'Baguio': 'CAR',
   'San Fernando':   'Region I',
   'Dagupan':        'Region I',
@@ -60,11 +65,11 @@ const CITY_REGION_MAP: Record<string, string> = {
   'Dasmariñas':     'Region IV-A',
   'General Santos': 'Region XII',
   'Cagayan de Oro': 'Region X',
-  
+  // Visayas
   'Cebu City':      'Region VII', 'Lapu-Lapu': 'Region VII', 'Mandaue': 'Region VII',
   'Bacolod':        'Region VI', 'Iloilo City': 'Region VI', 'Iloilo': 'Region VI',
   'Tacloban':       'Region VIII',
-  
+  // Mindanao
   'Davao City':     'Region XI',
   'Zamboanga':      'Region IX', 'Zamboanga City': 'Region IX',
   'Butuan':         'Region XIII',
@@ -84,12 +89,15 @@ function getRegionForCity(city: string): string {
 function generateUovrNumber(city: string, date: string): string {
   if (!date) return '';
   const prefix = getCityPrefix(city.trim());
-  const yy = date.slice(2, 4); 
-  const seq = String(Math.floor(Math.random() * 9000000) + 1000000); 
-  const checksum = String(Math.floor(Math.random() * 10)); 
+  const yy = date.slice(2, 4); // '2025-...' → '25'
+  const seq = String(Math.floor(Math.random() * 9000000) + 1000000); // 7-digit
+  const checksum = String(Math.floor(Math.random() * 10)); // 1-digit
   return `${prefix}${yy}-${seq}-${checksum}`;
 }
 
+// ---------------------------------------------------------------------------
+// Valid payment statuses per violation status
+// ---------------------------------------------------------------------------
 const VALID_PAYMENT_FOR_STATUS: Record<ViolationStatus, PaymentStatus[]> = {
   [ViolationStatus.Pending]:   [PaymentStatus.Unpaid],
   [ViolationStatus.Resolved]:  [PaymentStatus.Paid, PaymentStatus.Waived],
@@ -97,6 +105,9 @@ const VALID_PAYMENT_FOR_STATUS: Record<ViolationStatus, PaymentStatus[]> = {
   [ViolationStatus.Dismissed]: [PaymentStatus.Waived],
 };
 
+// ---------------------------------------------------------------------------
+// Violation type combobox helpers
+// ---------------------------------------------------------------------------
 type ViolationCategory =
   | 'Parking / Loading'
   | 'Traffic Flow'
@@ -163,6 +174,9 @@ const TYPE_CATEGORIES: Record<ViolationTypeEnum, ViolationCategory> = {
   [ViolationTypeEnum.Others]:                          'Other',
 };
 
+// ---------------------------------------------------------------------------
+// Shared style constants
+// ---------------------------------------------------------------------------
 const inputBase = [
   'h-9 px-3 text-sm rounded-md w-full',
   'bg-surface border border-border text-ink placeholder:text-ink-faint',
@@ -179,11 +193,14 @@ function FieldError({ errors, field }: { errors: Record<string, string>; field: 
   return errors[field] ? <p className={errorText}>{errors[field]}</p> : null;
 }
 
+// ---------------------------------------------------------------------------
+// TypeRow shape
+// ---------------------------------------------------------------------------
 interface TypeRow {
   id:             number;
   violation_type: ViolationTypeEnum | '';
   base_fine:      number;
-  query:          string; 
+  query:          string; // local search string for the combobox
   open:           boolean;
 }
 
@@ -193,6 +210,9 @@ function blankRow(): TypeRow {
   return { id: nextId(), violation_type: '', base_fine: 0, query: '', open: false };
 }
 
+// ---------------------------------------------------------------------------
+// ViolationTypeCombobox , searchable combobox for a single type row
+// ---------------------------------------------------------------------------
 interface ViolationTypeComboboxProps {
   row:       TypeRow;
   usedTypes: Set<ViolationTypeEnum | ''>;
@@ -204,6 +224,7 @@ interface ViolationTypeComboboxProps {
 function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: ViolationTypeComboboxProps) {
   const [localSearch, setLocalSearch] = useState('');
 
+  // Reset localSearch when the selection modal opens
   useEffect(() => {
     if (row.open) {
       setLocalSearch('');
@@ -234,12 +255,13 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: V
 
   const centeredModal = row.open ? (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      
+      {/* Background Overlay */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200 ease-out"
         onClick={() => onOpen(row.id, false)}
       />
 
+      {/* Modal Dialog Card */}
       <div
         className="relative z-10 w-full max-w-xl rounded-xl flex flex-col max-h-[80vh] shadow-2xl overflow-hidden transition-all scale-100 duration-200 ease-out"
         style={{
@@ -247,7 +269,7 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: V
           border: '1px solid rgba(226, 232, 240, 0.95)',
         }}
       >
-        
+        {/* Modal Header */}
         <div
           className="flex items-center justify-between px-6 py-4 shrink-0"
           style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.6)' }}
@@ -270,6 +292,7 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: V
           </button>
         </div>
 
+        {/* Search Bar */}
         <div className="px-6 py-4 border-b border-border bg-surface shrink-0">
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center text-ink-faint pointer-events-none">
@@ -289,6 +312,7 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: V
           </div>
         </div>
 
+        {/* Grouped and Categorized List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {grouped.size === 0 ? (
             <p className="text-center py-8 text-sm text-ink-faint">No matching violation types found.</p>
@@ -347,6 +371,9 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, disabled }: V
   );
 }
 
+// ---------------------------------------------------------------------------
+// CityCombobox, searchable city input that auto-fills region
+// ---------------------------------------------------------------------------
 interface CityComboboxProps {
   value:     string;
   onChange:  (city: string) => void;
@@ -360,6 +387,7 @@ function CityCombobox({ value, onChange, onRegion, error, disabled }: CityCombob
   const [open,  setOpen]    = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Keep local query in sync when value is reset externally
   useEffect(() => { setQuery(value); }, [value]);
 
   const filtered = useMemo(() => {
@@ -385,7 +413,7 @@ function CityCombobox({ value, onChange, onRegion, error, disabled }: CityCombob
   function handleChange(raw: string) {
     setQuery(raw);
     onChange(raw);
-    
+    // If the user typed exactly a known city, auto-fill region
     const region = getRegionForCity(raw);
     if (region) onRegion(region);
     setOpen(true);
@@ -422,6 +450,9 @@ function CityCombobox({ value, onChange, onRegion, error, disabled }: CityCombob
   );
 }
 
+// ---------------------------------------------------------------------------
+// Main form
+// ---------------------------------------------------------------------------
 interface ViolationFormProps {
   violation?: TrafficViolationFull;
   onSubmit:   (dto: CreateViolationDTO) => void;
@@ -457,13 +488,15 @@ export default function ViolationForm({
 
   const { drivers } = useDrivers();
 
+  // ── Incident fields ──────────────────────────────────────────────────────
   const [uovrNumber,      setUovrNumber]      = useState(violation?.uovr_number ?? '');
-  const [uovrSuggested,   setUovrSuggested]   = useState(false); 
+  const [uovrSuggested,   setUovrSuggested]   = useState(false); // true once auto-generated
   const [officer,         setOfficer]         = useState(violation?.officer ?? '');
   const [violationDate,   setViolationDate]   = useState(() => formatToISODate(violation?.violation_date));
   const [city,            setCity]            = useState(violation?.violation_location_city ?? '');
   const [region,          setRegion]          = useState(violation?.violation_location_region ?? '');
 
+  // ── Status fields ────────────────────────────────────────────────────────
   const [violationStatus, setViolationStatus] = useState<ViolationStatus>(
     violation?.violation_status ?? ViolationStatus.Pending
   );
@@ -471,6 +504,7 @@ export default function ViolationForm({
     violation?.payment_status ?? PaymentStatus.Unpaid
   );
 
+  // ── Driver / vehicle / registration ─────────────────────────────────────
   const [licenseNumber,      setLicenseNumber]      = useState(violation?.license_number ?? '');
   const [plateNumber,        setPlateNumber]        = useState(violation?.plate_number ?? '');
   const [registrationNumber, setRegistrationNumber] = useState(violation?.registration_number ?? '');
@@ -483,6 +517,7 @@ export default function ViolationForm({
   const [driverOpen, setDriverOpen] = useState(false);
   const driverRef = useRef<HTMLDivElement>(null);
 
+  // ── Violation type rows ──────────────────────────────────────────────────
   const [typeRows, setTypeRows] = useState<TypeRow[]>(() =>
     violation?.violation_types.length
       ? violation.violation_types.map((t) => ({
@@ -497,6 +532,7 @@ export default function ViolationForm({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ── Dependent data hooks ─────────────────────────────────────────────────
   const { vehicles: vehiclesForDriver } = useVehicles(
     licenseNumber ? { owner_license_number: licenseNumber } : undefined
   );
@@ -504,6 +540,7 @@ export default function ViolationForm({
     plateNumber ? { plate_number: plateNumber } : undefined
   );
 
+  // ── Derived values ───────────────────────────────────────────────────────
   const filteredDrivers = useMemo(() => {
     const q = driverQuery.toLowerCase();
     if (!q) return drivers;
@@ -519,11 +556,13 @@ export default function ViolationForm({
     [typeRows]
   );
 
+  // Valid payment options filtered to only what's legal given current violation status
   const validPaymentOptions = useMemo(
     () => VALID_PAYMENT_FOR_STATUS[violationStatus] ?? PAYMENT_STATUS_OPTIONS,
     [violationStatus]
   );
 
+  // ── Auto-generate UOVR when city+date both known (add mode only) ─────────
   useEffect(() => {
     if (isEdit) return;
     if (!violationDate || uovrSuggested) return;
@@ -532,6 +571,7 @@ export default function ViolationForm({
     setUovrSuggested(true);
   }, [violationDate, city, isEdit, uovrSuggested]);
 
+  // If city changes in add mode and UOVR hasn't been manually edited, regenerate
   function regenerateUovr() {
     const suggestion = generateUovrNumber(city || 'M', violationDate);
     if (suggestion) {
@@ -540,6 +580,7 @@ export default function ViolationForm({
     }
   }
 
+  // ── Cascade resets when driver/vehicle changes ───────────────────────────
   useEffect(() => {
     if (isEdit) return;
     if (!licenseNumber) return;
@@ -557,6 +598,7 @@ export default function ViolationForm({
     if (!stillLinked) setRegistrationNumber('');
   }, [plateNumber, registrationsForVehicle, isEdit]);
 
+  // ── Payment status: auto-correct when violation status changes ───────────
   useEffect(() => {
     const validOptions = VALID_PAYMENT_FOR_STATUS[violationStatus];
     if (!validOptions.includes(paymentStatus)) {
@@ -564,6 +606,7 @@ export default function ViolationForm({
     }
   }, [violationStatus]);
 
+  // ── Driver combobox click-outside ────────────────────────────────────────
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (driverRef.current && !driverRef.current.contains(e.target as Node)) {
@@ -574,6 +617,7 @@ export default function ViolationForm({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // Sync driver query when drivers list loads in edit mode
   useEffect(() => {
     if (isEdit && violation && drivers.length > 0) {
       const d = drivers.find((dr) => dr.license_number === violation.license_number);
@@ -583,6 +627,7 @@ export default function ViolationForm({
     }
   }, [isEdit, violation, drivers]);
 
+  // ── Handlers ─────────────────────────────────────────────────────────────
   function selectDriver(licNum: string, name: string) {
     setLicenseNumber(licNum);
     setDriverQuery(name);
@@ -590,7 +635,7 @@ export default function ViolationForm({
     setPlateNumber('');
     setRegistrationNumber('');
     setErrors((prev) => ({ ...prev, licenseNumber: '' }));
-    
+    // Regenerate UOVR with city prefix if city already set
     if (!isEdit && violationDate) {
       setUovrNumber(generateUovrNumber(city || 'M', violationDate));
     }
@@ -599,7 +644,7 @@ export default function ViolationForm({
   function handleCityChange(newCity: string) {
     setCity(newCity);
     setErrors((prev) => ({ ...prev, city: '' }));
-    
+    // Regenerate UOVR prefix if date is set
     if (!isEdit && violationDate) {
       setUovrNumber(generateUovrNumber(newCity || 'M', violationDate));
     }
@@ -612,6 +657,7 @@ export default function ViolationForm({
     }
   }
 
+  // ── TypeRow handlers ─────────────────────────────────────────────────────
   function addTypeRow() {
     setTypeRows((prev) => [...prev, blankRow()]);
   }
@@ -633,6 +679,7 @@ export default function ViolationForm({
   function updateTypeRowOpen(id: number, open: boolean) {
     setTypeRows((prev) => prev.map((r) => r.id === id ? { ...r, open } : r));
   }
+
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -668,6 +715,7 @@ export default function ViolationForm({
     onSubmit(dto);
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <form
       id="violation-form"
@@ -684,8 +732,10 @@ export default function ViolationForm({
         </div>
       )}
 
+      {/* ── Section 1: Incident details ─────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4">
 
+        {/* UOVR Number with auto-generate */}
         <div>
           <label className={labelBase}>UOVR Number *</label>
           <div className="flex gap-2">
@@ -719,6 +769,7 @@ export default function ViolationForm({
           </div>
         </div>
 
+        {/* Date */}
         <div>
           <label className={labelBase}>Date *</label>
           <input
@@ -729,7 +780,7 @@ export default function ViolationForm({
             onChange={(e) => {
               setViolationDate(e.target.value);
               setErrors((prev) => ({ ...prev, violationDate: '' }));
-              
+              // Trigger UOVR suggestion once date is set for the first time
               if (!uovrSuggested && e.target.value) {
                 setUovrNumber(generateUovrNumber(city || 'M', e.target.value));
                 setUovrSuggested(true);
@@ -739,6 +790,7 @@ export default function ViolationForm({
           <FieldError errors={errors} field="violationDate" />
         </div>
 
+        {/* City, searchable combobox that auto-fills region */}
         <div>
           <label className={labelBase}>City *</label>
           <CityCombobox
@@ -751,6 +803,7 @@ export default function ViolationForm({
           <FieldError errors={errors} field="city" />
         </div>
 
+        {/* Region, auto-filled, still editable */}
         <div>
           <label className={labelBase}>Region *</label>
           <input
@@ -765,6 +818,7 @@ export default function ViolationForm({
           />
         </div>
 
+        {/* Officer */}
         <div className="col-span-2">
           <label className={labelBase}>Officer</label>
           <input
@@ -777,6 +831,7 @@ export default function ViolationForm({
         </div>
       </div>
 
+      {/* ── Section 2: Status, filtered to only valid combos ───────────── */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelBase}>Violation Status *</label>
@@ -798,7 +853,7 @@ export default function ViolationForm({
             value={paymentStatus}
             onChange={(e) => setPaymentStatus(e.target.value as PaymentStatus)}
           >
-            
+            {/* Only render options that are legal for the current violation status */}
             {PAYMENT_STATUS_OPTIONS.map((s) => (
               <option key={s} value={s} disabled={!validPaymentOptions.includes(s)}>
                 {s}{!validPaymentOptions.includes(s) ? ' (not allowed)' : ''}
@@ -814,8 +869,10 @@ export default function ViolationForm({
         </div>
       </div>
 
+      {/* ── Section 3: Driver / vehicle / registration ───────────────────── */}
       <div className="flex flex-col gap-4">
 
+        {/* Driver combobox */}
         <div ref={driverRef} className="relative">
           <label className={labelBase}>Driver * (search by name or license number)</label>
           <input
@@ -852,6 +909,7 @@ export default function ViolationForm({
           )}
         </div>
 
+        {/* Vehicle, filtered to driver */}
         <div>
           <label className={labelBase}>Vehicle * (auto-filtered to selected driver)</label>
           <select
@@ -874,6 +932,7 @@ export default function ViolationForm({
           <FieldError errors={errors} field="plateNumber" />
         </div>
 
+        {/* Registration, filtered to vehicle, optional */}
         <div>
           <label className={labelBase}>Registration (optional, auto-filtered to selected vehicle)</label>
           <select
@@ -892,6 +951,7 @@ export default function ViolationForm({
         </div>
       </div>
 
+      {/* ── Section 4: Violation types, searchable combobox per row ─────── */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-ink-muted">Violation Types *</label>

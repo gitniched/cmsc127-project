@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { adjustDriverExpiry } from './useDrivers';
 import {
   getReport1,
   getReport2,
@@ -38,7 +39,7 @@ export function useReport1() {
     setState({ rows: [], loading: true, error: null });
     try {
       const rows = await getReport1(params);
-      setState({ rows, loading: false, error: null });
+      setState({ rows: rows.map(adjustDriverExpiry), loading: false, error: null });
     } catch (err: any) {
       setState({ rows: [], loading: false, error: err.message ?? 'Report failed' });
     }
@@ -86,7 +87,7 @@ export function useReport4() {
     setState({ rows: [], loading: true, error: null });
     try {
       const rows = await getReport4();
-      setState({ rows, loading: false, error: null });
+      setState({ rows: rows.map(adjustDriverExpiry), loading: false, error: null });
     } catch (err: any) {
       setState({ rows: [], loading: false, error: err.message ?? 'Report failed' });
     }
