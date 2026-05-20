@@ -40,16 +40,16 @@ function computeExpiryLabel(plateNumber: string, registrationDate: string): stri
 
   if (!renewalMonth) {
     const flat = new Date(registrationDate);
-    flat.setFullYear(flat.getFullYear() + 1);
+    flat.setUTCFullYear(flat.getUTCFullYear() + 1);
     return `${flat.toISOString().slice(0, 7)}, 12 months flat (non-numeric plate ending)`;
   }
 
   const regDate    = new Date(registrationDate);
-  const regMonth   = regDate.getMonth() + 1;
-  const regYear    = regDate.getFullYear();
+  const regMonth   = regDate.getUTCMonth() + 1;
+  const regYear    = regDate.getUTCFullYear();
   const expiryYear = regMonth <= renewalMonth ? regYear + 1 : regYear + 2;
 
-  const lastDay = new Date(expiryYear, renewalMonth, 0).getDate();
+  const lastDay = new Date(Date.UTC(expiryYear, renewalMonth, 0)).getUTCDate();
   return `${MONTH_NAMES[renewalMonth]} ${lastDay}, ${expiryYear} (last day of renewal month)`;
 }
 

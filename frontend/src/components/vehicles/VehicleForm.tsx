@@ -89,7 +89,7 @@ const COLORS = [
   'Green', 'Olive Green', 'Yellow', 'Orange', 'Brown', 'Beige', 'Champagne', 'Gold',
 ];
 
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getUTCFullYear();
 const YEAR_OPTIONS: number[] = Array.from(
   { length: CURRENT_YEAR + 1 - 1990 + 1 },
   (_, i) => CURRENT_YEAR + 1 - i,

@@ -131,9 +131,9 @@ function getAge(birthDate: string): number {
   if (!birthDate) return 0;
   const dob = new Date(birthDate);
   const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  let age = today.getUTCFullYear() - dob.getUTCFullYear();
+  const m = today.getUTCMonth() - dob.getUTCMonth();
+  if (m < 0 || (m === 0 && today.getUTCDate() < dob.getUTCDate())) age--;
   return age;
 }
 
@@ -144,8 +144,8 @@ function expiryRelativeLabel(expiryDateStr: string): string {
   const isPast = expiry < today;
   const ref = isPast ? today : expiry;
   const base = isPast ? expiry : today;
-  let years = ref.getFullYear() - base.getFullYear();
-  let months = ref.getMonth() - base.getMonth();
+  let years = ref.getUTCFullYear() - base.getUTCFullYear();
+  let months = ref.getUTCMonth() - base.getUTCMonth();
   if (months < 0) { years--; months += 12; }
   const parts: string[] = [];
   if (years > 0) parts.push(`${years} yr${years !== 1 ? 's' : ''}`);
