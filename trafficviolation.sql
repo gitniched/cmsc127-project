@@ -304,7 +304,7 @@ BEGIN
     END IF;
 END$$
 
--- check if there is already an active regitration for the same plate number before allowing a new active registration to be inserted.
+-- check if there is already an active registration for the same plate number before allowing a new active registration to be inserted.
 CREATE TRIGGER trg_registration_before_insert_active_check
 BEFORE INSERT ON vehicle_registration
 FOR EACH ROW
@@ -315,7 +315,8 @@ BEGIN
         SELECT COUNT(*) INTO v_active_count
         FROM vehicle_registration
         WHERE plate_number = NEW.plate_number
-          AND registration_status = 'Active';
+          AND registration_status = 'Active'
+          AND expiration_date >= NEW.registration_date;
 
         IF v_active_count > 0 THEN
             SIGNAL SQLSTATE '45000'

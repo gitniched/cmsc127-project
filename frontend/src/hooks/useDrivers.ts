@@ -32,6 +32,7 @@ export function adjustDriverExpiry<T extends {
   birth_date: string;
   license_issue_date: string;
   license_expiry_date: string;
+  license_status?: string;
 }>(driver: T): T {
   if (!driver.license_issue_date || !driver.birth_date) return driver;
 
@@ -66,9 +67,23 @@ export function adjustDriverExpiry<T extends {
   const dd = String(day).padStart(2, '0');
   const adjustedExpiry = `${expiryYear}-${mm}-${dd}`;
 
+  const today = new Date();
+  const year = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${m}-${d}`;
+
+  let adjustedStatus = driver.license_status;
+  if (driver.license_status === 'Active' && adjustedExpiry < todayStr) {
+    adjustedStatus = 'Expired';
+  } else if (driver.license_status === 'Expired' && adjustedExpiry >= todayStr) {
+    adjustedStatus = 'Active';
+  }
+
   return {
     ...driver,
     license_expiry_date: adjustedExpiry,
+    ...(driver.license_status !== undefined ? { license_status: adjustedStatus } : {}),
   };
 }
 

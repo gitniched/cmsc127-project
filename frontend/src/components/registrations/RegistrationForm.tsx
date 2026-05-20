@@ -82,6 +82,14 @@ export default function RegistrationForm({
   const [form, setForm]     = useState<FormState>(makeEmpty());
   const [errors, setErrors] = useState<FieldError>({});
 
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
   useEffect(() => {
     if (open) {
       const empty = makeEmpty();
@@ -105,6 +113,48 @@ export default function RegistrationForm({
     set('registration_number', generateRegistrationNumber(form.registration_date));
   }
 
+  const computedExpirationDate = useMemo(
+    () => {
+      if (!form.registration_date) return '';
+
+      const renewalMonth = getRenewalMonthFromPlate(plateNumber);
+
+      if (!renewalMonth) {
+        const flat = new Date(form.registration_date);
+        flat.setUTCFullYear(flat.getUTCFullYear() + 1);
+        const y = flat.getUTCFullYear();
+        const m = String(flat.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(flat.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      const regDate    = new Date(form.registration_date);
+      const regMonth   = regDate.getUTCMonth() + 1;
+      const regYear    = regDate.getUTCFullYear();
+      const expiryYear = regMonth <= renewalMonth ? regYear + 1 : regYear + 2;
+
+      const lastDay = new Date(Date.UTC(expiryYear, renewalMonth, 0)).getUTCDate();
+      const mm = String(renewalMonth).padStart(2, '0');
+      const dd = String(lastDay).padStart(2, '0');
+      return `${expiryYear}-${mm}-${dd}`;
+    },
+    [plateNumber, form.registration_date],
+  );
+
+  useEffect(() => {
+    if (!computedExpirationDate) return;
+    const isPast = computedExpirationDate < todayStr;
+    if (isPast) {
+      if (form.registration_status === RegistrationStatus.Active) {
+        set('registration_status', RegistrationStatus.Expired);
+      }
+    } else {
+      if (form.registration_status === RegistrationStatus.Expired) {
+        set('registration_status', RegistrationStatus.Active);
+      }
+    }
+  }, [computedExpirationDate, todayStr, form.registration_status]);
+
   const regNumberValid = useMemo(
     () => REG_NUMBER_RE.test(form.registration_number.trim()),
     [form.registration_number],
@@ -124,7 +174,11 @@ export default function RegistrationForm({
     } else if (!REG_NUMBER_RE.test(form.registration_number.trim())) {
       e.registration_number = 'Format must be REG-YYYY-NNN';
     }
-    if (!form.registration_date) e.registration_date = 'Required';
+    if (!form.registration_date) {
+      e.registration_date = 'Required';
+    } else if (form.registration_date > todayStr) {
+      e.registration_date = 'Registration date cannot be in the future';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -204,6 +258,7 @@ export default function RegistrationForm({
           </label>
           <input
             type="date"
+            max={todayStr}
             className={[inputBase, errors.registration_date ? inputErr : ''].join(' ')}
             value={form.registration_date}
             onChange={(e) => set('registration_date', e.target.value)}

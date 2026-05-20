@@ -411,8 +411,30 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     originalLicenseType !== null &&
     LICENSE_RANK[form.license_type] < LICENSE_RANK[originalLicenseType];
 
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  useEffect(() => {
+    if (!computedExpiry) return;
+    const isPast = computedExpiry < todayStr;
+    if (isPast) {
+      if (form.license_status === LicenseStatus.Active) {
+        set('license_status', LicenseStatus.Expired);
+      }
+    } else {
+      if (form.license_status === LicenseStatus.Expired) {
+        set('license_status', LicenseStatus.Active);
+      }
+    }
+  }, [computedExpiry, todayStr, form.license_status]);
+
   const issueFuture = form.license_issue_date
-    ? new Date(form.license_issue_date) > new Date()
+    ? form.license_issue_date > todayStr
     : false;
 
   function validate(): boolean {
@@ -425,7 +447,9 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
     if (!form.license_number.trim()) e.license_number = 'Required';
     if (!form.license_issue_date) e.license_issue_date = 'Required';
 
-    if (form.birth_date && !ageOk) {
+    if (form.birth_date && form.birth_date > todayStr) {
+      e.birth_date = 'Birth date cannot be in the future';
+    } else if (form.birth_date && !ageOk) {
       e.birth_date = `Must be at least ${minAge} years old for ${form.license_type}`;
     }
     if (issueFuture) {
@@ -559,6 +583,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             <label className={labelBase}>Birth Date <span className="text-danger-500">*</span></label>
             <input
               type="date"
+              max={todayStr}
               className={[inputBase, errors.birth_date ? inputErr : ''].join(' ')}
               style={glassInput}
               value={form.birth_date}
@@ -679,6 +704,7 @@ export default function DriverForm({ open, onClose, onSubmit, initial, saveError
             <label className={labelBase}>Issue Date <span className="text-danger-500">*</span></label>
             <input
               type="date"
+              max={todayStr}
               className={[inputBase, errors.license_issue_date ? inputErr : ''].join(' ')}
               style={glassInput}
               value={form.license_issue_date}

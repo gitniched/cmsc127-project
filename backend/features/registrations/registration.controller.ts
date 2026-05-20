@@ -10,6 +10,17 @@ export const addRegistration = async(req:Request, res: Response) => {
 
     try {
         conn = await pool.getConnection();
+
+        // Auto-expire any existing active registrations for this plate that have already expired
+        const autoExpireQuery = `
+            UPDATE vehicle_registration 
+            SET registration_status = 'Expired' 
+            WHERE plate_number = ? 
+              AND registration_status = 'Active' 
+              AND expiration_date < ?
+        `;
+        await conn.query(autoExpireQuery, [data.plate_number, data.registration_date]);
+
         const query = 'INSERT INTO vehicle_registration (registration_number, plate_number, registration_date, registration_status) VALUES (?, ?, ?, ?)';
         const values = [
             data.registration_number,

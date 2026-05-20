@@ -488,6 +488,14 @@ export default function ViolationForm({
 
   const { drivers } = useDrivers();
 
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
   // ── Incident fields ──────────────────────────────────────────────────────
   const [uovrNumber,      setUovrNumber]      = useState(violation?.uovr_number ?? '');
   const [uovrSuggested,   setUovrSuggested]   = useState(false); // true once auto-generated
@@ -684,7 +692,11 @@ export default function ViolationForm({
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (!uovrNumber.trim()) e.uovrNumber   = 'UOVR Number is required.';
-    if (!violationDate)     e.violationDate = 'Date is required.';
+    if (!violationDate) {
+      e.violationDate = 'Date is required.';
+    } else if (violationDate > todayStr) {
+      e.violationDate = 'Violation date cannot be in the future.';
+    }
     if (!city.trim())       e.city          = 'City is required.';
     if (!region.trim())     e.region        = 'Region is required.';
     if (!licenseNumber)     e.licenseNumber = 'Driver is required.';
@@ -774,6 +786,7 @@ export default function ViolationForm({
           <label className={labelBase}>Date *</label>
           <input
             type="date"
+            max={todayStr}
             className={[inputBase, shouldDisableNonStatus ? inputDisabled : '', errors.violationDate ? inputError : ''].join(' ')}
             value={violationDate}
             disabled={shouldDisableNonStatus}
