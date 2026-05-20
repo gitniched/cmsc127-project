@@ -222,18 +222,21 @@ interface ViolationTypeComboboxProps {
 }
 
 function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery }: ViolationTypeComboboxProps) {
-  const inputRef  = useRef<HTMLInputElement>(null);
-  const portalRef = useRef<HTMLDivElement>(null);
+  const [localSearch, setLocalSearch] = useState('');
 
-  // Track the input's position so the portal can follow it
-  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  // Reset localSearch when the selection modal opens
+  useEffect(() => {
+    if (row.open) {
+      setLocalSearch('');
+    }
+  }, [row.open]);
 
   const filtered = useMemo(() => {
-    const q = row.query.toLowerCase();
+    const q = localSearch.toLowerCase();
     return VIOLATION_TYPE_OPTIONS.filter(
       (t) => !usedTypes.has(t) && (!q || t.toLowerCase().includes(q))
     );
-  }, [row.query, usedTypes]);
+  }, [localSearch, usedTypes]);
 
   const grouped = useMemo(() => {
     const map = new Map<ViolationCategory, ViolationTypeEnum[]>();
@@ -245,96 +248,121 @@ function ViolationTypeCombobox({ row, usedTypes, onChange, onOpen, onQuery }: Vi
     return map;
   }, [filtered]);
 
-  // Recompute position when opening or on scroll/resize
-  useEffect(() => {
-    if (!row.open) return;
-    function update() {
-      if (!inputRef.current) return;
-      const r = inputRef.current.getBoundingClientRect();
-      setRect({ top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, width: r.width });
-    }
-    update();
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    };
-  }, [row.open]);
+  const handleSelect = (t: ViolationTypeEnum) => {
+    onChange(row.id, t, t);
+    onOpen(row.id, false);
+  };
 
-  // Close on outside click (check both input and portal)
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      const target = e.target as Node;
-      const insideInput  = inputRef.current?.contains(target);
-      const insidePortal = portalRef.current?.contains(target);
-      if (!insideInput && !insidePortal) onOpen(row.id, false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [row.id, onOpen]);
+  const centeredModal = row.open ? (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      {/* Background Overlay */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200 ease-out"
+        onClick={() => onOpen(row.id, false)}
+      />
 
-  const dropdown = row.open && rect ? (
-    <div
-      ref={portalRef}
-      style={{
-        position:  'fixed',
-        top:       rect.top,
-        left:      rect.left,
-        width:     rect.width,
-        zIndex:    9999,
-        maxHeight: '14rem',
-        overflowY: 'auto',
-      }}
-      className="bg-surface border border-border rounded-md shadow-xl"
-    >
-      {grouped.size === 0 ? (
-        <p className="px-3 py-2 text-sm text-ink-faint">No matching violation types.</p>
-      ) : (
-        Array.from(grouped.entries()).map(([cat, types]) => (
-          <div key={cat}>
-            <p className="px-3 pt-2 pb-1 text-xs font-semibold text-ink-muted uppercase tracking-wide bg-surface-inset sticky top-0">
-              {cat}
-            </p>
-            {types.map((t) => (
-              <button
-                key={t}
-                type="button"
-                className="w-full text-left px-3 py-1.5 text-sm text-ink hover:bg-surface-inset flex items-center justify-between gap-3"
-                onMouseDown={() => {
-                  onChange(row.id, t, t);
-                  onOpen(row.id, false);
-                }}
-              >
-                <span>{t}</span>
-                <span className="text-xs text-ink-faint shrink-0">
-                  ₱{(FINE_SCHEDULE[t] ?? 0).toLocaleString()}
-                </span>
-              </button>
-            ))}
+      {/* Modal Dialog Card */}
+      <div
+        className="relative z-10 w-full max-w-xl rounded-xl flex flex-col max-h-[80vh] shadow-2xl overflow-hidden transition-all scale-100 duration-200 ease-out"
+        style={{
+          background: 'rgba(255, 255, 255, 0.96)',
+          border: '1px solid rgba(226, 232, 240, 0.95)',
+        }}
+      >
+        {/* Modal Header */}
+        <div
+          className="flex items-center justify-between px-6 py-4 shrink-0"
+          style={{ borderBottom: '1px solid rgba(226, 232, 240, 0.6)' }}
+        >
+          <h3 className="text-base font-semibold text-ink">Select Violation Type</h3>
+          <button
+            type="button"
+            onClick={() => onOpen(row.id, false)}
+            className="w-8 h-8 flex items-center justify-center rounded-md text-ink-faint hover:text-ink hover:bg-black/5 transition-colors duration-150"
+            aria-label="Close modal"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M2 2L12 12M12 2L2 12"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="px-6 py-4 border-b border-border bg-surface shrink-0">
+          <div className="relative">
+            <span className="absolute inset-y-0 left-3 flex items-center text-ink-faint pointer-events-none">
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              autoFocus
+              className="h-10 pl-9 pr-4 text-sm rounded-md w-full bg-surface border border-border text-ink placeholder:text-ink-faint outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-colors"
+              placeholder="Search by violation title..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+            />
           </div>
-        ))
-      )}
+        </div>
+
+        {/* Grouped and Categorized List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {grouped.size === 0 ? (
+            <p className="text-center py-8 text-sm text-ink-faint">No matching violation types found.</p>
+          ) : (
+            Array.from(grouped.entries()).map(([cat, types]) => (
+              <div key={cat} className="space-y-1">
+                <h4 className="px-2 text-[10px] font-bold text-ink-muted uppercase tracking-wider sticky top-0 bg-surface/90 py-1">
+                  {cat}
+                </h4>
+                <div className="space-y-0.5">
+                  {types.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className="w-full text-left px-3 py-2.5 text-sm text-ink hover:bg-brand-50 hover:text-brand-900 rounded-md transition-colors flex items-center justify-between gap-3 group"
+                      onClick={() => handleSelect(t)}
+                    >
+                      <span className="group-hover:translate-x-0.5 transition-transform duration-150">{t}</span>
+                      <span className="text-xs bg-surface-inset border border-border text-ink-muted group-hover:bg-brand-100 group-hover:border-brand-200 group-hover:text-brand-850 px-2 py-0.5 rounded font-mono shrink-0">
+                        ₱{(FINE_SCHEDULE[t] ?? 0).toLocaleString()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   ) : null;
 
   return (
     <>
-      <input
-        ref={inputRef}
-        className={[inputBase, !row.violation_type ? inputError : ''].join(' ')}
-        value={row.query}
-        placeholder="Search violation type…"
-        onChange={(e) => {
-          onQuery(row.id, e.target.value);
-          if (row.violation_type) onChange(row.id, '', '');
-          onOpen(row.id, true);
-        }}
-        onFocus={() => onOpen(row.id, true)}
-        autoComplete="off"
-      />
-      {/* Portal renders the dropdown directly on document.body, escaping any overflow:hidden ancestor */}
-      {row.open && dropdown && createPortal(dropdown, document.body)}
+      <button
+        type="button"
+        className={[
+          'h-9 px-3 text-sm rounded-md w-full text-left bg-surface border border-border text-ink hover:border-brand-400 transition-colors flex items-center justify-between gap-2',
+          !row.violation_type ? 'border-danger-400 text-ink-faint' : '',
+        ].join(' ')}
+        onClick={() => onOpen(row.id, true)}
+      >
+        <span className="truncate">
+          {row.violation_type || 'Click to select violation type…'}
+        </span>
+        <span className="text-ink-faint text-xs shrink-0 select-none">
+          ▾
+        </span>
+      </button>
+      {createPortal(centeredModal, document.body)}
     </>
   );
 }
@@ -704,6 +732,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
             />
             {!isEdit && (
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
                 onClick={regenerateUovr}
@@ -897,7 +926,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-ink-muted">Violation Types *</label>
-          <Button variant="ghost" size="sm" onClick={addTypeRow}>+ Add Type</Button>
+          <Button type="button" variant="ghost" size="sm" onClick={addTypeRow}>+ Add Type</Button>
         </div>
 
         <div className="rounded-md border border-border overflow-hidden">
@@ -971,8 +1000,8 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
 
       {!hideFooter && (
         <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
-          <Button variant="ghost" onClick={onCancel} disabled={saving}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={saving}>Cancel</Button>
+          <Button type="submit" variant="primary" disabled={saving}>
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Violation'}
           </Button>
         </div>
