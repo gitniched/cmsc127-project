@@ -428,6 +428,17 @@ interface ViolationFormProps {
   hideFooter?: boolean;
 }
 
+function formatToISODate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export default function ViolationForm({ violation, onSubmit, onCancel, saving, saveError, hideFooter = false }: ViolationFormProps) {
   const isEdit = !!violation;
 
@@ -437,7 +448,7 @@ export default function ViolationForm({ violation, onSubmit, onCancel, saving, s
   const [uovrNumber,      setUovrNumber]      = useState(violation?.uovr_number ?? '');
   const [uovrSuggested,   setUovrSuggested]   = useState(false); // true once auto-generated
   const [officer,         setOfficer]         = useState(violation?.officer ?? '');
-  const [violationDate,   setViolationDate]   = useState(violation?.violation_date ?? '');
+  const [violationDate,   setViolationDate]   = useState(() => formatToISODate(violation?.violation_date));
   const [city,            setCity]            = useState(violation?.violation_location_city ?? '');
   const [region,          setRegion]          = useState(violation?.violation_location_region ?? '');
 

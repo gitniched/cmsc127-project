@@ -336,18 +336,29 @@ const EMPTY: FormState = {
   license_issue_date: '',
 };
 
+function formatToISODate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function toFormState(d: Driver | DriverWithAge): FormState {
   return {
     first_name: d.first_name,
     last_name: d.last_name,
     middle_name: d.middle_name ?? '',
-    birth_date: d.birth_date,
+    birth_date: formatToISODate(d.birth_date),
     sex: d.sex,
     address: d.address,
     license_number: d.license_number,
     license_type: d.license_type,
     license_status: d.license_status,
-    license_issue_date: d.license_issue_date,
+    license_issue_date: formatToISODate(d.license_issue_date),
   };
 }
 
